@@ -9,6 +9,8 @@ import java.util.Objects;
  */
 @Data
 public class ColumnInfo {
+    //字段名,用来区分新增更新
+    private String oldColumnName;
     //字段名称
     private String columnName;
     //字段注释

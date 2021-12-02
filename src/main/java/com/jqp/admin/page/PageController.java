@@ -19,7 +19,7 @@ public class PageController {
         String uri = request.getRequestURI();
         uri = uri.substring(PREFIX.length());
         log.info(uri);
-        model.addAttribute("js","/json"+uri+".js");
+        model.addAttribute("js","/json"+uri+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
 }

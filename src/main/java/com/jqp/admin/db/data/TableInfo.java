@@ -2,6 +2,7 @@ package com.jqp.admin.db.data;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,6 +11,10 @@ import java.util.Objects;
  */
 @Data
 public class TableInfo {
+    //用于复制,和tableName一致
+    private String id;
+    //表名,用于更新
+    private String oldTableName;
     //表名字
     private String tableName;
     //表注释
@@ -17,9 +22,9 @@ public class TableInfo {
     //表行数
     private int tableRows;
     //列信息
-    private List<ColumnInfo> columnInfos;
+    private List<ColumnInfo> columnInfos = new ArrayList<>();
     //索引信息
-    private List<IndexInfo> indexInfos;
+    private List<IndexInfo> indexInfos = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

@@ -9,6 +9,8 @@ import java.util.Objects;
  */
 @Data
 public class IndexInfo {
+    //key名称,用来区分新增,更新
+    private String oldKeyName;
     private String keyName;
     private String columnName;
     private String indexComment;

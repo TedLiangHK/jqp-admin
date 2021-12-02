@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Result <T>{
-    private int status;
+    private int status = Status.SUCCESS;
     private String msg;
     private T data;
 
@@ -19,5 +19,30 @@ public class Result <T>{
         this.status = status;
         this.msg = msg;
         this.data = data;
+    }
+
+    public static <T> Result<T> error(T data,String msg){
+        return new Result<>(Status.ERROR,msg,data);
+    }
+    public static <T> Result<T> error(String msg){
+        return error(null,msg);
+    }
+
+    public static <T> Result<T> success(T data,String msg){
+        return new Result<>(Status.SUCCESS,msg,data);
+    }
+
+    public static <T> Result<T> success(T data){
+        return success(data,null);
+    }
+
+    public static <T> Result<T> success(String msg){
+        return success(null,msg);
+    }
+    public static <T> Result<T> success(){
+        return success(null,null);
+    }
+    public boolean isSuccess(){
+        return this.status == Status.SUCCESS;
     }
 }
