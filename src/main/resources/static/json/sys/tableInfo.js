@@ -26,6 +26,7 @@ AMIS_JSON={
                         "name": "columnInfos",
                         "addable": true,
                         "removable": true,
+                        "needConfirm":false,
                         //"copyable": true,
                         //"editable": true,
                         "columns": [
@@ -35,9 +36,55 @@ AMIS_JSON={
                                 "label": "名称"
                             },
                             {
-                                "type":"input-text",
+                                "type":"select",
                                 "name": "columnType",
-                                "label": "类型"
+                                "label": "类型",
+                                "options": [
+                                    {
+                                        "label": "整数(11)",
+                                        "value": "int(11)"
+                                    },
+                                    {
+                                        "label": "整数(20)",
+                                        "value": "bigint(20)"
+                                    },
+                                    {
+                                        "label": "字符串(20)",
+                                        "value": "varchar(20)"
+                                    },
+                                    {
+                                        "label": "字符串(64)",
+                                        "value": "varchar(64)"
+                                    },
+                                    {
+                                        "label": "字符串(256)",
+                                        "value": "varchar(256)"
+                                    },
+                                    {
+                                        "label": "字符串(1024)",
+                                        "value": "varchar(1024)"
+                                    },
+                                    {
+                                        "label": "大文本类型",
+                                        "value": "longtext"
+                                    },
+                                    {
+                                        "label": "日期类型",
+                                        "value": "datetime"
+                                    },
+                                    {
+                                        "label": "小数",
+                                        "value": "float"
+                                    },
+                                    {
+                                        "label": "小数1",
+                                        "value": "float(19,2)"
+                                    },
+                                    {
+                                        "label": "小数2",
+                                        "value": "float(19,4)"
+                                    }
+                                ]
                             },
                             {
                                 "type":"input-text",
@@ -45,9 +92,16 @@ AMIS_JSON={
                                 "label": "注释"
                             },
                             {
-                                "type":"input-text",
+                                "type":"select",
                                 "name": "isNullable",
-                                "label": "允许为空"
+                                "label": "允许为空",
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
                             }
                         ]
                     }
@@ -60,6 +114,7 @@ AMIS_JSON={
                         "name": "indexInfos",
                         "addable": true,
                         "removable": true,
+                        "needConfirm":false,
                         //"copyable": true,
                         //"editable": true,
                         "columns": [
@@ -69,9 +124,14 @@ AMIS_JSON={
                                 "label": "名称"
                             },
                             {
-                                "type":"input-text",
+                                //"type":"input-text",
+                                "type": "select",
                                 "name": "columnName",
-                                "label": "字段"
+                                "label": "字段",
+                                "multiple": true,
+                                "labelField":"columnComment",
+                                "valueField":"columnName",
+                                "source":"${columnInfos}"
                             },
                             {
                                 "type":"input-text",
@@ -84,7 +144,7 @@ AMIS_JSON={
             }]
         },
         "form":{
-            "title": "${tableName || '新增'}",
+            "title": "${IF(ISEMPTY(tableName),'新增',CONCATENATE('编辑-',tableName))}",
             "size": "lg",
             "body": {
                 "type": "form",
@@ -121,23 +181,29 @@ AMIS_JSON={
         "api": "post:/tableInfo/queryTable",
         "syncLocation": false,
         "autoFillHeight": true,
+        "headerToolbar": [
+            "export-excel",
+            "export-csv"
+        ],
         "filter": {
             "title": "条件搜索",
             "submitText": "",
+            "mode": "inline",
             "body": [
                 {
                     "type": "input-text",
                     "name": "tableName",
+                    "label":"表名",
                     "placeholder": "表名"
                 },
                 {
                     "type": "input-text",
                     "name": "tableComment",
-                    "placeholder": "注释",
-                    "addOn": {
-                       "label": "搜索",
-                       "type": "submit"
-                    }
+                    "label":"注释",
+                    "placeholder": "注释"
+                },{
+                    "label": "搜索",
+                    "type": "submit"
                 }
             ]
         },
@@ -178,7 +244,8 @@ AMIS_JSON={
                         "actionType": "ajax",
                         "label": "删除",
                         "confirmText": "您确认要删除${oldTableName}?",
-                        "api": "delete:/tableInfo/dropTable?tableName=${oldTableName}"
+                        "api": "delete:/tableInfo/dropTable?tableName=${oldTableName}",
+                        //"disabled":"${tableName=='test10'}"
                     }
                 ]
             }

@@ -9,7 +9,10 @@
             content="width=device-width, initial-scale=1, maximum-scale=1"
     />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <!--
     <link rel="stylesheet" href="/amis/sdk.css" />
+    -->
+    <link rel="stylesheet" href="/amis/antd.css" />
     <link rel="stylesheet" href="/amis/helper.css" />
     <link rel="stylesheet" href="/amis/iconfont.css" />
     <!-- 这是默认主题所需的，如果是其他主题则不需要 -->
@@ -57,7 +60,9 @@
         //         ]
         //     }
         // };
-        let amisScoped = amis.embed('#root', AMIS_JSON);
+        let amisScoped = amis.embed('#root', AMIS_JSON,{
+            theme:"antd"
+        });
     })();
 </script>
 </body>

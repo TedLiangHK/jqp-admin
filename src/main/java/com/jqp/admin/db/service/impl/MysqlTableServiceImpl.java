@@ -145,7 +145,7 @@ public class MysqlTableServiceImpl implements TableService {
         if(isCreate){
             //建表
             String sql = "create table "+tableInfo.getTableName()+" (\n";
-            sql += "id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键' ,\n";
+            sql += "id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键' ,\n";
             for (int i = 0; i < tableInfo.getColumnInfos().size(); i++) {
                 ColumnInfo columnInfo = tableInfo.getColumnInfos().get(i);
                 sql += "\t";
