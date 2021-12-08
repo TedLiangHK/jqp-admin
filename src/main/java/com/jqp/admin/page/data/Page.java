@@ -21,9 +21,6 @@ public class Page extends BaseData {
     //js脚本
     private String js = "";
 
-    //表
-    private String tables;
-
     //查询条件
     private List<PageQueryField> queryFields = new ArrayList<>();
     //查询结果

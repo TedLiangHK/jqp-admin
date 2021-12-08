@@ -6,6 +6,7 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.config.DbConfig;
 import com.jqp.admin.db.data.ColumnInfo;
+import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.data.IndexInfo;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcDao;

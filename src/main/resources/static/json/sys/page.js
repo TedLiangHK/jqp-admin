@@ -96,8 +96,26 @@ AMIS_JSON={
                                     "label":"字符串",
                                     "value":"string"
                                 },{
+                                    "label":"长文本",
+                                    "value":"long-string"
+                                },{
+                                    "label":"超长文本",
+                                    "value":"big-string"
+                                },{
+                                    "label":"SQL",
+                                    "value":"sql"
+                                },{
+                                    "label":"js脚本",
+                                    "value":"js"
+                                },{
+                                    "label":"文章",
+                                    "value":"article"
+                                },{
                                     "label":"数字",
                                     "value":"number"
+                                },{
+                                    "label":"小数",
+                                    "value":"double"
                                 },{
                                     "label":"日期",
                                     "value":"date"

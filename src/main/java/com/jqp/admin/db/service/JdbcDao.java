@@ -3,6 +3,7 @@ package com.jqp.admin.db.service;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.db.data.ColumnMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -19,4 +20,5 @@ public interface JdbcDao {
     List<Map<String,Object>> find(String sql, Object ...args);
     <T> T getById(Class<T> clz,Long id);
     Map<String,Object> getById(String tableName,Long id);
+    List<ColumnMeta> columnMeta(String sql);
 }

@@ -4,19 +4,26 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.db.config.DbConfig;
+import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcDao;
 import com.jqp.admin.util.RowMapperUtil;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +33,10 @@ import java.util.Map;
 public class MysqlJdbcDaoImpl implements JdbcDao {
     @Resource
     private JdbcTemplate jdbcTemplate;
+
+    @Resource
+    private DbConfig dbConfig;
+
     @Override
     public int update(String msg,String sql, Object... args) {
         log.info("{},{},{}",msg,sql,args);
@@ -115,5 +126,71 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     private String getTableName(Class clz){
         return StringUtil.toSqlColumn(clz.getSimpleName());
+    }
+
+    @Override
+    public List<ColumnMeta> columnMeta(String sql) {
+
+        List<ColumnMeta> columnMetas = new ArrayList<>();
+
+        List<String> tableColumns = new ArrayList<>();
+        Map<String,ColumnMeta> metaMap = new HashMap<>();
+        jdbcTemplate.execute(sql + " limit 0 ", (PreparedStatementCallback<Object>) ps -> {
+            ParameterMetaData parameterMetaData = ps.getParameterMetaData();
+            ResultSetMetaData resultSetMetaData = ps.getMetaData();
+
+//            int parameterCount = parameterMetaData.getParameterCount();
+//            log.info("parameterCount,{}",parameterCount);
+            //下面无法获取
+//            for(int i=1;i<=parameterCount;i++){
+//                String parameterClassName = parameterMetaData.getParameterClassName(i);
+//                String typeName = parameterMetaData.getParameterTypeName(i);
+//                log.info("参数类型,{},{}",typeName,parameterClassName);
+//            }
+            int columnCount = resultSetMetaData.getColumnCount();
+
+            for (int i = 1; i <=columnCount; i++) {
+                ColumnMeta columnMeta = new ColumnMeta();
+
+                String columnLabel = resultSetMetaData.getColumnLabel(i);
+                String columnTypeName = resultSetMetaData.getColumnTypeName(i);
+                String columnClassName = resultSetMetaData.getColumnClassName(i);
+                String tableName = resultSetMetaData.getTableName(i);
+                String columnName = resultSetMetaData.getColumnName(i);
+                log.info("返回数据类型,{},{},{},{},{}",tableName,columnName,columnLabel,columnClassName,columnTypeName);
+
+                columnMeta.setColumnLabel(columnLabel);
+                columnMeta.setColumnType(columnTypeName);
+                columnMeta.setColumnClassName(columnClassName);
+                columnMeta.setTableName(tableName);
+                columnMeta.setColumnName(columnName);
+                columnMetas.add(columnMeta);
+                if(StrUtil.isNotBlank(tableName) && StrUtil.isNotBlank(columnName)){
+                    tableColumns.add(StrUtil.format("(c.table_name = '{}' and c.column_name = '{}')",tableName,columnName));
+
+                    metaMap.put(StrUtil.format("{}-{}",tableName,columnName),columnMeta);
+                }
+            }
+            return null;
+        });
+        if(!tableColumns.isEmpty()){
+            StringBuffer commentSql = new StringBuffer(StrUtil.format(
+                    "select c.TABLE_NAME,c.COLUMN_NAME,c.COLUMN_COMMENT from {}.`COLUMNS` c where c.TABLE_SCHEMA = '{}' and ({})",
+                    dbConfig.getManageSchema(),
+                    dbConfig.getSchema(),
+                    StringUtil.concatStr(tableColumns," or \n ")
+            ));
+            log.info(commentSql.toString());
+
+            List<Map<String, Object>> maps = this.find(commentSql.toString());
+            for(Map<String,Object> en:maps){
+                String key = StrUtil.format("{}-{}",en.get("tableName"),en.get("columnName"));
+                String columnComment = (String) en.get("columnComment");
+                if(metaMap.containsKey(key)){
+                    metaMap.get(key).setColumnComment(columnComment);
+                }
+            }
+        }
+        return columnMetas;
     }
 }
