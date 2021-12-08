@@ -2,9 +2,7 @@ package com.jqp.admin.db.data;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /***
  * 表信息
@@ -25,6 +23,30 @@ public class TableInfo {
     private List<ColumnInfo> columnInfos = new ArrayList<>();
     //索引信息
     private List<IndexInfo> indexInfos = new ArrayList<>();
+
+    private List<Map<String,Object>> buttons = new ArrayList<>();
+
+    {
+        Random r = new Random();
+        if(r.nextBoolean()){
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("name","按钮1");
+
+            buttons.add(map);
+        }
+        if(r.nextBoolean()){
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("name","按钮2");
+
+            buttons.add(map);
+        }
+        if(r.nextBoolean()){
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("name","按钮3");
+
+            buttons.add(map);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {

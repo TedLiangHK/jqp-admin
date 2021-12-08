@@ -8,12 +8,10 @@ import com.jqp.admin.db.config.DbConfig;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.IndexInfo;
 import com.jqp.admin.db.data.TableInfo;
-import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.db.service.JdbcDao;
 import com.jqp.admin.db.service.TableService;
-import com.jqp.admin.util.RowMapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,10 +26,7 @@ public class MysqlTableServiceImpl implements TableService {
     private DbConfig dbConfig;
 
     @Resource
-    private JdbcTemplate jdbcTemplate;
-
-    @Resource
-    private JdbcService jdbcService;
+    private JdbcDao jdbcDao;
 
     @Override
     public Result<PageData<TableInfo>> queryTable(PageParam pageParam) {
@@ -48,23 +43,13 @@ public class MysqlTableServiceImpl implements TableService {
             args.add(StrUtil.format("%{}%",pageParam.getStr("tableComment")));
         }
         Object[] params = args.toArray();
-        String countSql = "select count(*) from ("+sql+") t";
-        Integer count = jdbcTemplate.queryForObject(countSql, Integer.class,params);
-        int start = (pageParam.getPage() - 1) * pageParam.getPerPage();
-        if(start >= count || start < 0){
-            start = 0;
-        }
-        String pageSql = sql + "limit "+start+","+ pageParam.getPerPage();
-        List<TableInfo> tableInfos = jdbcTemplate.query(pageSql, RowMapperUtil.newRowMapper(TableInfo.class),params);
+
+        Result<PageData<TableInfo>> result = jdbcDao.query(pageParam, TableInfo.class, sql, params);
+        List<TableInfo> tableInfos = result.getData().getItems();
         tableInfos.forEach(tableInfo -> {
             tableInfo.setId(tableInfo.getTableName());
             tableInfo.setOldTableName(tableInfo.getTableName());
         });
-        Result<PageData<TableInfo>> result = new Result<>();
-        PageData<TableInfo> data = new PageData<>();
-        data.setItems(tableInfos);
-        data.setTotal(count);
-        result.setData(data);
         return result;
     }
 
@@ -79,7 +64,7 @@ public class MysqlTableServiceImpl implements TableService {
         }
 
         String tableSql = getTableSql() + " and table_name='"+tableName+"'";
-        List<TableInfo> list = jdbcTemplate.query(tableSql, RowMapperUtil.newRowMapper(TableInfo.class));
+        List<TableInfo> list = jdbcDao.find(tableSql,TableInfo.class);
         if(list.isEmpty()){
             return Result.error("表不存在");
         }
@@ -88,14 +73,14 @@ public class MysqlTableServiceImpl implements TableService {
         tableInfo.setId(tableInfo.getTableName());
 
         String columnSql = "select c.COLUMN_NAME,c.COLUMN_COMMENT,c.COLUMN_TYPE,c.IS_NULLABLE from "+dbConfig.getManageSchema()+".`COLUMNS` c where c.TABLE_SCHEMA = '"+dbConfig.getSchema()+"' and c.TABLE_NAME = '"+tableName+"' and c.column_name <> 'id' ";
-        List<ColumnInfo> columnInfos = jdbcTemplate.query(columnSql, RowMapperUtil.newRowMapper(ColumnInfo.class));
+        List<ColumnInfo> columnInfos = jdbcDao.find(columnSql, ColumnInfo.class);
         for(ColumnInfo c:columnInfos){
             c.setOldColumnName(c.getColumnName());
         }
         tableInfo.setColumnInfos(columnInfos);
 
         String indexSql = "show keys from "+tableName;
-        List<Map<String, Object>> indexList = jdbcTemplate.query(indexSql, RowMapperUtil.newMapMapper());
+        List<Map<String, Object>> indexList = jdbcDao.find(indexSql);
 
         List<IndexInfo> indexInfos = new ArrayList<>();
         Map<String,IndexInfo> indexInfoMap = new HashMap<>();
@@ -145,7 +130,7 @@ public class MysqlTableServiceImpl implements TableService {
         if(isCreate){
             //建表
             String sql = "create table "+tableInfo.getTableName()+" (\n";
-            sql += "id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键' ,\n";
+            sql += "\tid BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键' ,\n";
             for (int i = 0; i < tableInfo.getColumnInfos().size(); i++) {
                 ColumnInfo columnInfo = tableInfo.getColumnInfos().get(i);
                 sql += "\t";
@@ -157,7 +142,7 @@ public class MysqlTableServiceImpl implements TableService {
                 sql += i == tableInfo.getColumnInfos().size() -1 ? "\n" : ",\n";
             }
             sql += ") comment = '"+tableInfo.getTableComment()+"'";
-            jdbcService.update("建表",sql);
+            jdbcDao.update("建表",sql);
 
             tableInfo.getIndexInfos().forEach(indexInfo -> {
                 String indexSql = StrUtil.format(" alter table {} add index {} ({}) comment '{}' ",
@@ -166,7 +151,7 @@ public class MysqlTableServiceImpl implements TableService {
                         indexInfo.getColumnName(),
                         indexInfo.getIndexComment()
                 );
-                jdbcService.update("添加索引",indexSql);
+                jdbcDao.update("添加索引",indexSql);
             });
             return Result.success();
         }
@@ -179,11 +164,11 @@ public class MysqlTableServiceImpl implements TableService {
         TableInfo oldTableInfo = oldTable.getData();
         if(!oldTableInfo.getOldTableName().equals(tableInfo.getTableName())){
             String sql = StrUtil.format("alter table {} rename to {} ",oldTableInfo.getTableName(),tableInfo.getTableName());
-            jdbcService.update("修改表名",sql);
+            jdbcDao.update("修改表名",sql);
         }
         if(!oldTableInfo.getTableComment().equals(tableInfo.getTableComment())){
             String sql = StrUtil.format("alter table {} comment ? ",tableInfo.getTableName());
-            jdbcService.update("修改表注释",sql,tableInfo.getTableComment());
+            jdbcDao.update("修改表注释",sql,tableInfo.getTableComment());
         }
         Map<String, ColumnInfo> oldColumnMap = oldTableInfo.getColumnInfos().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, c -> c));
         Set<String> names = new HashSet<>();
@@ -198,7 +183,7 @@ public class MysqlTableServiceImpl implements TableService {
                         (!"YES".equalsIgnoreCase(columnInfo.getIsNullable()) ? " NOT NULL" : ""),
                         columnInfo.getColumnComment()
                 );
-                jdbcService.update("新增字段",sql);
+                jdbcDao.update("新增字段",sql);
             }else{
                 names.add(columnInfo.getOldColumnName());
                 ColumnInfo oldColumnInfo = oldColumnMap.get(columnInfo.getOldColumnName());
@@ -212,7 +197,7 @@ public class MysqlTableServiceImpl implements TableService {
                                 columnInfo.getColumnType(),
                                 columnInfo.getColumnComment()
                         );
-                        jdbcService.update("修改字段名称",sql);
+                        jdbcDao.update("修改字段名称",sql);
                     }else{
                         //修改字段
                         String sql = StrUtil.format("alter table {} modify {} {} {} comment '{}' ",
@@ -222,7 +207,7 @@ public class MysqlTableServiceImpl implements TableService {
                                 (!"YES".equalsIgnoreCase(columnInfo.getIsNullable()) ? " NOT NULL" : ""),
                                 columnInfo.getColumnComment()
                         );
-                        jdbcService.update("修改字段",sql);
+                        jdbcDao.update("修改字段",sql);
                     }
                 }
             }
@@ -231,7 +216,7 @@ public class MysqlTableServiceImpl implements TableService {
         for(ColumnInfo oldColumnInfo:oldTableInfo.getColumnInfos()){
             if(!names.contains(oldColumnInfo.getColumnName())){
                 String sql = StrUtil.format("alter table {} drop column {} ",tableInfo.getTableName(),oldColumnInfo.getColumnName());
-                jdbcService.update("删除字段",sql);
+                jdbcDao.update("删除字段",sql);
             }
         }
         Map<String, IndexInfo> oldIndexMap = oldTableInfo.getIndexInfos().stream().collect(Collectors.toMap(IndexInfo::getKeyName, c -> c));
@@ -249,7 +234,7 @@ public class MysqlTableServiceImpl implements TableService {
                 if(!oldIndexInfo.equals(indexInfo)){
                     //修改索引,先删除,后添加
                     String sql = StrUtil.format(" drop index {} on {} ",oldIndexInfo.getKeyName(),tableInfo.getTableName());
-                    jdbcService.update("删除索引",sql);
+                    jdbcDao.update("删除索引",sql);
                     newIndex = true;
                 }
             }
@@ -261,14 +246,14 @@ public class MysqlTableServiceImpl implements TableService {
                         indexInfo.getColumnName(),
                         indexInfo.getIndexComment()
                 );
-                jdbcService.update("添加索引",indexSql);
+                jdbcDao.update("添加索引",indexSql);
             }
         }
         //删除索引
         for(IndexInfo oldIndexInfo:oldTableInfo.getIndexInfos()){
             if(!indexNames.contains(oldIndexInfo.getKeyName())){
                 String sql = StrUtil.format(" drop index {} on {} ",oldIndexInfo.getKeyName(),tableInfo.getTableName());
-                jdbcService.update("删除索引",sql);
+                jdbcDao.update("删除索引",sql);
             }
         }
         return Result.success();
@@ -277,7 +262,7 @@ public class MysqlTableServiceImpl implements TableService {
     @Override
     public Result dropTable(String tableName) {
         String sql = StrUtil.format(" drop table {}", tableName);
-        jdbcService.update("删除表",sql);
+        jdbcDao.update("删除表",sql);
         return Result.success();
     }
 }

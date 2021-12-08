@@ -10,12 +10,14 @@ AMIS_JSON={
                     {
                         "type": "input-text",
                         "name": "tableName",
-                        "label": "表名"
+                        "label": "表名",
+                        "required": true
                     },
                     {
                         "type": "input-text",
                         "name": "tableComment",
-                        "label": "注释"
+                        "label": "注释",
+                        "required": true
                     }
                 ]
             },{
@@ -29,16 +31,19 @@ AMIS_JSON={
                         "needConfirm":false,
                         //"copyable": true,
                         //"editable": true,
+                        "required": true,
                         "columns": [
                             {
                                 "type":"input-text",
                                 "name": "columnName",
-                                "label": "名称"
+                                "label": "名称",
+                                "required": true
                             },
                             {
                                 "type":"select",
                                 "name": "columnType",
                                 "label": "类型",
+                                "required": true,
                                 "options": [
                                     {
                                         "label": "整数(11)",
@@ -89,12 +94,14 @@ AMIS_JSON={
                             {
                                 "type":"input-text",
                                 "name": "columnComment",
-                                "label": "注释"
+                                "label": "注释",
+                                "required": true
                             },
                             {
                                 "type":"select",
                                 "name": "isNullable",
                                 "label": "允许为空",
+                                "required": true,
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -121,7 +128,8 @@ AMIS_JSON={
                             {
                                 "type":"input-text",
                                 "name": "keyName",
-                                "label": "名称"
+                                "label": "名称",
+                                "required": true
                             },
                             {
                                 //"type":"input-text",
@@ -131,12 +139,14 @@ AMIS_JSON={
                                 "multiple": true,
                                 "labelField":"columnComment",
                                 "valueField":"columnName",
-                                "source":"${columnInfos}"
+                                "source":"${columnInfos}",
+                                "required": true
                             },
                             {
                                 "type":"input-text",
                                 "name": "indexComment",
-                                "label": "注释"
+                                "label": "注释",
+                                "required": true
                             }
                         ]
                     }
@@ -180,15 +190,9 @@ AMIS_JSON={
         "type": "crud",
         "api": "post:/tableInfo/queryTable",
         "syncLocation": false,
-        "autoFillHeight": true,
-        "headerToolbar": [
-            "export-excel",
-            "export-csv"
-        ],
         "filter": {
             "title": "条件搜索",
             "submitText": "",
-            "mode": "inline",
             "body": [
                 {
                     "type": "input-text",
@@ -244,11 +248,24 @@ AMIS_JSON={
                         "actionType": "ajax",
                         "label": "删除",
                         "confirmText": "您确认要删除${oldTableName}?",
-                        "api": "delete:/tableInfo/dropTable?tableName=${oldTableName}",
-                        //"disabled":"${tableName=='test10'}"
+                        "api": "/tableInfo/dropTable?tableName=${oldTableName}"
                     }
                 ]
             }
+            /*,{
+                "type":"each",
+                "label":"循环",
+                "name":"buttons",
+                "className":"antd-OperationField",
+                "items":{
+                    "type":"button",
+                    "size":"sm",
+                    "label":"${name}",
+                    "actionType": "ajax",
+                    "api":"/xxxx.xxx"
+                }
+            }
+            */
         ]
     }
 }

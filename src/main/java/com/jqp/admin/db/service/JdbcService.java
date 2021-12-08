@@ -1,7 +1,17 @@
 package com.jqp.admin.db.service;
 
-public interface JdbcService {
-    int update(String msg,String sql,Object ...args);
-    int update(String sql,Object ...args);
+import com.jqp.admin.common.BaseData;
 
+import java.util.List;
+import java.util.Map;
+
+public interface JdbcService extends JdbcDao{
+    void insert(BaseData obj);
+    void update(BaseData obj);
+    void insert(Map<String,Object> obj,String tableName);
+    void update(Map<String,Object> obj,String tableName);
+    void saveOrUpdate(BaseData obj);
+    void saveOrUpdate(Map<String,Object> obj,String tableName);
+    void bathSaveOrUpdate(List<BaseData> objs);
+    void bathSaveOrUpdate(List<Map<String,Object>> objs,String tableName);
 }
