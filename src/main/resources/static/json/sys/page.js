@@ -61,10 +61,12 @@ AMIS_JSON={
                         //"reload":"resultFields?resultFields=${resultFields}"
                     },{
                         "type": "input-table",
+                        "label":"查询结果",
                         "name": "resultFields",
-                        "addable": true,
-                        "removable": true,
+                        "addable": false,
+                        "removable": false,
                         "needConfirm":false,
+                        "draggable": true,
                         //"copyable": true,
                         //"editable": true,
                         "required": true,
@@ -73,7 +75,8 @@ AMIS_JSON={
                                 "type":"input-text",
                                 "name": "field",
                                 "label": "字段",
-                                "required": true
+                                "required": true,
+                                "disabled":true
                             },
                             {
                                 "type":"input-text",
@@ -85,7 +88,7 @@ AMIS_JSON={
                                 "type":"input-number",
                                 "name": "width",
                                 "label": "宽度",
-                                "required": true
+                                "required": false
                             },
                             {
                                 "type":"select",
@@ -141,6 +144,154 @@ AMIS_JSON={
                                     "label":"NO",
                                     "value":"NO"
                                 }]
+                            }
+                        ]
+                    }
+                ]
+            },{
+                title:"查询条件",
+                body:[{
+                        "type": "input-table",
+                        "name": "queryFields",
+                        "addable": true,
+                        "removable": true,
+                        "needConfirm":false,
+                        "draggable": true,
+                        "strictMode":true,
+                        //"copyable": true,
+                        //"editable": true,
+                        "label":"查询条件",
+                        "required": false,
+                        "columns": [
+                            {
+                                "type":"input-text",
+                                "name": "field",
+                                "label": "字段",
+                                "required": true
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "label",
+                                "label": "名称",
+                                "required": true
+                            },
+
+                            {
+                                "type":"select",
+                                "name": "opt",
+                                "label": "操作类型",
+                                "required": true,
+                                "options":[{
+                                    "label":"等于",
+                                    "value":"eq"
+                                },{
+                                    "label":"不等于",
+                                    "value":"notEq"
+                                },{
+                                    "label":"等于多值",
+                                    "value":"in"
+                                },{
+                                    "label":"不等于多值",
+                                    "value":"notIn"
+                                },{
+                                    "label":"包含",
+                                    "value":"like"
+                                },{
+                                    "label":"包含多值",
+                                    "value":"likeIn"
+                                },{
+                                    "label":"不包含",
+                                    "value":"notLike"
+                                },{
+                                    "label":"不包含多值",
+                                    "value":"notLikeIn"
+                                },{
+                                    "label":"范围",
+                                    "value":"betweenAnd"
+                                },{
+                                    "label":"小于",
+                                    "value":"less"
+                                },{
+                                    "label":"小于等于",
+                                    "value":"lessEq"
+                                },{
+                                    "label":"大于",
+                                    "value":"large"
+                                },{
+                                    "label":"大于等于",
+                                    "value":"largeEq"
+                                }]
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "value",
+                                "label": "默认值",
+                                "required": false
+                            },
+                            {
+                                "type":"select",
+                                "name": "type",
+                                "label": "数据类型",
+                                "required": true,
+                                "options":[{
+                                    "label":"字符串",
+                                    "value":"string"
+                                },{
+                                    "label":"长文本",
+                                    "value":"long-string"
+                                },{
+                                    "label":"超长文本",
+                                    "value":"big-string"
+                                },{
+                                    "label":"SQL",
+                                    "value":"sql"
+                                },{
+                                    "label":"js脚本",
+                                    "value":"js"
+                                },{
+                                    "label":"文章",
+                                    "value":"article"
+                                },{
+                                    "label":"数字",
+                                    "value":"number"
+                                },{
+                                    "label":"小数",
+                                    "value":"double"
+                                },{
+                                    "label":"日期",
+                                    "value":"date"
+                                },{
+                                    "label":"数据字典",
+                                    "value":"dic"
+                                }]
+                            },
+                            {
+                                "type":"select",
+                                "name": "hidden",
+                                "label": "是否隐藏",
+                                "required": true,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "format",
+                                "label": "格式化"
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "dateExpress",
+                                "label": "日期表达式"
+                            },
+                            {
+                                "type":"textarea",
+                                "name": "optionSql",
+                                "label": "选项sql"
                             }
                         ]
                     }

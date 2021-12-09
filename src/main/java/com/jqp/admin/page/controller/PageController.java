@@ -8,8 +8,8 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageResultField;
+import com.jqp.admin.page.service.PageService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +18,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @RestController
 @RequestMapping("/admin/page")
@@ -28,7 +27,7 @@ public class PageController {
     private JdbcService jdbcService;
 
     @Resource
-    private JdbcTemplate jdbcTemplate;
+    private PageService pageService;
 
     @RequestMapping("/query")
     public Result<PageData<Page>> query(@RequestBody PageParam pageParam){
@@ -42,12 +41,12 @@ public class PageController {
         if(id == null){
             return Result.success(new Page());
         }
-        return Result.success(jdbcService.getById(Page.class,id));
+        return Result.success(pageService.get(id));
     }
 
     @RequestMapping("/save")
     public Result<String> save(@RequestBody Page page){
-        jdbcService.saveOrUpdate(page);
+        pageService.save(page);
         return Result.success();
     }
     @RequestMapping("/resultFields")
@@ -96,6 +95,4 @@ public class PageController {
 
         return Result.success(page,"已刷新");
     }
-
-
 }

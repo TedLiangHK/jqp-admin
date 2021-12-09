@@ -1,0 +1,28 @@
+{
+  "type": "page",
+  "title":"页面管理",
+  "body": {
+    "type": "crud",
+    "api": "post:/admin/page/query",
+    "syncLocation": false,
+    "filter": {
+      "title": "条件搜索",
+      "submitText": "",
+      "body": [
+        {
+          "type": "input-text",
+          "name": "code",
+          "label":"编号"
+        },
+        {
+          "type": "input-text",
+          "name": "name",
+          "label":"名称"
+        },{
+          "label": "搜索",
+          "type": "submit"
+        }
+      ]
+    }
+  }
+}

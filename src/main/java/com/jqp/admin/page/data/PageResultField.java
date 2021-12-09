@@ -22,4 +22,6 @@ public class PageResultField extends BaseData {
     private String format;
     //是否隐藏
     private String hidden = "NO";
+    //序号
+    private int seq;
 }
