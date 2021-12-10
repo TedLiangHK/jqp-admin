@@ -1,0 +1,21 @@
+AMIS_JSON={
+    "type": "page",
+    "body":{
+        "type": "crud",
+        "api": "post:/admin/page/crudQuery/${pageId}",
+        "syncLocation": false,
+        "filter": {
+          "title": "查询条件",
+          "submitText": "查询",
+          "mode": "horizontal",
+          "body":{
+            "type":"grid",
+            "columns":${queryConfigs}
+          }
+        },
+        "filterTogglable": true,
+        "headerToolbar": [
+            "filter-toggler"
+        ]
+    }
+}

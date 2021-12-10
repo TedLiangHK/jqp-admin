@@ -1,5 +1,6 @@
 package com.jqp.admin.common;
 
+import com.jqp.admin.util.StringUtil;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -17,7 +18,13 @@ public class PageParam extends HashMap<String,Object> {
     }
 
     public String getStr(String key){
-        Object o = super.get(key);
+        Object o = this.get(key);
         return o == null ? null : o.toString();
+    }
+
+    public PageParam(){
+        super();
+        super.put("page","1");
+        super.put("perPage","10");
     }
 }

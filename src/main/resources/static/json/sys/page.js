@@ -1,7 +1,6 @@
 
 AMIS_JSON={
     "type": "page",
-    "title":"页面管理",
     "definitions":{
         "formTabs":{
             "tabs":[{
@@ -70,6 +69,9 @@ AMIS_JSON={
                         //"copyable": true,
                         //"editable": true,
                         "required": true,
+                        "headerToolbar": [
+                            "filter-toggler"
+                        ],
                         "columns": [
                             {
                                 "type":"input-text",
@@ -114,8 +116,11 @@ AMIS_JSON={
                                     "label":"文章",
                                     "value":"article"
                                 },{
-                                    "label":"数字",
-                                    "value":"number"
+                                    "label":"短整数",
+                                    "value":"int"
+                                },{
+                                    "label":"长整数",
+                                    "value":"long"
                                 },{
                                     "label":"小数",
                                     "value":"double"
@@ -319,22 +324,25 @@ AMIS_JSON={
             }
         }
     },
-    "toolbar": [
-        {
-            "type": "button",
-            "actionType": "dialog",
-            "label": "新增",
-            "icon": "fa fa-plus pull-left",
-            "primary": true,
-            "dialog":{
-                "$ref":"form"
-            }
-        }
-    ],
     "body": {
         "type": "crud",
         "api": "post:/admin/page/query",
         "syncLocation": false,
+        "filterTogglable": true,
+        "headerToolbar": [
+            "filter-toggler",
+            {
+                "type": "button",
+                "actionType": "dialog",
+                "label": "新增",
+                "size":"sm",
+                "icon": "fa fa-plus pull-left",
+                "primary": true,
+                "dialog":{
+                    "$ref":"form"
+                }
+            }
+        ],
         "filter": {
             "title": "条件搜索",
             "submitText": "",

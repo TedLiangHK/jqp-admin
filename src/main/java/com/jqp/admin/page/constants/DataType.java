@@ -1,5 +1,15 @@
 package com.jqp.admin.page.constants;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import com.jqp.admin.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+@Slf4j
 public class DataType {
     //短字符串
     public static final String STRING = "string";
@@ -18,7 +28,69 @@ public class DataType {
     //日期类型
     public static final String DATE = "date";
     //数字类型
-    public static final String NUMBER = "number";
+    public static final String LONG = "long";
+    public static final String INT = "int";
     //小数
     public static final String DOUBLE = "double";
+
+    public static final boolean isStr(String type){
+        return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE).contains(type);
+    }
+    public static final boolean isDate(String type){
+        return Arrays.asList(DATE).contains(type);
+    }
+    public static final boolean isLong(String type){
+        return Arrays.asList(LONG).contains(type);
+    }
+    public static final boolean isInt(String type){
+        return Arrays.asList(INT).contains(type);
+    }
+    public static final boolean isDouble(String type){
+        return Arrays.asList(DOUBLE).contains(type);
+    }
+
+    public static final boolean isNumber(String type){
+        return Arrays.asList(LONG,INT,DOUBLE).contains(type);
+    }
+
+    public static final Object getValue(String type,String value,String format){
+        try {
+            if(StrUtil.isBlank(value)){
+                return null;
+            }
+            if (isStr(type)) {
+                return value;
+            }
+            if (isDate(type)) {
+                return DateUtil.parse(value,format);
+            }
+            if (isInt(type)) {
+                return Integer.valueOf(value);
+            }
+            if (isLong(type)) {
+                return Long.valueOf(type);
+            }
+            if (isDouble(type)) {
+                return Double.valueOf(type);
+            }
+        }catch (Exception e){
+            log.error(StrUtil.format("数据转换异常,{},{},{}",type,value,format),e);
+        }
+        return null;
+    }
+    public static final List<Object> getValues(String type, String value, String format){
+        List<Object> values = new ArrayList<>();
+        if(StrUtil.isBlank(value)){
+            return values;
+        }
+        String[] arr = StringUtil.splitStr(value, ",");
+        for(String v:arr){
+            Object realValue = getValue(type, v, format);
+            if(realValue != null){
+                values.add(realValue);
+            }
+        }
+        return values;
+    }
+
 }

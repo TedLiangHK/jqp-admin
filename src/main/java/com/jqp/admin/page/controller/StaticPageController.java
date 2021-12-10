@@ -3,6 +3,7 @@ package com.jqp.admin.page.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,12 @@ public class StaticPageController {
         uri = uri.substring(PREFIX.length());
         log.info(uri);
         model.addAttribute("js","/json"+uri+".js?_rt="+System.currentTimeMillis());
+        return "page";
+    }
+
+    @RequestMapping("/crud/{pageId}")
+    public String crudPage(Model model,@PathVariable("pageId") Long pageId){
+        model.addAttribute("js","/admin/page/js/"+pageId+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
 
