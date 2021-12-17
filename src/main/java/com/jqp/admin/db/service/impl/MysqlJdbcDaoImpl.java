@@ -104,11 +104,13 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public <T> List<T> find(String sql, Class<T> clz, Object... args) {
+        log.info(StrUtil.format("查询 {},{}"),sql,args);
         return jdbcTemplate.query(sql,RowMapperUtil.newRowMapper(clz),args);
     }
 
     @Override
     public List<Map<String, Object>> find(String sql, Object... args) {
+        log.info(StrUtil.format("查询 {},{}"),sql,args);
         return jdbcTemplate.query(sql,RowMapperUtil.newMapMapper(),args);
     }
 

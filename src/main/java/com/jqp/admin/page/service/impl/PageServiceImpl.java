@@ -1,11 +1,11 @@
 package com.jqp.admin.page.service.impl;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
+import com.jqp.admin.page.constants.PageType;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -85,11 +83,141 @@ public class PageServiceImpl implements PageService {
             }
             Opt.getSql(fieldName,field.getOpt(),field.getType(),value,field.getFormat(),sql,values);
         }
-
-        if(StrUtil.isNotBlank(page.getOrderBy())){
+        String orderBy = pageParam.getStr("orderBy");
+        String orderDir = pageParam.getStr("orderDir");
+        if(StrUtil.isNotBlank(orderBy) && StrUtil.isNotBlank(orderDir)){
+            sql.append(StrUtil.format(" order by {} {} ",StringUtil.toSqlColumn(orderBy),orderDir));
+        }else if(StrUtil.isNotBlank(page.getOrderBy())){
             sql.append(page.getOrderBy());
         }
+
         Result<PageData<Map<String, Object>>> result = jdbcService.query(pageParam, sql.toString(), values.toArray());
+
+        if(PageType.tree.equals(page.getPageType())){
+            Set<Long> rootIds = new HashSet<>();
+            Set<Long> allIds = new HashSet<>();
+            Map<Long,Map<String,Object>> allMap = new HashMap<>();
+            Map<Long,Set<Long>> childIdMap = new HashMap<>();
+            List<Map<String, Object>> items = result.getData().getItems();
+            for(Map<String,Object> item:items){
+                allIds.add((Long)item.get("id"));
+                allMap.put((Long)item.get("id"),item);
+            }
+            for(Map<String,Object> item:items){
+                Long id = (Long) item.get("id");
+                Long parentId = (Long) item.get("parentId");
+                if(parentId == null || !allIds.contains(parentId)){
+                    rootIds.add(id);
+                }
+
+                if(parentId != null){
+                    if(!childIdMap.containsKey(parentId)){
+                        childIdMap.put(parentId,new HashSet<>());
+                    }
+                    childIdMap.get(parentId).add(id);
+                }
+            }
+
+            Set<Long> childIds = new HashSet<>(rootIds);
+
+            while(true){
+                if(childIds.isEmpty()){
+                    break;
+                }
+                String childSql = StrUtil.format("select * from ({}) t where parent_id in ({})"
+                        ,page.getQuerySql()
+                        ,StringUtil.concatStr(childIds.stream().map(i-> "?").collect(Collectors.toList()),","));
+                List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
+                childIds.clear();
+                for(Map<String,Object> child:childs){
+                    Long id = (Long) child.get("id");
+                    allMap.put(id,child);
+                    childIds.add(id);
+                    Long parentId = (Long) child.get("parentId");
+                    if(parentId != null){
+                        if(!childIdMap.containsKey(parentId)){
+                            childIdMap.put(parentId,new HashSet<>());
+                        }
+                        childIdMap.get(parentId).add(id);
+                    }
+                }
+                childIds.removeAll(allIds);
+                allIds.addAll(childIds);
+            }
+
+            List<Map<String,Object>> roots = new ArrayList<>();
+            for(Long rootId:rootIds){
+                roots.add(allMap.get(rootId));
+            }
+            String orderField = null;
+            String orderSeq = null;
+            if(StrUtil.isNotBlank(orderBy) && StrUtil.isNotBlank(orderDir)){
+                orderField = orderBy;
+                orderSeq = orderDir;
+            }else if(StrUtil.isNotBlank(page.getOrderBy())){
+                String[] arr = page.getOrderBy().toLowerCase().replace("order by", "").trim().split("\\s");
+                if(arr.length == 1){
+                    orderField = StringUtil.toFieldColumn(arr[0]);
+                    orderSeq = "asc";
+                }else if(arr.length==2){
+                    orderField = StringUtil.toFieldColumn(arr[0]);
+                    orderSeq = arr[1];
+                }
+            }
+            Comparator<Map<String,Object>> comparator = null;
+            if(StrUtil.isNotBlank(orderField)){
+                String finalOrderField = orderField;
+                String finalOrderSeq = orderSeq;
+                comparator = (o1, o2) -> {
+                    Object v1 = o1.get(finalOrderField);
+                    Object v2 = o2.get(finalOrderField);
+
+                    int a = 0;
+                    if(v1 == null && v2 == null){
+                        a = 0;
+                    }else if(v1 == null && v2 != null){
+                        a = -1;
+                    }else if(v1 != null && v2 == null){
+                        a = 1;
+                    }else{
+                        if(v1 instanceof Comparable){
+                            a = ((Comparable<Object>) v1).compareTo(v2);
+                        }else if(v1 instanceof Comparator){
+                            a = ((Comparator<Object>) v1).compare(v1,v2);
+                        }
+                    }
+                    if("desc".equalsIgnoreCase(finalOrderSeq)){
+                        a = -a;
+                    }
+                    return a;
+                };
+            }
+            if(comparator != null){
+                Collections.sort(roots,comparator);
+            }
+
+
+            Comparator<Map<String, Object>> finalComparator = comparator;
+            childIdMap.forEach((key, value) -> {
+                Map<String, Object> p = allMap.get(key);
+                if(p == null){
+                    return;
+                }
+                if(!p.containsKey("children")){
+                    p.put("children",new ArrayList<Map<String,Object>>());
+                }
+                for(Long childId:value){
+                    ((List)p.get("children")).add(allMap.get(childId));
+                }
+
+                if(finalComparator != null){
+                    List<Map<String,Object>>  children = (List<Map<String, Object>>) p.get("children");
+                    Collections.sort(children, finalComparator);
+                }
+            });
+            result.getData().setItems(roots);
+        }
+
         PageData<Map<String, Object>> pageData = result.getData();
 
         CrudData<Map<String,Object>> crudData = new CrudData<>();
@@ -97,9 +225,14 @@ public class PageServiceImpl implements PageService {
         crudData.setCount(pageData.getTotal());
         List<PageResultField> resultFields = page.getResultFields();
         for(PageResultField resultField:resultFields){
+            if(Whether.YES.equals(resultField.getHidden())){
+                continue;
+            }
             ColumnData columnData = new ColumnData();
             columnData.setName(StringUtil.toFieldColumn(resultField.getField()));
             columnData.setLabel(resultField.getLabel());
+            columnData.put("sortable",true);
+
             crudData.getColumns().add(columnData);
         }
         return Result.success(crudData);
