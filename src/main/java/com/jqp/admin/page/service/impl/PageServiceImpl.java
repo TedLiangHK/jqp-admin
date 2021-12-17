@@ -3,6 +3,7 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.PageType;
 import com.jqp.admin.page.constants.Whether;
@@ -236,5 +237,69 @@ public class PageServiceImpl implements PageService {
             crudData.getColumns().add(columnData);
         }
         return Result.success(crudData);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryConfigs(Page page) {
+        List<Map<String,Object>> queryConfigs = new ArrayList<>();
+        for(PageQueryField field:page.getQueryFields()){
+            Map<String,Object> queryConfig = new HashMap<>();
+            queryConfig.put("name", StringUtil.toFieldColumn(field.getField()));
+            queryConfig.put("label",field.getLabel());
+            queryConfig.put("xs",12);
+            queryConfig.put("sm",6);
+            queryConfig.put("md",4);
+            queryConfig.put("lg",3);
+            queryConfig.put("columnClassName","mb-1");
+
+            if(field.getWidth() != null){
+                queryConfig.put("xs",field.getWidth());
+                queryConfig.put("sm",field.getWidth());
+                queryConfig.put("md",field.getWidth());
+                queryConfig.put("lg",field.getWidth());
+            }
+
+            boolean isMulti = !Opt.isSingleValue(field.getOpt());
+
+            if(StrUtil.isNotBlank(field.getValue())){
+                queryConfig.put("value",field.getValue());
+            }
+
+            if(Whether.YES.equals(field.getHidden())){
+                queryConfig.put("xs",0.0001);
+                queryConfig.put("sm",0.0001);
+                queryConfig.put("md",0.0001);
+                queryConfig.put("lg",0.0001);
+                queryConfig.put("label","");
+                queryConfig.put("type","hidden");
+            }else if(DataType.isDate(field.getType())){
+                queryConfig.put("format",field.getFormat().replace("yyyy-MM-dd","YYYY-MM-DD"));
+                if("yyyy-MM-dd".equals(field.getFormat())){
+                    queryConfig.put("type","input-date");
+                }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
+                    queryConfig.put("type","input-datetime");
+                }
+            }else if(DataType.DIC.equals(field.getType())){
+                queryConfig.put("type","select");
+                if(isMulti){
+                    queryConfig.put("multiple",true);
+                }
+            }else if(DataType.isNumber(field.getType())){
+                queryConfig.put("type","input-number");
+            }else{
+                queryConfig.put("type","input-text");
+            }
+            if(Opt.betweenAnd.equals(field.getOpt())){
+                if(DataType.isDate(field.getType())){
+                    if("yyyy-MM-dd".equals(field.getFormat())){
+                        queryConfig.put("type","input-date-range");
+                    }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
+                        queryConfig.put("type","input-datetime-range");
+                    }
+                }
+            }
+            queryConfigs.add(queryConfig);
+        }
+        return queryConfigs;
     }
 }

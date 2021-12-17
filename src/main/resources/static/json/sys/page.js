@@ -257,8 +257,11 @@ AMIS_JSON={
                                     "label":"文章",
                                     "value":"article"
                                 },{
-                                    "label":"数字",
-                                    "value":"number"
+                                    "label":"整数(20)",
+                                    "value":"long"
+                                },{
+                                    "label":"整数(11)",
+                                    "value":"int"
                                 },{
                                     "label":"小数",
                                     "value":"double"
@@ -282,6 +285,11 @@ AMIS_JSON={
                                     "label":"NO",
                                     "value":"NO"
                                 }]
+                            },
+                            {
+                                "type":"input-number",
+                                "name": "width",
+                                "label": "宽度(1~12)"
                             },
                             {
                                 "type":"input-text",

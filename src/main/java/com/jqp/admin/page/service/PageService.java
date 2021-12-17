@@ -5,6 +5,7 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.page.data.Page;
 
+import java.util.List;
 import java.util.Map;
 
 public interface PageService {
@@ -12,4 +13,6 @@ public interface PageService {
     Page get(Long id);
 
     Result<CrudData<Map<String,Object>>> query(Long pageId,PageParam pageParam);
+
+    List<Map<String,Object>> queryConfigs(Page page);
 }

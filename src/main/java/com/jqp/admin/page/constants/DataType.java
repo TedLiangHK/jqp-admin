@@ -68,10 +68,10 @@ public class DataType {
                 return Integer.valueOf(value);
             }
             if (isLong(type)) {
-                return Long.valueOf(type);
+                return Long.valueOf(value);
             }
             if (isDouble(type)) {
-                return Double.valueOf(type);
+                return Double.valueOf(value);
             }
         }catch (Exception e){
             log.error(StrUtil.format("数据转换异常,{},{},{}",type,value,format),e);

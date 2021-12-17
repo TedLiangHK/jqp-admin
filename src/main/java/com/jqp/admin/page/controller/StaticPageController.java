@@ -30,6 +30,13 @@ public class StaticPageController {
         model.addAttribute("js","/admin/page/js/"+pageId+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
+    @RequestMapping("/oneToMany/{pageId}/{childPageId}")
+    public String oneToManyPage(Model model,
+                                @PathVariable("pageId") Long pageId,
+                                @PathVariable("childPageId") Long childPageId){
+        model.addAttribute("js","/admin/page/js/"+pageId+"/"+childPageId+".js?_rt="+System.currentTimeMillis());
+        return "page";
+    }
 
     @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response){

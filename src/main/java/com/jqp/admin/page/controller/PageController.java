@@ -126,51 +126,36 @@ public class PageController {
         params.put("pageId",pageId);
 
         Page page = pageService.get(pageId);
-        List<PageQueryField> queryFields = page.getQueryFields();
 
-        List<Map<String,Object>> queryConfigs = new ArrayList<>();
-        for(PageQueryField field:queryFields){
-            Map<String,Object> queryConfig = new HashMap<>();
-            queryConfig.put("name", StringUtil.toFieldColumn(field.getField()));
-            queryConfig.put("label",field.getLabel());
-            queryConfig.put("xs",12);
-            queryConfig.put("sm",6);
-            queryConfig.put("md",4);
-            queryConfig.put("lg",3);
-            queryConfig.put("columnClassName","mb-1");
-
-            boolean isMulti = !Opt.isSingleValue(field.getOpt());
-
-            if(DataType.isDate(field.getType())){
-                queryConfig.put("format",field.getFormat().replace("yyyy-MM-dd","YYYY-MM-DD"));
-                if("yyyy-MM-dd".equals(field.getFormat())){
-                    queryConfig.put("type","input-date");
-                }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
-                    queryConfig.put("type","input-datetime");
-                }
-            }else if(DataType.DIC.equals(field.getType())){
-                queryConfig.put("type","select");
-                if(isMulti){
-                    queryConfig.put("multiple",true);
-                }
-            }else if(DataType.isNumber(field.getType())){
-                queryConfig.put("type","input-number");
-            }else{
-                queryConfig.put("type","input-text");
-            }
-            if(Opt.betweenAnd.equals(field.getOpt())){
-                if(DataType.isDate(field.getType())){
-                    if("yyyy-MM-dd".equals(field.getFormat())){
-                        queryConfig.put("type","input-date-range");
-                    }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
-                        queryConfig.put("type","input-datetime-range");
-                    }
-                }
-            }
-            queryConfigs.add(queryConfig);
-        }
+        List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
         params.put("pageName",page.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
+
+        js = TemplateUtil.getValue(js,params);
+        return js;
+    }
+
+    @RequestMapping("/js/{pageId}/{childPageId}.js")
+    public String oneToManyJs(@PathVariable("pageId") Long pageId,@PathVariable("childPageId") Long childPageId,HttpServletResponse response){
+
+        response.setContentType("application/javascript");
+        response.addHeader("Cache-Control","no-store");
+        URL url = getClass().getClassLoader().getResource("ui-json-template/oneToMany.js.vm");
+        List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
+        String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
+        Map<String,Object> params = new HashMap<>();
+        params.put("pageId",pageId);
+        params.put("childPageId",childPageId);
+
+        Page page = pageService.get(pageId);
+        Page childPage = pageService.get(childPageId);
+
+        List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
+        List<Map<String,Object>> childQueryConfigs = pageService.queryConfigs(childPage);
+        params.put("pageName",page.getName());
+        params.put("childPageName",childPage.getName());
+        params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
+        params.put("childQueryConfigs", JSONUtil.toJsonPrettyStr(childQueryConfigs));
 
         js = TemplateUtil.getValue(js,params);
         return js;

@@ -28,6 +28,9 @@ public class PageQueryField extends BaseData {
     //格式化
     private String format;
 
+    //宽度 1-12
+    private Integer width;
+
     //日期表达式1
     private String dateExpress;
 

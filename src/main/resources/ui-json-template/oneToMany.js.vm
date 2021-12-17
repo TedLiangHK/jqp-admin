@@ -1,0 +1,47 @@
+AMIS_JSON={
+    "type": "page",
+    "body":{
+        "type":"grid",
+        "columns":[{
+            "type": "crud",
+            "api": "post:/admin/page/crudQuery/${pageId}",
+            "syncLocation": false,
+            "filter": {
+                "title": "${pageName}",
+                "submitText": "查询",
+                "mode": "horizontal",
+                "body":{
+                    "type":"grid",
+                    "columns":${queryConfigs}
+                }
+            },
+            "itemAction": {
+                "type": "action",
+                "actionType": "reload",
+                "target": "childTable?parentId=${id}"
+            },
+            "filterTogglable": true,
+            "headerToolbar": [
+                "filter-toggler"
+            ]
+        },{
+            "name":"childTable",
+            "type": "crud",
+            "api": "post:/admin/page/crudQuery/${childPageId}",
+            "syncLocation": false,
+            "filter": {
+                "title": "${childPageName}",
+                "submitText": "查询",
+                "mode": "horizontal",
+                "body":{
+                    "type":"grid",
+                    "columns":${childQueryConfigs}
+                }
+            },
+            "filterTogglable": true,
+            "headerToolbar": [
+                "filter-toggler"
+            ]
+        }]
+    }
+}
