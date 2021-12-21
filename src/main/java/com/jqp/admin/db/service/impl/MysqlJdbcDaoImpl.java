@@ -22,10 +22,8 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("jdbcDao")
 @ConditionalOnProperty(value="db.type",havingValue = "mysql")
@@ -196,5 +194,31 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
             }
         }
         return columnMetas;
+    }
+
+    @Override
+    public <T> List<T> find(Class<T> clz, String[] fields, Object[] args) {
+        ;
+        String sql = StrUtil.format("select * from {} where 1=1 {} ",
+                getTableName(clz),
+                StringUtil.concatStr(Arrays.asList(fields).stream().map(field->StrUtil.format(" and {} = ? ",StringUtil.toSqlColumn(field))).collect(Collectors.toList()), " ")
+        );
+        return this.find(sql,clz,args);
+    }
+
+    @Override
+    public <T> T findOne(Class<T> clz, String[] fields, Object[] args) {
+        List<T> list = this.find(clz, fields, args);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public <T> List<T> find(Class<T> clz, String field, Object arg) {
+        return this.find(clz,new String[]{field},new Object[]{arg});
+    }
+
+    @Override
+    public <T> T findOne(Class<T> clz, String field, Object arg) {
+        return this.findOne(clz,new String[]{field},new Object[]{arg});
     }
 }

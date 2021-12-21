@@ -2,7 +2,7 @@ AMIS_JSON={
     "type": "page",
     "body":{
         "type": "crud",
-        "api": "post:/admin/page/crudQuery/${pageId}",
+        "api": "post:/admin/page/crudQuery/${pageCode}",
         "syncLocation": false,
         "filter": {
           "title": "查询条件",

@@ -11,8 +11,9 @@ import java.util.Map;
 public interface PageService {
     void save(Page page);
     Page get(Long id);
+    Page get(String pageCode);
 
-    Result<CrudData<Map<String,Object>>> query(Long pageId,PageParam pageParam);
+    Result<CrudData<Map<String,Object>>> query(String pageCode,PageParam pageParam);
 
     List<Map<String,Object>> queryConfigs(Page page);
 }

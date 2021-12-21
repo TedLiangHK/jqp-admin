@@ -4,7 +4,7 @@ AMIS_JSON={
         "type":"grid",
         "columns":[{
             "type": "crud",
-            "api": "post:/admin/page/crudQuery/${pageId}",
+            "api": "post:/admin/page/crudQuery/${pageCode}",
             "syncLocation": false,
             "filter": {
                 "title": "${pageName}",
@@ -27,7 +27,7 @@ AMIS_JSON={
         },{
             "name":"childTable",
             "type": "crud",
-            "api": "post:/admin/page/crudQuery/${childPageId}",
+            "api": "post:/admin/page/crudQuery/${childPageCode}",
             "syncLocation": false,
             "filter": {
                 "title": "${childPageName}",

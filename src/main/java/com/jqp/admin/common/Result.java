@@ -2,6 +2,9 @@ package com.jqp.admin.common;
 
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 public class Result <T>{
     private int status = Status.SUCCESS;
@@ -34,6 +37,11 @@ public class Result <T>{
 
     public static <T> Result<T> success(T data){
         return success(data,null);
+    }
+    public static <T> Result<Map<String,T>> successForKey(String key,T data){
+        Map<String,T> map = new HashMap<>();
+        map.put(key,data);
+        return success(map,null);
     }
 
     public static <T> Result<T> success(String msg){

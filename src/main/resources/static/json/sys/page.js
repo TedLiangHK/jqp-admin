@@ -309,6 +309,112 @@ AMIS_JSON={
                         ]
                     }
                 ]
+            },{
+                title:"页面按钮",
+                body:[{
+                    "type": "input-table",
+                    "name": "pageButtons",
+                    "addable": true,
+                    "removable": true,
+                    "needConfirm":false,
+                    "draggable": true,
+                    "strictMode":true,
+                    //"copyable": true,
+                    //"editable": true,
+                    "label":"页面按钮",
+                    "required": false,
+                    "columns": [
+                        {
+                            "type":"input-text",
+                            "name": "label",
+                            "label": "名称",
+                            "required": true
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "buttonLocation",
+                            "label": "位置",
+                            "required": true,
+                            "options":[{
+                                "label":"顶部",
+                                "value":"top"
+                            },{
+                                "label":"行按钮",
+                                "value":"row"
+                            }]
+                        },
+
+                        {
+                            "type":"select",
+                            "name": "optionType",
+                            "label": "操作类型",
+                            "required": true,
+                            "options":[{
+                                "label":"弹出表单",
+                                "value":"form"
+                            },{
+                                "label":"请求",
+                                "value":"ajax"
+                            },{
+                                "label":"打开新窗口",
+                                "value":"openNew"
+                            }]
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "optionValue",
+                            "label": "操作配置",
+                            "required": false
+                        },
+                        {
+                            "type":"select",
+                            "name": "level",
+                            "label": "样式",
+                            "required": true,
+                            "options":[{
+                                "label":"默认",
+                                "value":"default"
+                            },{
+                                "label":"链接",
+                                "value":"link"
+                            },{
+                                "label":"主要",
+                                "value":"primary"
+                            },{
+                                "label":"次要",
+                                "value":"secondary"
+                            },{
+                                "label":"信息",
+                                "value":"info"
+                            },{
+                                "label":"成功",
+                                "value":"success"
+                            },{
+                                "label":"警告",
+                                "value":"warning"
+                            },{
+                                "label":"危险",
+                                "value":"danger"
+                            },{
+                                "label":"高亮",
+                                "value":"light"
+                            },{
+                                "label":"黑暗",
+                                "value":"dark"
+                            }]
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "confirmText",
+                            "label": "二次确认提示"
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "jsRule",
+                            "label": "规则"
+                        }
+                    ]
+                }]
             }]
         },
         "form":{

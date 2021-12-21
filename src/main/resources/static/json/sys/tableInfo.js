@@ -1,7 +1,6 @@
 
 AMIS_JSON={
     "type": "page",
-    "title":"数据库表管理",
     "definitions":{
         "formTabs":{
             "tabs":[{
@@ -174,22 +173,24 @@ AMIS_JSON={
             }
         }
     },
-    "toolbar": [
-        {
-            "type": "button",
-            "actionType": "dialog",
-            "label": "新增",
-            "icon": "fa fa-plus pull-left",
-            "primary": true,
-            "dialog":{
-                "$ref":"form"
-            }
-        }
-    ],
     "body": {
         "type": "crud",
         "api": "post:/tableInfo/queryTable",
         "syncLocation": false,
+        "headerToolbar": [
+            "filter-toggler",
+            {
+                "type": "button",
+                "actionType": "dialog",
+                "label": "新增",
+                "size":"sm",
+                "icon": "fa fa-plus pull-left",
+                "primary": true,
+                "dialog":{
+                    "$ref":"form"
+                }
+            }
+        ],
         "filter": {
             "title": "条件搜索",
             "submitText": "",

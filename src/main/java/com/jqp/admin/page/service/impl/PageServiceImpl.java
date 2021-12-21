@@ -8,6 +8,7 @@ import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.PageType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.PageService;
@@ -51,23 +52,44 @@ public class PageServiceImpl implements PageService {
             jdbcService.saveOrUpdate(field);
         }
 
-
+        jdbcService.update("delete from page_button where page_id = ? ",page.getId());
+        seq = 0;
+        for (PageButton button:
+                page.getPageButtons()) {
+            button.setId(null);
+            button.setPageId(page.getId());
+            button.setSeq(++seq);
+            jdbcService.saveOrUpdate(button);
+        }
     }
 
     @Override
     public Page get(Long id) {
         Page page = jdbcService.getById(Page.class, id);
-        List<PageResultField> pageResultFields = jdbcService.find("select * from page_result_field where page_id = ? order by seq asc", PageResultField.class, id);
-        page.setResultFields(pageResultFields);
-
-        List<PageQueryField> pageQueryFields = jdbcService.find("select * from page_query_field where page_id = ? order by seq asc", PageQueryField.class, id);
-        page.setQueryFields(pageQueryFields);
+        this.get(page);
+        return page;
+    }
+    @Override
+    public Page get(String pageCode) {
+        Page page = jdbcService.findOne(Page.class,"code",pageCode);
+        this.get(page);
         return page;
     }
 
+    private void get(Page page){
+        List<PageResultField> pageResultFields = jdbcService.find(PageResultField.class,"pageId",page.getId());
+        page.setResultFields(pageResultFields);
+
+        List<PageQueryField> pageQueryFields = jdbcService.find(PageQueryField.class,"pageId",page.getId());
+        page.setQueryFields(pageQueryFields);
+
+        List<PageButton> pageButtons = jdbcService.find(PageButton.class,"pageId",page.getId());
+        page.setPageButtons(pageButtons);
+    }
+
     @Override
-    public Result<CrudData<Map<String, Object>>> query(Long pageId, PageParam pageParam) {
-        Page page = get(pageId);
+    public Result<CrudData<Map<String, Object>>> query(String pageCode, PageParam pageParam) {
+        Page page = get(pageCode);
         StringBuffer sql = new StringBuffer(StrUtil.format("select * from ({}) t where 1=1 ",page.getQuerySql()));
         List<Object> values = new ArrayList<>();
         List<PageQueryField> queryFields = page.getQueryFields();

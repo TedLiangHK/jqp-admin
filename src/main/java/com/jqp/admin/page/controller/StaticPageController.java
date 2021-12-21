@@ -25,16 +25,16 @@ public class StaticPageController {
         return "page";
     }
 
-    @RequestMapping("/crud/{pageId}")
-    public String crudPage(Model model,@PathVariable("pageId") Long pageId){
-        model.addAttribute("js","/admin/page/js/"+pageId+".js?_rt="+System.currentTimeMillis());
+    @RequestMapping("/crud/{pageCode}")
+    public String crudPage(Model model,@PathVariable("pageCode") String pageCode){
+        model.addAttribute("js","/admin/page/js/"+pageCode+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
-    @RequestMapping("/oneToMany/{pageId}/{childPageId}")
+    @RequestMapping("/oneToMany/{pageCode}/{childPageCode}")
     public String oneToManyPage(Model model,
-                                @PathVariable("pageId") Long pageId,
-                                @PathVariable("childPageId") Long childPageId){
-        model.addAttribute("js","/admin/page/js/"+pageId+"/"+childPageId+".js?_rt="+System.currentTimeMillis());
+                                @PathVariable("pageCode") String pageCode,
+                                @PathVariable("childPageCode") String childPageCode){
+        model.addAttribute("js","/admin/page/js/"+pageCode+"/"+childPageCode+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
 

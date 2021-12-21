@@ -90,7 +90,7 @@ public class PageController {
                 }else{
                     field.setType(DataType.STRING);
                 }
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Date.class.getCanonicalName())){
+            }else if(columnMeta.getColumnClassName().toLowerCase().contains("date")){
                 field.setType(DataType.DATE);
                 field.setFormat("yyyy-MM-dd");
             }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Integer.class.getCanonicalName())){
@@ -109,13 +109,13 @@ public class PageController {
         return Result.success(page,"已刷新");
     }
 
-    @RequestMapping("/crudQuery/{pageId}")
-    public Result<CrudData<Map<String,Object>>> crudQuery(@RequestBody PageParam pageParam, @PathVariable(name="pageId") Long pageId){
-        return pageService.query(pageId,pageParam);
+    @RequestMapping("/crudQuery/{pageCode}")
+    public Result<CrudData<Map<String,Object>>> crudQuery(@RequestBody PageParam pageParam, @PathVariable(name="pageCode") String pageCode){
+        return pageService.query(pageCode,pageParam);
     }
 
-    @RequestMapping("/js/{pageId}.js")
-    public String js(@PathVariable("pageId") Long pageId,HttpServletResponse response){
+    @RequestMapping("/js/{pageCode}.js")
+    public String js(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
 
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
@@ -123,9 +123,9 @@ public class PageController {
         List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
         String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
         Map<String,Object> params = new HashMap<>();
-        params.put("pageId",pageId);
+        params.put("pageCode",pageCode);
 
-        Page page = pageService.get(pageId);
+        Page page = pageService.get(pageCode);
 
         List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
         params.put("pageName",page.getName());
@@ -135,8 +135,8 @@ public class PageController {
         return js;
     }
 
-    @RequestMapping("/js/{pageId}/{childPageId}.js")
-    public String oneToManyJs(@PathVariable("pageId") Long pageId,@PathVariable("childPageId") Long childPageId,HttpServletResponse response){
+    @RequestMapping("/js/{pageCode}/{childPageCode}.js")
+    public String oneToManyJs(@PathVariable("pageCode") String pageCode,@PathVariable("childPageCode") String childPageCode,HttpServletResponse response){
 
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
@@ -144,11 +144,11 @@ public class PageController {
         List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
         String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
         Map<String,Object> params = new HashMap<>();
-        params.put("pageId",pageId);
-        params.put("childPageId",childPageId);
+        params.put("pageCode",pageCode);
+        params.put("childPageCode",childPageCode);
 
-        Page page = pageService.get(pageId);
-        Page childPage = pageService.get(childPageId);
+        Page page = pageService.get(pageCode);
+        Page childPage = pageService.get(childPageCode);
 
         List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
         List<Map<String,Object>> childQueryConfigs = pageService.queryConfigs(childPage);
@@ -161,4 +161,10 @@ public class PageController {
         return js;
     }
 
+    @RequestMapping("/queryConfigs/{pageCode}")
+    public Result queryConfigs(@PathVariable("pageCode") String pageCode){
+        Page page = pageService.get(pageCode);
+        List<Map<String, Object>> queryConfigs = pageService.queryConfigs(page);
+        return Result.successForKey("config",queryConfigs);
+    }
 }

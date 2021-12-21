@@ -25,4 +25,6 @@ public class Page extends BaseData {
     private List<PageQueryField> queryFields = new ArrayList<>();
     //查询结果
     private List<PageResultField> resultFields = new ArrayList<>();
+    //页面按钮
+    private List<PageButton> pageButtons = new ArrayList<>();
 }
