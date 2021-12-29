@@ -195,5 +195,29 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         });
     }
 
+    @Override
+    public void delete(BaseData obj) {
+        if(obj == null || obj.getId() == null){
+            return;
+        }
+        String tableName = StringUtil.toSqlColumn(obj.getClass().getSimpleName());
+        this.delete(obj.getId(),tableName);
+    }
 
+    @Override
+    public void delete(Long id, Class<? extends BaseData> clz) {
+        if(id == null || clz == null){
+            return;
+        }
+        String tableName = StringUtil.toSqlColumn(clz.getSimpleName());
+        this.delete(id,tableName);
+    }
+
+    @Override
+    public void delete(Long id, String tableName) {
+        if(id == null || StrUtil.isBlank(tableName)){
+            return;
+        }
+        super.update("删除",StrUtil.format("delete from {} where id = ? ",tableName),id);
+    }
 }

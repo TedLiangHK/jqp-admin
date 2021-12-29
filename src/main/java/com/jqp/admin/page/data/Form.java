@@ -16,6 +16,18 @@ public class Form extends BaseData {
     private String tableName;
     //js
     private String js = "";
+
+    //初始化接口
+    private String initApi;
+    //保存接口
+    private String api;
+
     //字段列表
     private List<FormField> formFields = new ArrayList<>();
+
+    //弹出层大小
+    private String size = "default";
+
+    //字段宽度
+    private Integer fieldWidth;
 }

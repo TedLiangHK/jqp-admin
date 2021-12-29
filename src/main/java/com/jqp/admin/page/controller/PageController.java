@@ -10,11 +10,15 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
+import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
@@ -40,6 +44,12 @@ public class PageController {
 
     @Resource
     private PageService pageService;
+
+    @Resource
+    private FormService formService;
+
+    @Resource
+    private PageButtonService pageButtonService;
 
     @RequestMapping("/query")
     public Result<PageData<Page>> query(@RequestBody PageParam pageParam){
@@ -131,9 +141,23 @@ public class PageController {
         params.put("pageName",page.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
 
+        List<Object> topButtons = new ArrayList<>();
+        topButtons.add("filter-toggler");
+        List<PageButton> pageButtons = page.getPageButtons();
+        for(PageButton pageButton:pageButtons){
+            if("top".equals(pageButton.getButtonLocation())){
+                topButtons.add(pageButtonService.getButton(pageButton));
+            }else if("row".equals(pageButton.getButtonLocation())){
+
+            }
+        }
+        params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
+
         js = TemplateUtil.getValue(js,params);
         return js;
     }
+
+
 
     @RequestMapping("/js/{pageCode}/{childPageCode}.js")
     public String oneToManyJs(@PathVariable("pageCode") String pageCode,@PathVariable("childPageCode") String childPageCode,HttpServletResponse response){

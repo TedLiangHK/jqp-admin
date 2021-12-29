@@ -331,7 +331,7 @@ AMIS_JSON={
                             "required": true
                         },
                         {
-                            "type":"input-text",
+                            "type":"select",
                             "name": "buttonLocation",
                             "label": "位置",
                             "required": true,

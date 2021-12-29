@@ -22,5 +22,5 @@ public class PageButton extends BaseData {
     //序号
     private int seq;
     //规则
-    private int jsRule;
+    private String jsRule;
 }

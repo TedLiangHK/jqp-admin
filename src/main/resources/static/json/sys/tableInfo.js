@@ -248,6 +248,7 @@ AMIS_JSON={
                         "level":"danger",
                         "actionType": "ajax",
                         "label": "删除",
+                        //"disabledOn": "tableName=='test'",
                         "confirmText": "您确认要删除${oldTableName}?",
                         "api": "/tableInfo/dropTable?tableName=${oldTableName}"
                     }

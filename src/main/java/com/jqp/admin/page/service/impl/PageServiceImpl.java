@@ -1,5 +1,6 @@
 package com.jqp.admin.page.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.db.service.JdbcService;
@@ -11,6 +12,7 @@ import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
+import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,9 @@ public class PageServiceImpl implements PageService {
 
     @Resource
     JdbcService jdbcService;
+
+    @Resource
+    PageButtonService pageButtonService;
 
     @Override
     @Transactional
@@ -116,6 +122,30 @@ public class PageServiceImpl implements PageService {
 
         Result<PageData<Map<String, Object>>> result = jdbcService.query(pageParam, sql.toString(), values.toArray());
 
+        Map<String,PageResultField> dateFields = new HashMap<>();
+        for(PageResultField resultField:page.getResultFields()){
+            if(DataType.isDate(resultField.getType())){
+                dateFields.put(StringUtil.toFieldColumn(resultField.getField()),resultField);
+            }
+        }
+        if(!dateFields.isEmpty()){
+            for(Map<String,Object> item:result.getData().getItems()){
+                for(Map.Entry<String,PageResultField> en:dateFields.entrySet()){
+                    Object value = item.get(en.getKey());
+                    if(value != null){
+                        String format = StrUtil.isBlank(en.getValue().getFormat()) ? "yyyy-MM-dd":en.getValue().getFormat();
+                        if(value instanceof LocalDateTime){
+                            item.put(en.getKey(), DateUtil.format((LocalDateTime) value,format));
+                        }else if(value instanceof java.sql.Date){
+                            item.put(en.getKey(), DateUtil.format((java.sql.Date) value,format));
+                        }else if(value instanceof java.util.Date){
+                            item.put(en.getKey(), DateUtil.format((java.util.Date) value,format));
+                        }
+                    }
+                }
+            }
+        }
+
         if(PageType.tree.equals(page.getPageType())){
             Set<Long> rootIds = new HashSet<>();
             Set<Long> allIds = new HashSet<>();
@@ -153,6 +183,22 @@ public class PageServiceImpl implements PageService {
                 List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
                 childIds.clear();
                 for(Map<String,Object> child:childs){
+                    if(!dateFields.isEmpty()){
+                        for(Map.Entry<String,PageResultField> en:dateFields.entrySet()){
+                            Object value = child.get(en.getKey());
+                            if(value != null){
+                                String format = StrUtil.isBlank(en.getValue().getFormat()) ? "yyyy-MM-dd":en.getValue().getFormat();
+                                if(value instanceof LocalDateTime){
+                                    child.put(en.getKey(), DateUtil.format((LocalDateTime) value,format));
+                                }else if(value instanceof java.sql.Date){
+                                    child.put(en.getKey(), DateUtil.format((java.sql.Date) value,format));
+                                }else if(value instanceof java.util.Date){
+                                    child.put(en.getKey(), DateUtil.format((java.util.Date) value,format));
+                                }
+                            }
+                        }
+                    }
+
                     Long id = (Long) child.get("id");
                     allMap.put(id,child);
                     childIds.add(id);
@@ -247,6 +293,7 @@ public class PageServiceImpl implements PageService {
         crudData.setRows(pageData.getItems());
         crudData.setCount(pageData.getTotal());
         List<PageResultField> resultFields = page.getResultFields();
+
         for(PageResultField resultField:resultFields){
             if(Whether.YES.equals(resultField.getHidden())){
                 continue;
@@ -258,6 +305,25 @@ public class PageServiceImpl implements PageService {
 
             crudData.getColumns().add(columnData);
         }
+
+        List<Map<String,Object>> rowButtons = new ArrayList<>();
+        List<PageButton> pageButtons = page.getPageButtons();
+        for(PageButton pageButton:pageButtons){
+            if("row".equals(pageButton.getButtonLocation())){
+                rowButtons.add(pageButtonService.getButton(pageButton));
+            }else if("top".equals(pageButton.getButtonLocation())){
+
+            }
+        }
+        if(!rowButtons.isEmpty()){
+            ColumnData columnData = new ColumnData();
+            columnData.put("type","operation");
+            columnData.put("label","操作");
+            columnData.put("buttons",rowButtons);
+            crudData.getColumns().add(columnData);
+        }
+
+
         return Result.success(crudData);
     }
 

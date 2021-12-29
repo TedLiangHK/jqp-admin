@@ -25,6 +25,44 @@ AMIS_JSON={
                         "required": true
                     },
                     {
+                        "type": "input-text",
+                        "name": "initApi",
+                        "placeholder":"默认配置:post:/admin/common/{formCode}/get?id=${id}",
+                        "label": "初始化接口"
+                    },
+                    {
+                        "type": "input-text",
+                        "name": "api",
+                        "placeholder":"默认配置:post:/admin/common/{formCode}/saveOrUpdate",
+                        "label": "保存接口"
+                    },
+                    {
+                        "type": "select",
+                        "name": "size",
+                        "label": "窗口大小",
+                        "options":[{
+                            "label":"较小",
+                            "value":"sm"
+                        },{
+                            "label":"标准",
+                            "value":"default"
+                        },{
+                            "label":"较大",
+                            "value":"lg"
+                        },{
+                            "label":"很大",
+                            "value":"xl"
+                        },{
+                            "label":"全屏",
+                            "value":"full"
+                        }]
+                    },
+                    {
+                        "type": "input-number",
+                        "name": "fieldWidth",
+                        "label": "字段宽度"
+                    },
+                    {
                         "type": "editor",
                         "name": "js",
                         "label": "js脚本",
@@ -61,7 +99,7 @@ AMIS_JSON={
                                 "name": "field",
                                 "label": "字段",
                                 "required": true,
-                                "disabled":true
+                                //"disabled":true
                             },
                             {
                                 "type":"input-text",
@@ -132,6 +170,37 @@ AMIS_JSON={
                                     "label":"NO",
                                     "value":"NO"
                                 }]
+                            },
+                            {
+                                "type":"select",
+                                "name": "multi",
+                                "label": "是否多选",
+                                "required": true,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
+                                "type":"select",
+                                "name": "must",
+                                "label": "是否必填",
+                                "required": true,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "value",
+                                "label": "默认值",
                             }
                         ]
                     }

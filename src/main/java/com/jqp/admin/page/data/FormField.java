@@ -1,6 +1,7 @@
 package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.page.constants.Whether;
 import lombok.Data;
 
 @Data
@@ -20,7 +21,11 @@ public class FormField extends BaseData {
     //格式化
     private String format;
     //是否隐藏
-    private String hidden = "NO";
+    private String hidden = Whether.NO;
     //序号
     private int seq;
+    //是否多选
+    private String multi = Whether.NO;
+    //是否必填
+    private String must = Whether.NO;
 }

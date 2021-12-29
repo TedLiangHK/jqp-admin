@@ -114,6 +114,9 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public Map<String, Object> getById(String tableName, Long id) {
+        if(id == null){
+            return null;
+        }
         String sql = StrUtil.format("select * from {} where id = ? ",tableName);
         List<Map<String,Object>> list = this.find(sql, id);
         return list.isEmpty() ? null :list.get(0);

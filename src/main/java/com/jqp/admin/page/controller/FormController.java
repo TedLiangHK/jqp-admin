@@ -6,20 +6,18 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.util.StringUtil;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -59,9 +57,8 @@ public class FormController {
         List<ColumnMeta> columnMetas = jdbcService.columnMeta(StrUtil.format("select * from {} ",form.getTableName()));
         for(ColumnMeta columnMeta:columnMetas){
             FormField field = new FormField();
-            field.setField(columnMeta.getColumnLabel());
+            field.setField(StringUtil.toFieldColumn(columnMeta.getColumnLabel()));
             field.setLabel(columnMeta.getColumnComment());
-            System.out.println(columnMeta.getColumnClassName());
             if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("id")){
                 field.setHidden("YES");
             }

@@ -14,4 +14,7 @@ public interface JdbcService extends JdbcDao{
     void saveOrUpdate(Map<String,Object> obj,String tableName);
     void bathSaveOrUpdate(List<BaseData> objs);
     void bathSaveOrUpdate(List<Map<String,Object>> objs,String tableName);
+    void delete(BaseData obj);
+    void delete(Long id,String tableName);
+    void delete(Long id,Class<? extends BaseData> clz);
 }

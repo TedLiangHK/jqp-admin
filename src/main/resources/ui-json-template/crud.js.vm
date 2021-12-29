@@ -14,8 +14,6 @@ AMIS_JSON={
           }
         },
         "filterTogglable": true,
-        "headerToolbar": [
-            "filter-toggler"
-        ]
+        "headerToolbar": ${topButtons}
     }
 }
