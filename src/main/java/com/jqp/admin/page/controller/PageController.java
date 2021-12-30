@@ -1,8 +1,6 @@
 package com.jqp.admin.page.controller;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.CrudData;
 import com.jqp.admin.common.PageData;
@@ -10,12 +8,10 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.constants.DataType;
-import com.jqp.admin.page.constants.Opt;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
-import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonService;
@@ -23,15 +19,15 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -124,6 +120,75 @@ public class PageController {
         return pageService.query(pageCode,pageParam);
     }
 
+    @RequestMapping("/crudExport/{pageCode}")
+    public void crudExport(@RequestParam Map<String,Object> pageParam, @PathVariable(name="pageCode") String pageCode,HttpServletResponse response){
+
+        PageParam param = new PageParam();
+        param.putAll(pageParam);
+        param.put("page",1);
+        param.put("perPage",Integer.MAX_VALUE);
+
+        Result<CrudData<Map<String, Object>>> result = pageService.query(pageCode, param);
+        Page page = pageService.get(pageCode);
+
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            String fn = page.getName() + sdf.format(new Date()) + ".csv";
+            // 读取字符编码
+            String utf = "UTF-8";
+            // 设置响应
+            response.setContentType("application/ms-txt.numberformat:@");
+            response.setCharacterEncoding(utf);
+            response.setHeader("Pragma", "public");
+            response.setHeader("Cache-Control", "max-age=30");
+            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fn, utf));
+            response.setCharacterEncoding("GBK");
+            PrintWriter writer = response.getWriter();
+            List<String> fields = new ArrayList<>();
+            List<String> titles = new ArrayList<>();
+            for(PageResultField resultField:page.getResultFields()){
+                if(!Whether.YES.equals(resultField.getHidden())){
+                    fields.add(StringUtil.toFieldColumn(resultField.getField()));
+                    titles.add(resultField.getLabel());
+                }
+            }
+            writer.println("\t"+StringUtil.concatStr(titles,",\t"));
+            List<Map<String, Object>> rows = result.getData().getRows();
+            for(Map<String,Object> row:rows){
+                writeTree(row,writer,fields,0);
+            }
+            writer.flush();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void writeTree(Map<String,Object> data,PrintWriter writer,List<String> fields,int len){
+        List<Object> rowDatas = new ArrayList<>();
+        fields.forEach(field->{
+            rowDatas.add(data.get(field));
+        });
+
+        String pre = "";
+        for(int i=0;i<len;i++){
+            if(i==len-1){
+                pre += "  ";
+            }else{
+                pre += "    ";
+            }
+        }
+        if(len>0){
+            pre += "└";
+        }
+        List<Map<String,Object>> children = (List<Map<String, Object>>) data.get("children");
+        writer.println("\t"+pre+StringUtil.concatStr(rowDatas,",\t"));
+        if(children != null){
+            children.forEach(child->{
+                writeTree(child,writer,fields,len+1);
+            });
+        }
+    }
+
     @RequestMapping("/js/{pageCode}.js")
     public String js(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
 
@@ -137,9 +202,21 @@ public class PageController {
 
         Page page = pageService.get(pageCode);
 
+        StringBuffer downloadParam = new StringBuffer("?1=1");
+        page.getQueryFields().forEach(f->{
+            String fieldName = StringUtil.toFieldColumn(f.getField());
+            downloadParam.append("&")
+                    .append(fieldName)
+                    .append("=${")
+                    .append(fieldName)
+                    .append("}");
+        });
+
         List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
+
         params.put("pageName",page.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
+        params.put("downloadParam",downloadParam);
 
         List<Object> topButtons = new ArrayList<>();
         topButtons.add("filter-toggler");
