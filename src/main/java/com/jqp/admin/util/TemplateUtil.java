@@ -14,6 +14,7 @@ public class TemplateUtil {
 		for(Entry<String,? extends Object> en : params.entrySet()){
 			context.put(en.getKey(), en.getValue());
 		}
+		context.put("jq","$");
 		
 		StringWriter sw = new StringWriter();
 		

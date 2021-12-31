@@ -251,6 +251,55 @@ public class PageController {
         Page page = pageService.get(pageCode);
         Page childPage = pageService.get(childPageCode);
 
+
+        List<Object> topButtons = new ArrayList<>();
+        topButtons.add("filter-toggler");
+        List<PageButton> pageButtons = page.getPageButtons();
+        for(PageButton pageButton:pageButtons){
+            if("top".equals(pageButton.getButtonLocation())){
+                topButtons.add(pageButtonService.getButton(pageButton));
+            }else if("row".equals(pageButton.getButtonLocation())){
+
+            }
+        }
+        params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
+
+        StringBuffer downloadParam = new StringBuffer("?1=1");
+        page.getQueryFields().forEach(f->{
+            String fieldName = StringUtil.toFieldColumn(f.getField());
+            downloadParam.append("&")
+                    .append(fieldName)
+                    .append("=${")
+                    .append(fieldName)
+                    .append("}");
+        });
+        params.put("downloadParam",downloadParam);
+
+        StringBuffer childDownloadParam = new StringBuffer("?1=1");
+        childPage.getQueryFields().forEach(f->{
+            String fieldName = StringUtil.toFieldColumn(f.getField());
+            childDownloadParam.append("&")
+                    .append(fieldName)
+                    .append("=${")
+                    .append(fieldName)
+                    .append("}");
+        });
+        params.put("childDownloadParam",childDownloadParam);
+
+
+        List<Object> childTopButtons = new ArrayList<>();
+        topButtons.add("filter-toggler");
+        List<PageButton> childPageButtons = childPage.getPageButtons();
+        for(PageButton pageButton:childPageButtons){
+            if("top".equals(pageButton.getButtonLocation())){
+                childTopButtons.add(pageButtonService.getButton(pageButton));
+            }else if("row".equals(pageButton.getButtonLocation())){
+
+            }
+        }
+        params.put("childTopButtons",JSONUtil.toJsonPrettyStr(childTopButtons));
+
+
         List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
         List<Map<String,Object>> childQueryConfigs = pageService.queryConfigs(childPage);
         params.put("pageName",page.getName());
