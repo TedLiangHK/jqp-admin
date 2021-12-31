@@ -60,8 +60,10 @@ public class FormServiceImpl implements FormService {
         Form f = this.get(code);
         Map<String,Object> form = new HashMap<>();
         form.put("type","form");
-        form.put("initApi",StrUtil.format("post:/admin/common/{}/get",f.getCode())+"?id=${id}");
-        form.put("api",StrUtil.format("post:/admin/common/{}/saveOrUpdate",f.getCode()));
+        if(StrUtil.isNotBlank(f.getTableName())){
+            form.put("initApi",StrUtil.format("post:/admin/common/{}/get",f.getCode())+"?id=${id}");
+            form.put("api",StrUtil.format("post:/admin/common/{}/saveOrUpdate",f.getCode()));
+        }
         if(StrUtil.isNotBlank(f.getInitApi())){
             form.put("initApi",f.getInitApi());
         }

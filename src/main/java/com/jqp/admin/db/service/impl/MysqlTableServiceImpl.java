@@ -5,10 +5,7 @@ import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.config.DbConfig;
-import com.jqp.admin.db.data.ColumnInfo;
-import com.jqp.admin.db.data.ColumnMeta;
-import com.jqp.admin.db.data.IndexInfo;
-import com.jqp.admin.db.data.TableInfo;
+import com.jqp.admin.db.data.*;
 import com.jqp.admin.db.service.JdbcDao;
 import com.jqp.admin.db.service.TableService;
 import lombok.extern.slf4j.Slf4j;
@@ -264,6 +261,30 @@ public class MysqlTableServiceImpl implements TableService {
     public Result dropTable(String tableName) {
         String sql = StrUtil.format(" drop table {}", tableName);
         jdbcDao.update("删除表",sql);
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> saveForeignKey(ForeignKey foreignKey) {
+        String sql = StrUtil.format("alter table {} " +
+                "add constraint {}  " +
+                "foreign key({}) " +
+                "REFERENCES {}({}) " +
+                "ON DELETE CASCADE " +
+                "ON UPDATE CASCADE",
+                foreignKey.getTableName(),
+                foreignKey.getConstraintName(),
+                foreignKey.getColumnName(),
+                foreignKey.getReferencedTableName(),
+                foreignKey.getReferencedColumnName());
+        jdbcDao.update("增加外键",sql);
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> dropForeignKey(String tableName,String constraintName) {
+        String sql = StrUtil.format("alter table {} drop foreign key {}",tableName,constraintName);
+        jdbcDao.update("删除外键",sql);
         return Result.success();
     }
 }

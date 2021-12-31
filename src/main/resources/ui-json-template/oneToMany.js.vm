@@ -34,7 +34,7 @@ AMIS_JSON={
             "itemAction": {
                 "type": "action",
                 "actionType": "reload",
-                "target": "childTable?parentId=${id},mainTable?curId=${id}"
+                "target": "childTable?parentId=${id}"
             },
             "filterTogglable": true,
             "headerToolbar": ${topButtons},

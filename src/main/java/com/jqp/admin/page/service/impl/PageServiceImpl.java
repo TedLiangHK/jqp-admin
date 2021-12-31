@@ -320,6 +320,7 @@ public class PageServiceImpl implements PageService {
             columnData.put("type","operation");
             columnData.put("label","操作");
             columnData.put("buttons",rowButtons);
+            columnData.put("width",rowButtons.size()*50);
             crudData.getColumns().add(columnData);
         }
 

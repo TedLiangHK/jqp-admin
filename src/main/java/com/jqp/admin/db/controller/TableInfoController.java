@@ -3,6 +3,7 @@ package com.jqp.admin.db.controller;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.db.data.ForeignKey;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.TableService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,5 +49,13 @@ public class TableInfoController {
     @RequestMapping("/dropTable")
     public Result dropTable(String tableName){
         return tableService.dropTable(tableName);
+    }
+    @RequestMapping("/saveForeignKey")
+    public Result saveForeignKey(@RequestBody ForeignKey foreignKey){
+        return tableService.saveForeignKey(foreignKey);
+    }
+    @RequestMapping("/dropForeignKey")
+    public Result dropForeignKey(String tableName,String constraintName){
+        return tableService.dropForeignKey(tableName,constraintName);
     }
 }

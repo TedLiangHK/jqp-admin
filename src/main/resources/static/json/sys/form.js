@@ -22,7 +22,7 @@ AMIS_JSON={
                         "type": "input-text",
                         "name": "tableName",
                         "label": "表名",
-                        "required": true
+                        "required": false
                     },
                     {
                         "type": "input-text",
@@ -77,18 +77,19 @@ AMIS_JSON={
                         "type":"button",
                         "label":"刷新",
                         "actionType": "ajax",
+                        "disabledOn":"tableName==null || tableName==''",
                         "api": "post:/admin/form/formFields",
                         //"reload":"resultFields?resultFields=${resultFields}"
                     },{
                         "type": "input-table",
                         "label":"查询结果",
                         "name": "formFields",
-                        "addable": false,
-                        "removable": false,
+                        "addable": true,
+                        "removable": true,
                         "needConfirm":false,
                         "draggable": true,
                         //"copyable": true,
-                        //"editable": true,
+                        "editable": true,
                         "required": true,
                         "headerToolbar": [
                             "filter-toggler"
