@@ -129,6 +129,7 @@ public class FormServiceImpl implements FormService {
                 }
             }else if(DataType.DIC.equals(field.getType())){
                 fieldConfig.put("type","select");
+                fieldConfig.put("source",StrUtil.format("/options/{}",field.getFormat()));
                 if(isMulti){
                     fieldConfig.put("multiple",true);
                 }

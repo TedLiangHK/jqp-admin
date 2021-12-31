@@ -80,6 +80,22 @@ public class MysqlTableServiceImpl implements TableService {
         String indexSql = "show keys from "+tableName;
         List<Map<String, Object>> indexList = jdbcDao.find(indexSql);
 
+        String foreignKeySql = StrUtil.format("select\n" +
+                "s.CONSTRAINT_NAME\n" +
+                "from {}.KEY_COLUMN_USAGE s\n" +
+                "where s.TABLE_SCHEMA = '{}'\n" +
+                "and s.TABLE_NAME = '{}'\n" +
+                "and s.CONSTRAINT_SCHEMA <> 'PRIMARY'"
+                ,dbConfig.getManageSchema()
+                ,dbConfig.getSchema(),
+                tableName);
+        List<Map<String, Object>> maps = jdbcDao.find(foreignKeySql);
+        Set<String> foreignKeys = new HashSet<>();
+        maps.forEach(item->{
+            foreignKeys.add((String)item.get("constraintName"));
+        });
+
+
         List<IndexInfo> indexInfos = new ArrayList<>();
         Map<String,IndexInfo> indexInfoMap = new HashMap<>();
 
@@ -100,6 +116,10 @@ public class MysqlTableServiceImpl implements TableService {
             Long nonUnique = (Long)index.get("nonUnique");
             //排除唯一索引和主键
             if(Long.valueOf(0).equals(nonUnique)){
+                continue;
+            }
+            //排除外键
+            if(foreignKeys.contains(keyName)){
                 continue;
             }
             IndexInfo indexInfo = indexInfoMap.get(keyName);

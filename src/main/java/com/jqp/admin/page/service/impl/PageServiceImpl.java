@@ -302,7 +302,17 @@ public class PageServiceImpl implements PageService {
             columnData.setName(StringUtil.toFieldColumn(resultField.getField()));
             columnData.setLabel(resultField.getLabel());
             columnData.put("sortable",true);
-
+            if(DataType.DIC.equals(resultField.getType())){
+                columnData.put("type","mapping");
+                Map<String,Object> map = new HashMap<>();
+                List<Map<String, Object>> options = jdbcService.find("select label,value from dic_item where parent_id in(" +
+                        "select id from dic where dic_code = ? " +
+                        ") order by value asc ", resultField.getFormat());
+                options.forEach(o->{
+                    map.put((String)o.get("value"),o.get("label"));
+                });
+                columnData.put("map",map);
+            }
             crudData.getColumns().add(columnData);
         }
 
@@ -370,6 +380,7 @@ public class PageServiceImpl implements PageService {
                 }
             }else if(DataType.DIC.equals(field.getType())){
                 queryConfig.put("type","select");
+                queryConfig.put("source",StrUtil.format("/options/{}",field.getFormat()));
                 if(isMulti){
                     queryConfig.put("multiple",true);
                 }

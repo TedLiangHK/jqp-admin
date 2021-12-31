@@ -2,10 +2,7 @@ package com.jqp.admin.page.controller;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONUtil;
-import com.jqp.admin.common.CrudData;
-import com.jqp.admin.common.PageData;
-import com.jqp.admin.common.PageParam;
-import com.jqp.admin.common.Result;
+import com.jqp.admin.common.*;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -146,6 +143,11 @@ public class PageController {
             PrintWriter writer = response.getWriter();
             List<String> fields = new ArrayList<>();
             List<String> titles = new ArrayList<>();
+            List<ColumnData> columns = result.getData().getColumns();
+            Map<String,ColumnData> columnsMap = new HashMap<>();
+            columns.forEach(c->{
+                columnsMap.put(c.getName(),c);
+            });
             for(PageResultField resultField:page.getResultFields()){
                 if(!Whether.YES.equals(resultField.getHidden())){
                     fields.add(StringUtil.toFieldColumn(resultField.getField()));
@@ -155,7 +157,7 @@ public class PageController {
             writer.println("\t"+StringUtil.concatStr(titles,",\t"));
             List<Map<String, Object>> rows = result.getData().getRows();
             for(Map<String,Object> row:rows){
-                writeTree(row,writer,fields,0);
+                writeTree(row,writer,fields,0,columnsMap);
             }
             writer.flush();
         }catch (Exception e){
@@ -163,10 +165,19 @@ public class PageController {
         }
     }
 
-    private void writeTree(Map<String,Object> data,PrintWriter writer,List<String> fields,int len){
+    private void writeTree(Map<String,Object> data,PrintWriter writer,List<String> fields,int len,Map<String,ColumnData> columnsMap){
         List<Object> rowDatas = new ArrayList<>();
         fields.forEach(field->{
-            rowDatas.add(data.get(field));
+            ColumnData columnData = columnsMap.get(field);
+            Object value = data.get(field);
+            if("mapping".equals(columnData.get("type"))){
+                Map<String,Object> map = (Map<String, Object>) columnData.get("map");
+                value = map.get(data.get(field));
+            }
+            if(value == null){
+                value = "";
+            }
+            rowDatas.add(value);
         });
 
         String pre = "";
@@ -184,7 +195,7 @@ public class PageController {
         writer.println("\t"+pre+StringUtil.concatStr(rowDatas,",\t"));
         if(children != null){
             children.forEach(child->{
-                writeTree(child,writer,fields,len+1);
+                writeTree(child,writer,fields,len+1,columnsMap);
             });
         }
     }
