@@ -48,6 +48,17 @@ public class FormController {
         formService.save(form);
         return Result.success();
     }
+    @RequestMapping("/copyForm")
+    public Result<Form> copyForm(Long id){
+        if(id == null){
+            return Result.success();
+        }
+        Form copy = formService.get(id);
+        copy.setId(null);
+        copy.setCode(copy.getCode()+"_copy");
+        return Result.success(copy);
+    }
+
 
     @RequestMapping("/formFields")
     public Result formFields(@RequestBody Form form){

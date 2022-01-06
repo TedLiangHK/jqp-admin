@@ -25,6 +25,18 @@ AMIS_JSON={
                         "required": false
                     },
                     {
+                        "type": "input-text",
+                        "name": "labelField",
+                        "label": "名称字段",
+                        "required": false
+                    },
+                    {
+                        "type": "input-text",
+                        "name": "valueField",
+                        "label": "值字段",
+                        "required": false
+                    },
+                    {
                         "type": "select",
                         "name": "pageType",
                         "label": "页面类型",
@@ -271,6 +283,9 @@ AMIS_JSON={
                                 },{
                                     "label":"数据字典",
                                     "value":"dic"
+                                },{
+                                    "label":"选择器",
+                                    "value":"selector"
                                 }]
                             },
                             {
@@ -432,8 +447,8 @@ AMIS_JSON={
             "size": "xl",
             "body": {
                 "type": "form",
-                "initApi": "/tableInfo/copyTableInfo?tableName=${id}",
-                "api": "post:/tableInfo/updateTable",
+                "initApi": "/admin/page/copyPage?id=${id}",
+                "api": "post:/admin/page/save",
                 "$ref":"formTabs"
             }
         }
@@ -479,11 +494,13 @@ AMIS_JSON={
         "columns": [
             {
                 "name": "code",
-                "label": "编号"
+                "label": "编号",
+                "width":200
             },
             {
                 "name": "name",
-                "label": "名称"
+                "label": "名称",
+                "width":200
             },
             {
                 "name": "querySql",
@@ -491,11 +508,13 @@ AMIS_JSON={
             },
             {
                 "name": "pageType",
-                "label": "页面类型"
+                "label": "页面类型",
+                "width":200
             },
             {
                 "name": "orderBy",
-                "label": "排序"
+                "label": "排序",
+                "width":200
             },
             {
                 "name": "js",
@@ -504,6 +523,7 @@ AMIS_JSON={
             {
                 "type": "operation",
                 "label": "操作",
+                "width":200,
                 "buttons": [
                     {
                         "label": "编辑",

@@ -152,6 +152,9 @@ AMIS_JSON={
                                 },{
                                     "label":"数据字典",
                                     "value":"dic"
+                                },{
+                                    "label":"选择器",
+                                    "value":"selector"
                                 }]
                             },
                             {
@@ -223,8 +226,8 @@ AMIS_JSON={
             "size": "xl",
             "body": {
                 "type": "form",
-                "initApi": "/tableInfo/copyTableInfo?tableName=${id}",
-                "api": "post:/tableInfo/updateTable",
+                "initApi": "/admin/form/copyForm?id=${id}",
+                "api": "post:/admin/form/save",
                 "$ref":"formTabs"
             }
         }

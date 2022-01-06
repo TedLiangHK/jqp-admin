@@ -5,15 +5,8 @@ import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.page.data.Page;
 
-import java.util.List;
 import java.util.Map;
 
-public interface PageService {
-    void save(Page page);
-    Page get(Long id);
-    Page get(String pageCode);
-
+public interface PageService extends PageDao{
     Result<CrudData<Map<String,Object>>> query(String pageCode,PageParam pageParam);
-
-    List<Map<String,Object>> queryConfigs(Page page);
 }

@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
+@Service("pageButtonService")
 public class PageButtonServiceImpl implements PageButtonService {
 
     @Resource

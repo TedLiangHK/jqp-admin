@@ -15,6 +15,8 @@ public class DataType {
     public static final String STRING = "string";
     //数据字典
     public static final String DIC = "dic";
+    //选择器
+    public static final String Selector = "selector";
     //长字符串
     public static final String LONG_STRING = "long-string";
     //大文本
@@ -40,7 +42,7 @@ public class DataType {
         return Arrays.asList(DATE).contains(type);
     }
     public static final boolean isLong(String type){
-        return Arrays.asList(LONG).contains(type);
+        return Arrays.asList(LONG,Selector).contains(type);
     }
     public static final boolean isInt(String type){
         return Arrays.asList(INT).contains(type);

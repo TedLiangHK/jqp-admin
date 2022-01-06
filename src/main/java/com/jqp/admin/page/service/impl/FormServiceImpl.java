@@ -3,13 +3,12 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
-import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.service.FormService;
-import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.page.service.PageConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +18,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service("formService")
 @Slf4j
 public class FormServiceImpl implements FormService {
     @Resource
     JdbcService jdbcService;
+    @Resource
+    PageConfigService pageConfigService;
     @Override
     public void save(Form form) {
         jdbcService.saveOrUpdate(form);
@@ -81,6 +82,7 @@ public class FormServiceImpl implements FormService {
         List<FormField> formFields = f.getFormFields();
         for(FormField field:formFields){
             Map<String,Object> fieldConfig = new HashMap<>();
+            fieldConfig.put("clearable",true);
             fieldConfig.put("name", field.getField());
             fieldConfig.put("label",field.getLabel());
             fieldConfig.put("xs",12);
@@ -133,6 +135,9 @@ public class FormServiceImpl implements FormService {
                 if(isMulti){
                     fieldConfig.put("multiple",true);
                 }
+            }else if(DataType.Selector.equals(field.getType())){
+                Map<String, Object> selectorConfig = pageConfigService.getSelectorConfig(field.getFormat(),field.getField());
+                fieldConfig.putAll(selectorConfig);
             }else if(DataType.isNumber(field.getType())){
                 fieldConfig.put("type","input-number");
             }else{

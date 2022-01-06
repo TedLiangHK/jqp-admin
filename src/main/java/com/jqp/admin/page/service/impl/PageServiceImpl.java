@@ -17,7 +17,6 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -25,8 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class PageServiceImpl implements PageService {
+@Service("pageService")
+public class PageServiceImpl extends PageDaoImpl implements PageService {
 
     @Resource
     JdbcService jdbcService;
@@ -34,64 +33,6 @@ public class PageServiceImpl implements PageService {
     @Resource
     PageButtonService pageButtonService;
 
-    @Override
-    @Transactional
-    public void save(Page page) {
-        jdbcService.saveOrUpdate(page);
-
-        jdbcService.update("delete from page_result_field where page_id = ? ",page.getId());
-        int seq = 0;
-        for (PageResultField field:
-             page.getResultFields()) {
-            field.setId(null);
-            field.setPageId(page.getId());
-            field.setSeq(++seq);
-            jdbcService.saveOrUpdate(field);
-        }
-        jdbcService.update("delete from page_query_field where page_id = ? ",page.getId());
-        seq = 0;
-        for (PageQueryField field:
-                page.getQueryFields()) {
-            field.setId(null);
-            field.setPageId(page.getId());
-            field.setSeq(++seq);
-            jdbcService.saveOrUpdate(field);
-        }
-
-        jdbcService.update("delete from page_button where page_id = ? ",page.getId());
-        seq = 0;
-        for (PageButton button:
-                page.getPageButtons()) {
-            button.setId(null);
-            button.setPageId(page.getId());
-            button.setSeq(++seq);
-            jdbcService.saveOrUpdate(button);
-        }
-    }
-
-    @Override
-    public Page get(Long id) {
-        Page page = jdbcService.getById(Page.class, id);
-        this.get(page);
-        return page;
-    }
-    @Override
-    public Page get(String pageCode) {
-        Page page = jdbcService.findOne(Page.class,"code",pageCode);
-        this.get(page);
-        return page;
-    }
-
-    private void get(Page page){
-        List<PageResultField> pageResultFields = jdbcService.find(PageResultField.class,"pageId",page.getId());
-        page.setResultFields(pageResultFields);
-
-        List<PageQueryField> pageQueryFields = jdbcService.find(PageQueryField.class,"pageId",page.getId());
-        page.setQueryFields(pageQueryFields);
-
-        List<PageButton> pageButtons = jdbcService.find(PageButton.class,"pageId",page.getId());
-        page.setPageButtons(pageButtons);
-    }
 
     @Override
     public Result<CrudData<Map<String, Object>>> query(String pageCode, PageParam pageParam) {
@@ -112,6 +53,21 @@ public class PageServiceImpl implements PageService {
             }
             Opt.getSql(fieldName,field.getOpt(),field.getType(),value,field.getFormat(),sql,values);
         }
+        Long treeId = (Long) pageParam.remove("treeId");
+        Object op = pageParam.get("op");
+        if("loadOptions".equals(op)){
+            pageParam.put("page",1);
+            pageParam.put("perPage",100);
+            String[] optionValues = StringUtil.splitStr(pageParam.get("value").toString(),",");
+            List<String> args = new ArrayList<>();
+            for (int i = optionValues.length - 1; i >= 0; i--) {
+                args.add("?");
+                values.add(Long.valueOf(optionValues[i]));
+            }
+            sql.append(StrUtil.format(" and {} in ({}) ",
+                    page.getValueField(),
+                    StringUtil.concatStr(args,",")));
+        }
         String orderBy = pageParam.getStr("orderBy");
         String orderDir = pageParam.getStr("orderDir");
         if(StrUtil.isNotBlank(orderBy) && StrUtil.isNotBlank(orderDir)){
@@ -119,6 +75,7 @@ public class PageServiceImpl implements PageService {
         }else if(StrUtil.isNotBlank(page.getOrderBy())){
             sql.append(page.getOrderBy());
         }
+
 
         Result<PageData<Map<String, Object>>> result = jdbcService.query(pageParam, sql.toString(), values.toArray());
 
@@ -147,17 +104,50 @@ public class PageServiceImpl implements PageService {
         }
 
         if(PageType.tree.equals(page.getPageType())){
+
+            //树状结构选择父节点需要过滤当前节点,避免循环引用
+            Set<Long> filterIds = new HashSet<>();
+            if(treeId != null){
+                Set<Long> childIds = new HashSet<>();
+                childIds.add(treeId);
+                filterIds.add(treeId);
+                while(true){
+                    if(childIds.isEmpty()){
+                        break;
+                    }
+                    String childSql = StrUtil.format("select id from ({}) t where parent_id in ({})"
+                            ,page.getQuerySql()
+                            ,StringUtil.concatStr(childIds.stream().map(i-> "?").collect(Collectors.toList()),","));
+                    List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
+                    childIds.clear();
+                    for(Map<String,Object> child:childs){
+
+                        Long id = (Long) child.get("id");
+                        childIds.add(id);
+                        filterIds.add(id);
+                    }
+                }
+            }
+
+
             Set<Long> rootIds = new HashSet<>();
             Set<Long> allIds = new HashSet<>();
             Map<Long,Map<String,Object>> allMap = new HashMap<>();
             Map<Long,Set<Long>> childIdMap = new HashMap<>();
             List<Map<String, Object>> items = result.getData().getItems();
             for(Map<String,Object> item:items){
-                allIds.add((Long)item.get("id"));
-                allMap.put((Long)item.get("id"),item);
+                Long id = (Long)item.get("id");
+                if(filterIds.contains(id)){
+                    continue;
+                }
+                allIds.add(id);
+                allMap.put(id,item);
             }
             for(Map<String,Object> item:items){
                 Long id = (Long) item.get("id");
+                if(filterIds.contains(id)){
+                    continue;
+                }
                 Long parentId = (Long) item.get("parentId");
                 if(parentId == null || !allIds.contains(parentId)){
                     rootIds.add(id);
@@ -183,6 +173,11 @@ public class PageServiceImpl implements PageService {
                 List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
                 childIds.clear();
                 for(Map<String,Object> child:childs){
+                    Long id = (Long) child.get("id");
+                    if(filterIds.contains(id)){
+                        continue;
+                    }
+
                     if(!dateFields.isEmpty()){
                         for(Map.Entry<String,PageResultField> en:dateFields.entrySet()){
                             Object value = child.get(en.getKey());
@@ -198,8 +193,6 @@ public class PageServiceImpl implements PageService {
                             }
                         }
                     }
-
-                    Long id = (Long) child.get("id");
                     allMap.put(id,child);
                     childIds.add(id);
                     Long parentId = (Long) child.get("parentId");
@@ -216,6 +209,9 @@ public class PageServiceImpl implements PageService {
 
             List<Map<String,Object>> roots = new ArrayList<>();
             for(Long rootId:rootIds){
+                if(filterIds.contains(rootId)){
+                    continue;
+                }
                 roots.add(allMap.get(rootId));
             }
             String orderField = null;
@@ -315,91 +311,26 @@ public class PageServiceImpl implements PageService {
             }
             crudData.getColumns().add(columnData);
         }
+        Boolean selector = (Boolean) pageParam.get("selector");
+        if(!Boolean.TRUE.equals(selector)){
+            List<Map<String,Object>> rowButtons = new ArrayList<>();
+            List<PageButton> pageButtons = page.getPageButtons();
+            for(PageButton pageButton:pageButtons){
+                if("row".equals(pageButton.getButtonLocation())){
+                    rowButtons.add(pageButtonService.getButton(pageButton));
+                }else if("top".equals(pageButton.getButtonLocation())){
 
-        List<Map<String,Object>> rowButtons = new ArrayList<>();
-        List<PageButton> pageButtons = page.getPageButtons();
-        for(PageButton pageButton:pageButtons){
-            if("row".equals(pageButton.getButtonLocation())){
-                rowButtons.add(pageButtonService.getButton(pageButton));
-            }else if("top".equals(pageButton.getButtonLocation())){
-
+                }
+            }
+            if(!rowButtons.isEmpty()){
+                ColumnData columnData = new ColumnData();
+                columnData.put("type","operation");
+                columnData.put("label","操作");
+                columnData.put("buttons",rowButtons);
+                columnData.put("width",rowButtons.size()*50);
+                crudData.getColumns().add(columnData);
             }
         }
-        if(!rowButtons.isEmpty()){
-            ColumnData columnData = new ColumnData();
-            columnData.put("type","operation");
-            columnData.put("label","操作");
-            columnData.put("buttons",rowButtons);
-            columnData.put("width",rowButtons.size()*50);
-            crudData.getColumns().add(columnData);
-        }
-
-
         return Result.success(crudData);
-    }
-
-    @Override
-    public List<Map<String, Object>> queryConfigs(Page page) {
-        List<Map<String,Object>> queryConfigs = new ArrayList<>();
-        for(PageQueryField field:page.getQueryFields()){
-            Map<String,Object> queryConfig = new HashMap<>();
-            queryConfig.put("name", StringUtil.toFieldColumn(field.getField()));
-            queryConfig.put("label",field.getLabel());
-            queryConfig.put("xs",12);
-            queryConfig.put("sm",6);
-            queryConfig.put("md",4);
-            queryConfig.put("lg",3);
-            queryConfig.put("columnClassName","mb-1");
-
-            if(field.getWidth() != null){
-                queryConfig.put("xs",field.getWidth());
-                queryConfig.put("sm",field.getWidth());
-                queryConfig.put("md",field.getWidth());
-                queryConfig.put("lg",field.getWidth());
-            }
-
-            boolean isMulti = !Opt.isSingleValue(field.getOpt());
-
-            if(StrUtil.isNotBlank(field.getValue())){
-                queryConfig.put("value",field.getValue());
-            }
-
-            if(Whether.YES.equals(field.getHidden())){
-                queryConfig.put("xs",0.0001);
-                queryConfig.put("sm",0.0001);
-                queryConfig.put("md",0.0001);
-                queryConfig.put("lg",0.0001);
-                queryConfig.put("label","");
-                queryConfig.put("type","hidden");
-            }else if(DataType.isDate(field.getType())){
-                queryConfig.put("format",field.getFormat().replace("yyyy-MM-dd","YYYY-MM-DD"));
-                if("yyyy-MM-dd".equals(field.getFormat())){
-                    queryConfig.put("type","input-date");
-                }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
-                    queryConfig.put("type","input-datetime");
-                }
-            }else if(DataType.DIC.equals(field.getType())){
-                queryConfig.put("type","select");
-                queryConfig.put("source",StrUtil.format("/options/{}",field.getFormat()));
-                if(isMulti){
-                    queryConfig.put("multiple",true);
-                }
-            }else if(DataType.isNumber(field.getType())){
-                queryConfig.put("type","input-number");
-            }else{
-                queryConfig.put("type","input-text");
-            }
-            if(Opt.betweenAnd.equals(field.getOpt())){
-                if(DataType.isDate(field.getType())){
-                    if("yyyy-MM-dd".equals(field.getFormat())){
-                        queryConfig.put("type","input-date-range");
-                    }else if("yyyy-MM-dd HH:mm:ss".equals(field.getFormat())){
-                        queryConfig.put("type","input-datetime-range");
-                    }
-                }
-            }
-            queryConfigs.add(queryConfig);
-        }
-        return queryConfigs;
     }
 }

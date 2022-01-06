@@ -1,0 +1,33 @@
+{
+    "type": "picker",
+    "joinValues": true,
+    "valueField": "${page.valueField}",
+    "labelField": "${page.labelField}",
+    "source": "post:/admin/page/selector/${page.code}?${formField}=$jq${formField}&id=${id}",
+    "size": "lg",
+    "clearable": true,
+    "autoFill": {},
+    "pickerSchema": {
+        "mode": "table",
+        "name": "${page.code}Selector",
+        "filter": {
+            "title": "${page.name}",
+            "submitText": "查询",
+            "mode": "horizontal",
+            "body":{
+              "type":"grid",
+              "columns":${queryConfigs}
+            },
+            "actions":[{
+              "type":"button",
+              "label":"查询",
+              "primary":true,
+              "actionType":"submit"
+            },{
+              "type":"button",
+              "label":"重置",
+              "actionType":"reset"
+            }]
+        }
+    }
+}

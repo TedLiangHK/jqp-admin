@@ -1,9 +1,11 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.db.data.ColumnMeta;
+import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
@@ -12,6 +14,7 @@ import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonService;
+import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
@@ -19,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -40,6 +44,8 @@ public class PageController {
 
     @Resource
     private FormService formService;
+    @Resource
+    private PageConfigService pageConfigService;
 
     @Resource
     private PageButtonService pageButtonService;
@@ -50,7 +56,16 @@ public class PageController {
         List<Object> values = new ArrayList<>();
         return jdbcService.query(pageParam,Page.class,sql,values.toArray());
     }
-
+    @RequestMapping("/copyPage")
+    public Result<Page> copyPage(Long id){
+        if(id == null){
+            return Result.success();
+        }
+        Page copy = pageService.get(id);
+        copy.setId(null);
+        copy.setCode(copy.getCode()+"_copy");
+        return Result.success(copy);
+    }
     @RequestMapping("/get")
     public Result<Page> get(Long id){
         if(id == null){
@@ -114,6 +129,29 @@ public class PageController {
 
     @RequestMapping("/crudQuery/{pageCode}")
     public Result<CrudData<Map<String,Object>>> crudQuery(@RequestBody PageParam pageParam, @PathVariable(name="pageCode") String pageCode){
+        return pageService.query(pageCode,pageParam);
+    }
+    @RequestMapping("/selector/{pageCode}")
+    public Result<CrudData<Map<String,Object>>> selector(@RequestBody PageParam pageParam, @PathVariable(name="pageCode") String pageCode, HttpServletRequest request){
+        pageParam.put("selector",true);
+
+        Map<String, String[]> parameterMap = request.getParameterMap();
+
+        Set<String> keySet = new HashSet<>(pageParam.keySet());
+        keySet.forEach(key->{
+            if(key.startsWith("selector_")){
+                Object value = pageParam.remove(key);
+                pageParam.put(key.substring("selector_".length()),value);
+            }
+        });
+        //过滤树结构当前id,防止循环引用
+        if(parameterMap.containsKey("parentId") && parameterMap.containsKey("id")){
+            String[] ids = parameterMap.get("id");
+            if(ids != null && ids.length == 1 && StrUtil.isNotBlank(ids[0])){
+                Long treeId = Long.parseLong(ids[0]);
+                pageParam.put("treeId",treeId);
+            }
+        }
         return pageService.query(pageCode,pageParam);
     }
 
@@ -223,7 +261,7 @@ public class PageController {
                     .append("}");
         });
 
-        List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
+        List<Map<String,Object>> queryConfigs = pageConfigService.queryConfigs(page);
 
         params.put("pageName",page.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
@@ -311,8 +349,8 @@ public class PageController {
         params.put("childTopButtons",JSONUtil.toJsonPrettyStr(childTopButtons));
 
 
-        List<Map<String,Object>> queryConfigs = pageService.queryConfigs(page);
-        List<Map<String,Object>> childQueryConfigs = pageService.queryConfigs(childPage);
+        List<Map<String,Object>> queryConfigs = pageConfigService.queryConfigs(page);
+        List<Map<String,Object>> childQueryConfigs = pageConfigService.queryConfigs(childPage);
         params.put("pageName",page.getName());
         params.put("childPageName",childPage.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
@@ -325,7 +363,7 @@ public class PageController {
     @RequestMapping("/queryConfigs/{pageCode}")
     public Result queryConfigs(@PathVariable("pageCode") String pageCode){
         Page page = pageService.get(pageCode);
-        List<Map<String, Object>> queryConfigs = pageService.queryConfigs(page);
+        List<Map<String, Object>> queryConfigs = pageConfigService.queryConfigs(page);
         return Result.successForKey("config",queryConfigs);
     }
 }
