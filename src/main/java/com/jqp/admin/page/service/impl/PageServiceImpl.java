@@ -49,7 +49,12 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
             }
             String value = pageParam.getStr(StringUtil.toFieldColumn(fieldName));
             if(StrUtil.isBlank(value)){
-                continue;
+
+                if(Whether.YES.equals(field.getMust()) && StrUtil.isNotBlank(field.getValue())){
+                    value = field.getValue();
+                }else{
+                    continue;
+                }
             }
             Opt.getSql(fieldName,field.getOpt(),field.getType(),value,field.getFormat(),sql,values);
         }

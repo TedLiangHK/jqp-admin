@@ -2,6 +2,7 @@ AMIS_JSON={
     "type": "page",
     "body":{
         "type": "crud",
+        "name":"mainTable",
         "api": "post:/admin/page/crudQuery/${pageCode}",
         "syncLocation": false,
         "filter": {

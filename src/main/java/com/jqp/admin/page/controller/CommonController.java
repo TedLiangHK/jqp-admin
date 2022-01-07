@@ -52,7 +52,7 @@ public class CommonController {
         }
         String tableName = form.getTableName();
         jdbcService.saveOrUpdate(obj,tableName);
-        return Result.success();
+        return Result.success(obj);
     }
 
     @RequestMapping("/{model}/delete/{id}")

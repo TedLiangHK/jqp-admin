@@ -1,0 +1,38 @@
+{
+    "title": "${pageTitle}",
+    "type": "crud",
+    "name": "${pageCode}Table",
+    "api": "post:/admin/page/crudQuery/${pageCode}",
+    "syncLocation": false,
+    "filter": {
+      "title": "查询条件",
+      "submitText": "查询",
+      "mode": "horizontal",
+      "body":{
+        "type":"grid",
+        "columns":${queryConfigs}
+      },
+      "actions":[{
+          "type":"button",
+          "label":"查询",
+          "primary":true,
+          "actionType":"submit"
+      },{
+          "type":"button",
+          "label":"重置",
+          "actionType":"reset"
+      },{
+          "type":"button",
+          "label":"导出Excel",
+          "actionType": "url",
+          "url":"/admin/page/crudExport/${pageCode}${downloadParam}"
+      }]
+    },
+    "headerToolbar": ${topButtons},
+    "footerToolbar": [
+        "statistics",
+        "switch-per-page",
+        "pagination"
+    ],
+"perPageAvailable":[10,20,50,100,300,500]
+}

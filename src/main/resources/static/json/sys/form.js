@@ -209,6 +209,39 @@ AMIS_JSON={
                         ]
                     }
                 ]
+            },{
+                title:"关联子表",
+                body:[{
+                        "type": "input-table",
+                        "label":"关联子表",
+                        "name": "formRefs",
+                        "addable": true,
+                        "removable": true,
+                        "needConfirm":false,
+                        "draggable": true,
+                        //"copyable": true,
+                        "editable": true,
+                        "required": true,
+                        "headerToolbar": [
+                            "filter-toggler"
+                        ],
+                        "columns": [
+                            {
+                                "type":"input-text",
+                                "name": "refPageCode",
+                                "label": "关联页面编号",
+                                "required": true,
+                                //"disabled":true
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "refField",
+                                "label": "关联字段",
+                                "required": true
+                            }
+                        ]
+                    }
+                ]
             }]
         },
         "form":{

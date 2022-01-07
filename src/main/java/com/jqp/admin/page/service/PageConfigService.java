@@ -9,4 +9,6 @@ public interface PageConfigService {
     Map<String,Object> getSelectorConfig(String code,String formField);
     List<Map<String,Object>> queryConfigs(Page page);
     List<Map<String,Object>> queryConfigs(Page page,boolean selector);
+
+    Map<String,Object> getCurdJson(String code);
 }

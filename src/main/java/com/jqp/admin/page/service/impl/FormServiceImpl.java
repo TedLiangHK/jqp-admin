@@ -6,11 +6,14 @@ import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
+import com.jqp.admin.page.data.FormRef;
 import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ public class FormServiceImpl implements FormService {
     @Resource
     PageConfigService pageConfigService;
     @Override
+    @Transactional
     public void save(Form form) {
         jdbcService.saveOrUpdate(form);
         jdbcService.update("delete from form_field where form_id = ? ",form.getId());
@@ -36,6 +40,15 @@ public class FormServiceImpl implements FormService {
             formField.setSeq(seq);
             jdbcService.saveOrUpdate(formField);
         }
+
+        jdbcService.update("delete from form_ref where form_id = ? ",form.getId());
+        seq = 0;
+        for(FormRef ref:form.getFormRefs()){
+            ref.setId(null);
+            ref.setFormId(form.getId());
+            ref.setSeq(seq);
+            jdbcService.saveOrUpdate(ref);
+        }
     }
 
     @Override
@@ -43,6 +56,9 @@ public class FormServiceImpl implements FormService {
         Form form = jdbcService.getById(Form.class, id);
         List<FormField> formFields = jdbcService.find(FormField.class, "formId", id);
         form.setFormFields(formFields);
+
+        List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", id);
+        form.setFormRefs(formRefs);
         return form;
     }
 
@@ -51,6 +67,9 @@ public class FormServiceImpl implements FormService {
         Form form = jdbcService.findOne(Form.class,"code",code);
         List<FormField> formFields = jdbcService.find(FormField.class, "formId", form.getId());
         form.setFormFields(formFields);
+
+        List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", form.getId());
+        form.setFormRefs(formRefs);
         return form;
     }
 
@@ -154,8 +173,65 @@ public class FormServiceImpl implements FormService {
         if("default".equals(f.getSize())){
             dialog.remove("size");
         }
-        dialog.put("body",form);
 
+
+
+        if(!f.getFormRefs().isEmpty()){
+
+            List<Map<String,Object>> dialogButtons = new ArrayList<>();
+            Map<String,Object> saveBtn = new HashMap<>();
+            saveBtn.put("label","保存基本信息");
+            saveBtn.put("type","button");
+            saveBtn.put("actionType","submit");
+            saveBtn.put("primary",true);
+            saveBtn.put("close",false);
+
+            Map<String,Object> closeBtn = new HashMap<>();
+            closeBtn.put("label","关闭");
+            closeBtn.put("type","button");
+            closeBtn.put("actionType","close");
+            closeBtn.put("close",true);
+
+            dialogButtons.add(saveBtn);
+            dialogButtons.add(closeBtn);
+
+            dialog.put("actions",dialogButtons);
+
+            form.remove("body");
+
+            List<Map<String,Object>> tabs = new ArrayList<>();
+            grid.put("title","基本信息");
+            tabs.add(grid);
+
+            List<String> targets = new ArrayList<>();
+            targets.add("mainTable");
+            f.getFormRefs().forEach(ref->{
+                Map<String,Object> data = new HashMap<>();
+                data.put("id","");
+                data.put(ref.getRefField(),"${id}");
+                Map<String, Object> curdJson = pageConfigService.getCurdJson(ref.getRefPageCode());
+                curdJson.put("data",data);
+
+                Object title = curdJson.remove("title");
+
+                List<Map<String,Object>> tabContent = new ArrayList<>();
+                tabContent.add(curdJson);
+
+                Map<String,Object> tab = new HashMap<>();
+                tab.put("title",title);
+                tab.put("body",tabContent);
+
+                tabs.add(tab);
+                targets.add(ref.getRefPageCode()+"Table?"+ref.getRefField()+"=${id}");
+            });
+
+            form.put("tabs",tabs);
+            saveBtn.put("reload", StringUtil.concatStr(targets,","));
+
+
+
+        }
+        dialog.put("body",form);
         return dialog;
     }
 }

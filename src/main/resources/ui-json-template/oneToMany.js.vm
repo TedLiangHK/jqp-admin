@@ -42,7 +42,7 @@ AMIS_JSON={
             "name":"childTable",
             "type": "crud",
             "data":{
-                "parentId":"-1"
+                "parentId":-1
             },
             "api": "post:/admin/page/crudQuery/${childPageCode}",
             "syncLocation": false,

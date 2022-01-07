@@ -302,6 +302,19 @@ AMIS_JSON={
                                 }]
                             },
                             {
+                                "type":"select",
+                                "name": "must",
+                                "label": "是否必填",
+                                "required": true,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
                                 "type":"input-number",
                                 "name": "width",
                                 "label": "宽度(1~12)"
