@@ -1,5 +1,6 @@
 package com.jqp.admin.common;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.Map;
 @Data
 public class Result <T>{
     private int status = Status.SUCCESS;
-    private String msg;
+    private String msg = "操作成功";
     private T data;
 
     public Result() {
@@ -20,7 +21,7 @@ public class Result <T>{
 
     public Result(int status, String msg, T data) {
         this.status = status;
-        this.msg = msg;
+        this.msg = StrUtil.isNotBlank(msg) ? msg:"操作成功";
         this.data = data;
     }
 

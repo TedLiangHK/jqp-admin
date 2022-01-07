@@ -1,5 +1,6 @@
 package com.jqp.admin.page.service;
 
+import com.jqp.admin.page.data.BaseButton;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.PageButton;
 
@@ -10,5 +11,5 @@ public interface FormService {
     Form get(Long id);
     Form get(String code);
 
-    Map<String,Object> getFormJson(String code, PageButton pageButton);
+    Map<String,Object> getFormJson(String code, BaseButton button);
 }

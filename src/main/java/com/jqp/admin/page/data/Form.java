@@ -1,6 +1,7 @@
 package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.page.constants.Whether;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -27,10 +28,15 @@ public class Form extends BaseData {
 
     //表单关联
     private List<FormRef> formRefs = new ArrayList<>();
+    //表单按钮
+    private List<FormButton> formButtons = new ArrayList<>();
 
     //弹出层大小
     private String size = "default";
 
     //字段宽度
     private Integer fieldWidth;
+
+    //是否禁用
+    private String disabled = Whether.NO;
 }

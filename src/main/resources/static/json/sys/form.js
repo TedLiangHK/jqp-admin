@@ -63,6 +63,19 @@ AMIS_JSON={
                         "label": "字段宽度"
                     },
                     {
+                        "type":"select",
+                        "name": "disabled",
+                        "label": "是否只读",
+                        "required": false,
+                        "options":[{
+                            "label":"YES",
+                            "value":"YES"
+                        },{
+                            "label":"NO",
+                            "value":"NO"
+                        }]
+                    },
+                    {
                         "type": "editor",
                         "name": "js",
                         "label": "js脚本",
@@ -202,6 +215,19 @@ AMIS_JSON={
                                 }]
                             },
                             {
+                                "type":"select",
+                                "name": "disabled",
+                                "label": "是否只读",
+                                "required": false,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
                                 "type":"input-text",
                                 "name": "value",
                                 "label": "默认值",
@@ -221,7 +247,7 @@ AMIS_JSON={
                         "draggable": true,
                         //"copyable": true,
                         "editable": true,
-                        "required": true,
+                        "required": false,
                         "headerToolbar": [
                             "filter-toggler"
                         ],
@@ -242,6 +268,111 @@ AMIS_JSON={
                         ]
                     }
                 ]
+            },{
+                title:"表单按钮",
+                body:[{
+                    "type": "input-table",
+                    "name": "formButtons",
+                    "addable": true,
+                    "removable": true,
+                    "needConfirm":false,
+                    "draggable": true,
+                    "strictMode":true,
+                    //"copyable": true,
+                    //"editable": true,
+                    "label":"表单按钮",
+                    "required": false,
+                    "columns": [
+                        {
+                            "type":"input-text",
+                            "name": "label",
+                            "label": "名称",
+                            "required": true
+                        },
+                        {
+                            "type":"select",
+                            "name": "optionType",
+                            "label": "操作类型",
+                            "required": true,
+                            "options":[{
+                                "label":"弹出表单",
+                                "value":"form"
+                            },{
+                                "label":"请求",
+                                "value":"ajax"
+                            },{
+                                "label":"打开新窗口",
+                                "value":"openNew"
+                            }]
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "optionValue",
+                            "label": "操作配置",
+                            "required": false
+                        },
+                        {
+                            "type":"select",
+                            "name": "level",
+                            "label": "样式",
+                            "required": true,
+                            "options":[{
+                                "label":"默认",
+                                "value":"default"
+                            },{
+                                "label":"链接",
+                                "value":"link"
+                            },{
+                                "label":"主要",
+                                "value":"primary"
+                            },{
+                                "label":"次要",
+                                "value":"secondary"
+                            },{
+                                "label":"信息",
+                                "value":"info"
+                            },{
+                                "label":"成功",
+                                "value":"success"
+                            },{
+                                "label":"警告",
+                                "value":"warning"
+                            },{
+                                "label":"危险",
+                                "value":"danger"
+                            },{
+                                "label":"高亮",
+                                "value":"light"
+                            },{
+                                "label":"黑暗",
+                                "value":"dark"
+                            }]
+                        },
+                        {
+                            "type":"select",
+                            "name": "close",
+                            "label": "关闭弹出层",
+                            "required": false,
+                            "options":[{
+                                "label":"YES",
+                                "value":"YES"
+                            },{
+                                "label":"NO",
+                                "value":"NO"
+                            }]
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "confirmText",
+                            "label": "二次确认提示"
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "jsRule",
+                            "label": "规则"
+                        }
+                    ]
+                }]
             }]
         },
         "form":{

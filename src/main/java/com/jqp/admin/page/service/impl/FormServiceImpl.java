@@ -1,14 +1,13 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
-import com.jqp.admin.page.data.Form;
-import com.jqp.admin.page.data.FormField;
-import com.jqp.admin.page.data.FormRef;
-import com.jqp.admin.page.data.PageButton;
+import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,20 +33,29 @@ public class FormServiceImpl implements FormService {
         jdbcService.saveOrUpdate(form);
         jdbcService.update("delete from form_field where form_id = ? ",form.getId());
         int seq = 0;
-        for(FormField formField:form.getFormFields()){
-            formField.setId(null);
-            formField.setFormId(form.getId());
-            formField.setSeq(seq);
-            jdbcService.saveOrUpdate(formField);
+        for(FormField item:form.getFormFields()){
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(seq);
+            jdbcService.saveOrUpdate(item);
         }
 
         jdbcService.update("delete from form_ref where form_id = ? ",form.getId());
         seq = 0;
-        for(FormRef ref:form.getFormRefs()){
-            ref.setId(null);
-            ref.setFormId(form.getId());
-            ref.setSeq(seq);
-            jdbcService.saveOrUpdate(ref);
+        for(FormRef item:form.getFormRefs()){
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(seq);
+            jdbcService.saveOrUpdate(item);
+        }
+
+        jdbcService.update("delete from form_button where form_id = ? ",form.getId());
+        seq = 0;
+        for(FormButton item:form.getFormButtons()){
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(seq);
+            jdbcService.saveOrUpdate(item);
         }
     }
 
@@ -59,6 +67,9 @@ public class FormServiceImpl implements FormService {
 
         List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", id);
         form.setFormRefs(formRefs);
+
+        List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", id);
+        form.setFormButtons(formButtons);
         return form;
     }
 
@@ -70,12 +81,15 @@ public class FormServiceImpl implements FormService {
 
         List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", form.getId());
         form.setFormRefs(formRefs);
+
+        List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", form.getId());
+        form.setFormButtons(formButtons);
         return form;
     }
 
 
     @Override
-    public Map<String, Object> getFormJson(String code, PageButton pageButton) {
+    public Map<String, Object> getFormJson(String code, BaseButton button) {
 
         Form f = this.get(code);
         Map<String,Object> form = new HashMap<>();
@@ -90,6 +104,7 @@ public class FormServiceImpl implements FormService {
         if(StrUtil.isNotBlank(f.getApi())){
             form.put("api",f.getApi());
         }
+        boolean formDisabled = Whether.YES.equals(f.getDisabled());
 
         List<Map<String,Object>> items = new ArrayList<>();
 
@@ -100,6 +115,7 @@ public class FormServiceImpl implements FormService {
 
         List<FormField> formFields = f.getFormFields();
         for(FormField field:formFields){
+            boolean fieldDisabled = Whether.YES.equals(f.getDisabled());
             Map<String,Object> fieldConfig = new HashMap<>();
             fieldConfig.put("clearable",true);
             fieldConfig.put("name", field.getField());
@@ -109,6 +125,10 @@ public class FormServiceImpl implements FormService {
             fieldConfig.put("md",4);
             fieldConfig.put("lg",3);
             fieldConfig.put("columnClassName","mb-1");
+
+            if(formDisabled || fieldDisabled){
+                fieldConfig.put("disabled",true);
+            }
 
             if(f.getFieldWidth() != null){
                 fieldConfig.put("xs",f.getFieldWidth());
@@ -168,13 +188,21 @@ public class FormServiceImpl implements FormService {
 
 
         Map<String,Object> dialog = new HashMap<>();
-        dialog.put("title",pageButton.getLabel());
+        dialog.put("title",button.getLabel());
         dialog.put("size",f.getSize());
         if("default".equals(f.getSize())){
             dialog.remove("size");
         }
 
-
+        PageButtonService pageButtonService = SpringUtil.getBean(PageButtonService.class);
+        List<Map<String,Object>> formButtons = new ArrayList<>();
+        f.getFormButtons().forEach(b->{
+            Map<String, Object> config = pageButtonService.getButton(b);
+            if(Whether.YES.equals(b.getClose())){
+                config.put("close",true);
+            }
+            formButtons.add(config);
+        });
 
         if(!f.getFormRefs().isEmpty()){
 
@@ -187,7 +215,7 @@ public class FormServiceImpl implements FormService {
             saveBtn.put("close",false);
 
             Map<String,Object> closeBtn = new HashMap<>();
-            closeBtn.put("label","关闭");
+            closeBtn.put("label","取消");
             closeBtn.put("type","button");
             closeBtn.put("actionType","close");
             closeBtn.put("close",true);
@@ -228,9 +256,30 @@ public class FormServiceImpl implements FormService {
             form.put("tabs",tabs);
             saveBtn.put("reload", StringUtil.concatStr(targets,","));
 
-
-
         }
+
+        Map<String,Object> closeBtn = new HashMap<>();
+        closeBtn.put("label","取消");
+        closeBtn.put("type","button");
+        closeBtn.put("actionType","close");
+        closeBtn.put("close",true);
+
+
+        if(formDisabled){
+            List<Map<String,Object>> dialogButtons = new ArrayList<>();
+
+            dialogButtons.add(closeBtn);
+            dialog.put("actions",dialogButtons);
+        }
+
+        if(!formButtons.isEmpty()){
+            List<Map<String,Object>> dialogButtons = new ArrayList<>();
+            dialogButtons.addAll(formButtons);
+
+            dialogButtons.add(closeBtn);
+            dialog.put("actions",dialogButtons);
+        }
+
         dialog.put("body",form);
         return dialog;
     }

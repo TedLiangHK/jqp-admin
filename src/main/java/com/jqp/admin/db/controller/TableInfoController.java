@@ -37,6 +37,13 @@ public class TableInfoController {
             TableInfo data = copyTableInfo.getData();
             data.setOldTableName(null);
             data.setTableName(data.getTableName()+"_copy");
+
+            data.getColumnInfos().forEach(c->{
+                c.setOldColumnName(null);
+            });
+            data.getIndexInfos().forEach(c->{
+                c.setOldKeyName(null);
+            });
         }
         return copyTableInfo;
     }

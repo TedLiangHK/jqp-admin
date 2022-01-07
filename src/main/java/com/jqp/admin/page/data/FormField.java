@@ -28,4 +28,6 @@ public class FormField extends BaseData {
     private String multi = Whether.NO;
     //是否必填
     private String must = Whether.NO;
+    //是否禁用
+    private String disabled = Whether.NO;
 }
