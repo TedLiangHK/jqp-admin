@@ -14,7 +14,7 @@
 <link href="css/style.min.css" rel="stylesheet">
 </head>
   
-<body>
+<body data-logobg="color_8" data-headerbg="default" data-sidebarbg="color_8">
 <div class="lyear-layout-web">
   <div class="lyear-layout-container">
     <!--左侧导航-->
@@ -27,7 +27,7 @@
       <div class="lyear-layout-sidebar-scroll"> 
         
         <nav class="sidebar-main">
-          <ul class="nav nav-drawer">
+          <ul class="nav nav-drawer" id="menus">
             <li class="nav-item active"> <a class="multitabs" href="lyear_main.html"><i class="mdi mdi-home"></i> <span>后台首页</span></a> </li>
               <li class="nav-item nav-item-has-subnav">
                   <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> <span>系统管理</span></a>
@@ -41,6 +41,7 @@
                       <li> <a class="multitabs" href="/crud/test">测试查询页面</a> </li>
                       <li> <a class="multitabs" href="/oneToMany/dic/dic_item">数据字典</a> </li>
                       <li> <a class="multitabs" href="/page/static/sys/test">测试页面</a> </li>
+                      <li> <a class="multitabs" href="/magic/web/index.html">magic-api</a> </li>
                   </ul>
               </li>
               <li class="nav-item nav-item-has-subnav">
@@ -229,6 +230,47 @@
 </div>
 
 <script type="text/javascript" src="js/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $.ajax({
+        method:"post",
+        url:"/admin/page/crudQuery/menu",
+        data:JSON.stringify({
+            page:1,
+            perPage:99999
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType:"JSON",
+        success:function(resp){
+            let menus = resp.data.rows;
+            $("#menus").empty();
+            buildMenu($("#menus"),menus);
+        }
+    });
+
+    function buildMenu(ul,menus){
+        for (let i = 0; i < menus.length; i++) {
+            let menu = menus[i];
+            let icon = "";
+            if(menu.icon && menu.icon != ""){
+                icon = '<i class="mdi '+menu.icon+'"></i>';
+            }
+            if(menu.children && menu.children.length>0 ){
+                let li = '<li class="nav-item nav-item-has-subnav">';
+                li += '<a href="javascript:void(0)">'+icon+' <span>'+menu.menuName+'</span></a>'
+                li += '</li>';
+                li = $(li);
+                let childUl = $('<ul class="nav nav-subnav"></ul>');
+                li.append(childUl);
+                ul.append(li);
+                buildMenu(childUl,menu.children);
+            }else{
+                ul.append('<li class="nav-item"> <a class="multitabs" href="'+menu.url+'">'+icon+'<span>'+menu.menuName+'</span></a> </li>');
+            }
+        }
+    }
+</script>
+
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
 <script type="text/javascript" src="js/bootstrap-multitabs/multitabs.js"></script>
