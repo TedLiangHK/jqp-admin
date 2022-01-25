@@ -171,6 +171,27 @@ AMIS_JSON={
                 "api": "post:/tableInfo/updateTable",
                 "$ref":"formTabs"
             }
+        },
+        "generateJavaCode":{
+            "title": "生成表-${tableName}",
+            "size": "full",
+            "body": {
+                "type": "form",
+                "initApi": "/tableInfo/generateJavaCode?tableName=${id}",
+                "actions":[],
+                "tabs":[{
+                    "title":"实体",
+                    "body": [
+                        {
+                            "type": "editor",
+                            "name": "model",
+                            "size":"xxl",
+                            "language": "java",
+                            "disabled": true
+                        }
+                    ]
+                }]
+            }
         }
     },
     "body": {
@@ -242,6 +263,13 @@ AMIS_JSON={
                         "actionType": "dialog",
                         "dialog": {
                             "$ref":"copyForm"
+                        }
+                    },{
+                        "label": "java代码",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "$ref":"generateJavaCode"
                         }
                     },{
                         "type": "button",
