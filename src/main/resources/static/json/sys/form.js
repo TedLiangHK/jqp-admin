@@ -177,6 +177,14 @@ AMIS_JSON={
                             },
                             {
                                 "type":"select",
+                                "source":"/options/componentType",
+                                "searchable":true,
+                                "clearable":true,
+                                "name": "format",
+                                "label": "组件类型"
+                            },
+                            {
+                                "type":"select",
                                 "name": "hidden",
                                 "label": "是否隐藏",
                                 "required": true,
@@ -474,8 +482,8 @@ AMIS_JSON={
                         "level":"danger",
                         "actionType": "ajax",
                         "label": "删除",
-                        "confirmText": "您确认要删除${oldTableName}?",
-                        "api": "/tableInfo/dropTable?tableName=${oldTableName}"
+                        "confirmText": "您确认要删除${name}?",
+                        "api": "/admin/common/form/delete/${id}"
                     }
                 ]
             }

@@ -2,6 +2,7 @@ package com.jqp.admin.page.controller;
 
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.service.DicService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,14 +16,11 @@ import java.util.Map;
 public class DicController {
 
     @Resource
-    private JdbcService jdbcService;
+    private DicService dicService;
     @RequestMapping("/options/{dicCode}")
     public Result options(@PathVariable String dicCode){
-        List<Map<String, Object>> options = jdbcService.find("select label,value from dic_item where parent_id in(" +
-                "select id from dic where dic_code = ? " +
-                ") order by value asc ", dicCode);
         Map<String,Object> data = new HashMap<>();
-        data.put("options",options);
+        data.put("options",dicService.options(dicCode));
         return Result.success(data);
     }
 }
