@@ -13,6 +13,7 @@ import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -39,6 +40,14 @@ public class CommonController {
     public Result saveOrUpdate(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
         Form form = formService.get(formCode);
         List<FormField> formFields = form.getFormFields();
+        Object id = obj.get("id");
+        if(id != null && StringUtils.isNotBlank(id.toString())){
+            Map<String, Object> dbObj = jdbcService.getById(form.getTableName(), Long.parseLong(id.toString()));
+            if(dbObj != null){
+                dbObj.putAll(obj);
+                obj = dbObj;
+            }
+        }
         for(FormField formField:formFields){
             String type = formField.getType();
             Object value = obj.get(formField.getField());

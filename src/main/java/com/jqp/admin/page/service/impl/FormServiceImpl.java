@@ -1,7 +1,9 @@
 package com.jqp.admin.page.service.impl;
 
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.jqp.admin.common.BaseData;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
@@ -230,5 +232,23 @@ public class FormServiceImpl implements FormService {
 
         dialog.put("body",form);
         return dialog;
+    }
+
+    @Override
+    public <T extends BaseData> T getObj(T obj, String formCode) {
+        if(obj.getId() == null){
+            return obj;
+        }
+        T dbObj = (T)jdbcService.getById(obj.getClass(), obj.getId());
+        if(dbObj == null){
+            return obj;
+        }
+        Form form = get(formCode);
+        List<FormField> formFields = form.getFormFields();
+        for(FormField formField:formFields){
+            Object fieldValue = ReflectUtil.getFieldValue(obj, formField.getField());
+            ReflectUtil.setFieldValue(dbObj,formField.getField(),fieldValue);
+        }
+        return dbObj;
     }
 }

@@ -180,14 +180,13 @@ AMIS_JSON={
                                 "source":"/options/componentType",
                                 "searchable":true,
                                 "clearable":true,
-                                "name": "format",
+                                "name": "componentType",
                                 "label": "组件类型"
                             },
                             {
                                 "type":"select",
                                 "name": "hidden",
                                 "label": "是否隐藏",
-                                "required": true,
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -200,7 +199,6 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "multi",
                                 "label": "是否多选",
-                                "required": true,
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -213,7 +211,6 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "must",
                                 "label": "是否必填",
-                                "required": true,
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"

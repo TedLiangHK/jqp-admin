@@ -42,7 +42,7 @@ public class InputDefaultRender implements InputRender{
             config.put("lg",field.getWidth());
         }
 
-        boolean isMulti = !Whether.YES.equals(field.getMulti());
+        boolean isMulti = Whether.YES.equals(field.getMulti());
         if(StrUtil.isNotBlank(field.getValue())){
             config.put("value",field.getValue());
         }
