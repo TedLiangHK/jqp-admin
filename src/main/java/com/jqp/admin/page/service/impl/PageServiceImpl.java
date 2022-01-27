@@ -3,6 +3,7 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.*;
+import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
@@ -234,6 +235,9 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
                     orderSeq = arr[1];
                 }
             }
+            if(orderField.contains(".")){
+                orderField = orderField.substring(orderField.indexOf(".")+1);
+            }
             Comparator<Map<String,Object>> comparator = null;
             if(StrUtil.isNotBlank(orderField)){
                 String finalOrderField = orderField;
@@ -313,6 +317,13 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
                     map.put((String)o.get("value"),o.get("label"));
                 });
                 columnData.put("map",map);
+            }else if(DataType.IMAGE.equals(resultField.getType())){
+                columnData.put("type","images");
+                columnData.put("enlargeAble",true);
+            }else if(DataType.FILE.equals(resultField.getType())){
+                columnData.put("type","input-file");
+                columnData.put("multiple",true);
+                columnData.put("disabled",true);
             }
             crudData.getColumns().add(columnData);
         }
@@ -337,5 +348,60 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
             }
         }
         return Result.success(crudData);
+    }
+
+    @Override
+    public void reload(Page page) {
+
+        Map<String,PageResultField> fieldMap = new HashMap<>();
+        for(PageResultField field:page.getResultFields()){
+            fieldMap.put(field.getField(),field);
+        }
+        page.getResultFields().clear();
+
+        List<ColumnMeta> columnMetas = jdbcService.columnMeta(page.getQuerySql());
+        for(ColumnMeta columnMeta:columnMetas){
+            if(fieldMap.containsKey(columnMeta.getColumnLabel())){
+                page.getResultFields().add(fieldMap.get(columnMeta.getColumnLabel()));
+                continue;
+            }
+            PageResultField field = new PageResultField();
+            field.setField(columnMeta.getColumnLabel());
+            field.setLabel(columnMeta.getColumnComment());
+            if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("id")){
+                field.setHidden("YES");
+            }
+
+            if(columnMeta.getColumnClassName().equalsIgnoreCase(String.class.getCanonicalName())){
+                //字符串类型
+                if(columnMeta.getColumnType().toLowerCase().contains("longtext")){
+                    if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("sql")){
+                        field.setType(DataType.SQL);
+                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("js")){
+                        field.setType(DataType.JS);
+                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("article")){
+                        field.setType(DataType.ARTICLE);
+                    }else{
+                        field.setType(DataType.LONG_TEXT);
+                    }
+
+                }else{
+                    field.setType(DataType.STRING);
+                }
+            }else if(columnMeta.getColumnClassName().toLowerCase().contains("date")){
+                field.setType(DataType.DATE);
+                field.setFormat("yyyy-MM-dd");
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Integer.class.getCanonicalName())){
+                field.setType(DataType.INT);
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Long.class.getCanonicalName())){
+                field.setType(DataType.LONG);
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Float.class.getCanonicalName())
+                    || columnMeta.getColumnClassName().equalsIgnoreCase(Double.class.getCanonicalName())){
+                field.setType(DataType.DOUBLE);
+            }
+            page.getResultFields().add(field);
+        }
+
+        log.info("元数据信息:{}",columnMetas);
     }
 }

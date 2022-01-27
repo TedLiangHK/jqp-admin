@@ -2,12 +2,7 @@ package com.jqp.admin.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -542,6 +537,21 @@ public class StringUtil {
 			e.printStackTrace();
 		}
 		return pFileName;
+	}
+
+	public static String getAlis(String tableName){
+		tableName = tableName.toLowerCase();
+		StringBuffer name = new StringBuffer();
+		char[] array = tableName.toCharArray();
+		name.append(array[0]);
+		for(int i=0;i<array.length;i++){
+			char c = array[i];
+			if(c == '_' && array.length>i+1){
+				i++;
+				name.append(array[i]);
+			}
+		}
+		return name.toString().toLowerCase();
 	}
 	
 	

@@ -187,7 +187,32 @@ AMIS_JSON={
                             "name": "model",
                             "size":"xxl",
                             "language": "java",
-                            "disabled": true
+                            "disabled": false,
+                            "allowFullscreen":true
+                        }
+                    ]
+                },{
+                    "title":"查询sql",
+                    "body": [
+                        {
+                            "type": "editor",
+                            "name": "querySql",
+                            "size":"xxl",
+                            "language": "sql",
+                            "disabled": false,
+                            "allowFullscreen":true
+                        }
+                    ]
+                },{
+                    "title":"导出sql",
+                    "body": [
+                        {
+                            "type": "editor",
+                            "name": "exportSql",
+                            "size":"xxl",
+                            "language": "sql",
+                            "disabled": false,
+                            "allowFullscreen":true
                         }
                     ]
                 }]
@@ -213,7 +238,7 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title": "条件搜索",
+            "title": "条件搜索<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
             "submitText": "",
             "body": [
                 {
@@ -271,6 +296,14 @@ AMIS_JSON={
                         "dialog": {
                             "$ref":"generateJavaCode"
                         }
+                    },{
+                        "type": "button",
+                        "level":"primary",
+                        "actionType": "ajax",
+                        "label": "一键生成",
+                        //"disabledOn": "tableName=='test'",
+                        "confirmText": "确定生成${oldTableName},页面,表单,菜单?存在会自动跳过",
+                        "api": "/tableInfo/oneTouch?tableName=${oldTableName}"
                     },{
                         "type": "button",
                         "level":"danger",

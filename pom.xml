@@ -72,6 +72,12 @@
             <artifactId>magic-api-spring-boot-starter</artifactId>
             <version>1.7.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

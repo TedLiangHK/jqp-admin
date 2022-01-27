@@ -28,6 +28,8 @@
         
         <nav class="sidebar-main">
           <ul class="nav nav-drawer" id="menus">
+              <li class="nav-item active"> <a class="multitabs" href="lyear_main.html"><i class="mdi mdi-home"></i> <span>首页</span></a> </li>
+              <!--
             <li class="nav-item active"> <a class="multitabs" href="lyear_main.html"><i class="mdi mdi-home"></i> <span>后台首页</span></a> </li>
               <li class="nav-item nav-item-has-subnav">
                   <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> <span>系统管理</span></a>
@@ -45,6 +47,7 @@
                   </ul>
               </li>
             </li>
+            -->
           </ul>
         </nav>
       </div>
@@ -224,7 +227,7 @@
         dataType:"JSON",
         success:function(resp){
             let menus = resp.data.rows;
-            $("#menus").empty();
+            //$("#menus").empty();
             buildMenu($("#menus"),menus);
         }
     });

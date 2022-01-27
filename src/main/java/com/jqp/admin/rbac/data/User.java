@@ -29,4 +29,8 @@ public class User extends BaseData {
     private String avatar;
     //用户类型
     private String userType;
+    //用户状态
+    private String userStatus;
+    //附件列表
+    private String otherFiles;
 }

@@ -6,6 +6,7 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.InputField;
+import com.jqp.admin.page.service.DicService;
 import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -69,8 +70,13 @@ public class InputDefaultRender implements InputRender{
             }
         }else if(DataType.DIC.equals(field.getType())){
             config.put("type","select");
-            config.put("searchable",true);
-            config.put("source",StrUtil.format("/options/{}",field.getFormat()));
+            DicService dicService = SpringUtil.getBean(DicService.class);
+            List<Map<String, Object>> options = dicService.options(field.getFormat());
+            if(options.size()>10){
+                config.put("searchable",true);
+            }
+//            config.put("source",StrUtil.format("/options/{}",field.getFormat()));
+            config.put("options",options);
         }else if(DataType.Selector.equals(field.getType())){
             Map<String, Object> selectorConfig = pageConfigService.getSelectorConfig(field.getFormat(),field.getField());
             config.putAll(selectorConfig);

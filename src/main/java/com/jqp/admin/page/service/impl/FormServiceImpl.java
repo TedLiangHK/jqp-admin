@@ -4,6 +4,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service("formService")
 @Slf4j
@@ -81,6 +83,9 @@ public class FormServiceImpl implements FormService {
     @Override
     public Form get(String code) {
         Form form = jdbcService.findOne(Form.class,"code",code);
+        if(form == null){
+            return null;
+        }
         List<FormField> formFields = jdbcService.find(FormField.class, "formId", form.getId());
         form.setFormFields(formFields);
 
@@ -250,5 +255,57 @@ public class FormServiceImpl implements FormService {
             ReflectUtil.setFieldValue(dbObj,formField.getField(),fieldValue);
         }
         return dbObj;
+    }
+
+    @Override
+    public void reload(Form form) {
+        Map<String, FormField> fieldMap = form.getFormFields().stream().collect(Collectors.toMap(FormField::getField, f -> f));
+
+        form.getFormFields().clear();
+        List<ColumnMeta> columnMetas = jdbcService.columnMeta(StrUtil.format("select * from {} ",form.getTableName()));
+        for(ColumnMeta columnMeta:columnMetas){
+            String name = StringUtil.toFieldColumn(columnMeta.getColumnLabel());
+            if(fieldMap.containsKey(name)){
+                form.getFormFields().add(fieldMap.get(name));
+                continue;
+            }
+            FormField field = new FormField();
+            field.setField(name);
+            field.setHidden(Whether.NO);
+            field.setDisabled(Whether.NO);
+            field.setLabel(columnMeta.getColumnComment());
+            if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("id")){
+                field.setHidden("YES");
+            }
+
+            if(columnMeta.getColumnClassName().equalsIgnoreCase(String.class.getCanonicalName())){
+                //字符串类型
+                if(columnMeta.getColumnType().toLowerCase().contains("longtext")){
+                    if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("sql")){
+                        field.setType(DataType.SQL);
+                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("js")){
+                        field.setType(DataType.JS);
+                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("article")){
+                        field.setType(DataType.ARTICLE);
+                    }else{
+                        field.setType(DataType.LONG_TEXT);
+                    }
+
+                }else{
+                    field.setType(DataType.STRING);
+                }
+            }else if(columnMeta.getColumnClassName().toLowerCase().contains("date")){
+                field.setType(DataType.DATE);
+                field.setFormat("yyyy-MM-dd");
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Integer.class.getCanonicalName())){
+                field.setType(DataType.INT);
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Long.class.getCanonicalName())){
+                field.setType(DataType.LONG);
+            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Float.class.getCanonicalName())
+                    || columnMeta.getColumnClassName().equalsIgnoreCase(Double.class.getCanonicalName())){
+                field.setType(DataType.DOUBLE);
+            }
+            form.getFormFields().add(field);
+        }
     }
 }

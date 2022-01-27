@@ -6,7 +6,7 @@ AMIS_JSON={
         "api": "post:/admin/page/crudQuery/${pageCode}",
         "syncLocation": false,
         "filter": {
-          "title": "查询条件",
+          "title": "查询条件<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
           "submitText": "查询",
           "mode": "horizontal",
           "body":{

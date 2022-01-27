@@ -12,6 +12,8 @@ public interface FormService {
     void save(Form form);
     Form get(Long id);
     Form get(String code);
+    //重新生成关联数据
+    void reload(Form form);
 
     Map<String,Object> getFormJson(String code, BaseButton button);
 

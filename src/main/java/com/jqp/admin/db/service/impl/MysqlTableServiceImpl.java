@@ -1,5 +1,6 @@
 package com.jqp.admin.db.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
@@ -8,6 +9,8 @@ import com.jqp.admin.db.config.DbConfig;
 import com.jqp.admin.db.data.*;
 import com.jqp.admin.db.service.JdbcDao;
 import com.jqp.admin.db.service.TableService;
+import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -306,5 +309,66 @@ public class MysqlTableServiceImpl implements TableService {
         String sql = StrUtil.format("alter table {} drop foreign key {}",tableName,constraintName);
         jdbcDao.update("删除外键",sql);
         return Result.success();
+    }
+
+    @Override
+    public Map<String, String> generateCode(String tableName) {
+        Result<TableInfo> result = this.tableInfo(tableName);
+        TableInfo tableInfo = result.getData();
+        List<ColumnInfo> columnInfos = tableInfo.getColumnInfos();
+        Map<String,String> java = new HashMap<>();
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("tableName", StringUtil.toFirstUp(StringUtil.toFieldColumn(tableInfo.getTableName())));
+        params.put("tableComment",tableInfo.getTableComment());
+        params.put("date", DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+
+        List<Map<String,Object>> columns = new ArrayList<>();
+        String exportSql = "-- 导出" + tableInfo.getTableComment();
+        String querySql = "-- 查询" + tableInfo.getTableComment();
+        querySql += "\nselect";
+        exportSql += "\nselect";
+
+        querySql += "\n\tid, -- 主键";
+        exportSql += "\n\tid,-- 主键";
+        String alis = StringUtil.getAlis(tableName);
+        String lastColumnName = columnInfos.get(columnInfos.size() - 1).getColumnName();
+        for(ColumnInfo columnInfo:columnInfos){
+            Map<String,Object> column = new HashMap<>();
+            column.put("columnName",StringUtil.toFieldColumn(columnInfo.getColumnName()));
+            column.put("columnComment",columnInfo.getColumnComment());
+            String type = columnInfo.getColumnType();
+            String javaType = "";
+            if(type.startsWith("int")){
+                javaType = "Integer";
+            }else if(type.startsWith("bigint")){
+                javaType = "Long";
+            }else if(type.startsWith("varchar") || type.startsWith("longtext")){
+                javaType = "String";
+            }else if(type.startsWith("datetime")){
+                javaType = "Date";
+            }else if(type.startsWith("float")){
+                javaType = "Double";
+            }
+            column.put("type",javaType);
+            columns.add(column);
+
+            String d = ",";
+            if(lastColumnName.equals(columnInfo.getColumnName())){
+                d="";
+            }
+            querySql += "\n\t"+alis+"."+columnInfo.getColumnName()+d+" -- " + columnInfo.getColumnComment();
+            exportSql += "\n\t"+alis+"."+columnInfo.getColumnName()+" " + columnInfo.getColumnComment()+d;
+        }
+        querySql += "\nfrom "+tableInfo.getTableName() + " " + alis;
+        exportSql += "\nfrom "+tableInfo.getTableName() + " " + alis;
+        params.put("columns",columns);
+
+        String model = TemplateUtil.getUi("model.java.vm", params);
+
+        java.put("model",model);
+        java.put("querySql",querySql);
+        java.put("exportSql",exportSql);
+        return java;
     }
 }

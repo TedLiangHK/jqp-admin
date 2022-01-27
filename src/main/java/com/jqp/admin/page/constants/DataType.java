@@ -35,8 +35,12 @@ public class DataType {
     //小数
     public static final String DOUBLE = "double";
 
+    //图片
+    public static final String IMAGE = "image";
+    public static final String FILE = "file";
+
     public static final boolean isStr(String type){
-        return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE).contains(type);
+        return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE,IMAGE,FILE).contains(type);
     }
     public static final boolean isDate(String type){
         return Arrays.asList(DATE).contains(type);

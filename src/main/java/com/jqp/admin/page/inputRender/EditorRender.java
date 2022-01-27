@@ -11,5 +11,6 @@ public class EditorRender extends InputDefaultRender{
         if(StringUtils.isNotBlank(field.getFormat())){
             config.put("language",field.getFormat());
         }
+        config.put("allowFullscreen",true);
     }
 }

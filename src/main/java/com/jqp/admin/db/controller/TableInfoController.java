@@ -7,7 +7,17 @@ import com.jqp.admin.common.Result;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.ForeignKey;
 import com.jqp.admin.db.data.TableInfo;
+import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
+import com.jqp.admin.page.constants.ActionType;
+import com.jqp.admin.page.constants.ButtonLocation;
+import com.jqp.admin.page.constants.PageType;
+import com.jqp.admin.page.constants.Whether;
+import com.jqp.admin.page.data.Form;
+import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.data.PageButton;
+import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tableInfo")
@@ -27,6 +38,12 @@ public class TableInfoController {
 
     @Resource
     private TableService tableService;
+    @Resource
+    private PageService pageService;
+    @Resource
+    private FormService formService;
+    @Resource
+    private JdbcService jdbcService;
     @RequestMapping("/queryTable")
     public Result<PageData<TableInfo>> queryTable(@RequestBody PageParam pageParam){
         log.info("参数,{}",pageParam);
@@ -74,42 +91,86 @@ public class TableInfoController {
     }
     @RequestMapping("/generateJavaCode")
     public Result generateJavaCode(String tableName){
-        Result<TableInfo> result = tableService.tableInfo(tableName);
-        TableInfo tableInfo = result.getData();
-        List<ColumnInfo> columnInfos = tableInfo.getColumnInfos();
-        Map<String,String> java = new HashMap<>();
-
-        Map<String,Object> params = new HashMap<>();
-        params.put("tableName", StringUtil.toFirstUp(StringUtil.toFieldColumn(tableInfo.getTableName())));
-        params.put("tableComment",tableInfo.getTableComment());
-        params.put("date", DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-
-        List<Map<String,Object>> columns = new ArrayList<>();
-        for(ColumnInfo columnInfo:columnInfos){
-            Map<String,Object> column = new HashMap<>();
-            column.put("columnName",StringUtil.toFieldColumn(columnInfo.getColumnName()));
-            column.put("columnComment",columnInfo.getColumnComment());
-            String type = columnInfo.getColumnType();
-            String javaType = "";
-            if(type.startsWith("int")){
-                javaType = "Integer";
-            }else if(type.startsWith("bigint")){
-                javaType = "Long";
-            }else if(type.startsWith("varchar") || type.startsWith("longtext")){
-                javaType = "String";
-            }else if(type.startsWith("datetime")){
-                javaType = "Date";
-            }else if(type.startsWith("float")){
-                javaType = "Double";
+        return Result.success(tableService.generateCode(tableName));
+    }
+    @RequestMapping("/oneTouch")
+    public Result oneTouch(String tableName){
+        TableInfo tableInfo = tableService.tableInfo(tableName).getData();
+        String pageCode = StringUtil.toFieldColumn(tableName);
+        Page page = pageService.get(pageCode);
+        if(page == null){
+            page = new Page();
+            page.setName(tableInfo.getTableComment()+"列表");
+            page.setCode(pageCode);
+            List<String> columnNames = tableInfo.getColumnInfos().stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
+            if(columnNames.contains("parent_id")){
+                page.setPageType(PageType.tree);
+            }else{
+                page.setPageType(PageType.list);
             }
-            column.put("type",javaType);
-            columns.add(column);
+            page.setOrderBy(" order by id desc ");
+            Map<String, String> codeMap = tableService.generateCode(tableName);
+            page.setQuerySql(codeMap.get("querySql"));
+            pageService.reload(page);
+
+            PageButton add = new PageButton();
+            add.setLabel("新增");
+            add.setButtonLocation(ButtonLocation.Top);
+            add.setOptionType(ActionType.PopForm);
+            add.setOptionValue(pageCode);
+            add.setLevel("primary");
+            page.getPageButtons().add(add);
+
+            PageButton edit = new PageButton();
+            edit.setLabel("编辑");
+            edit.setButtonLocation(ButtonLocation.Row);
+            edit.setOptionType(ActionType.PopForm);
+            edit.setOptionValue(pageCode);
+            edit.setLevel("primary");
+            page.getPageButtons().add(edit);
+
+            PageButton delete = new PageButton();
+            delete.setLabel("删除");
+            delete.setButtonLocation(ButtonLocation.Row);
+            delete.setOptionType(ActionType.Ajax);
+            delete.setOptionValue("post:/common/admin/"+pageCode+"/delete/${id}");
+            delete.setLevel("danger");
+            delete.setConfirmText("确定删除"+tableInfo.getTableComment()+"${name}吗?");
+            page.getPageButtons().add(delete);
+
+            pageService.save(page);
         }
-        params.put("columns",columns);
+        Form form = formService.get(pageCode);
+        if(form == null){
+            form = new Form();
+            form.setCode(pageCode);
+            form.setName(tableInfo.getTableComment()+"表单");
+            form.setFieldWidth(12);
+            form.setSize("default");
+            form.setDisabled(Whether.NO);
+            form.setTableName(tableName);
 
-        String model = TemplateUtil.getUi("model.java.vm", params);
+            formService.reload(form);
+            formService.save(form);
+        }
+        String url = "/crud/"+pageCode;
+        List<Map<String, Object>> menus = jdbcService.find("select id from sys_menu where url=?", url);
+        List<Map<String, Object>> maxMenus = jdbcService.find("select max(menu_code) max_code from sys_menu where parent_id is null ");
+        int maxCode = 0;
+        if(!maxMenus.isEmpty()){
+            maxCode = Integer.parseInt((String)maxMenus.get(0).get("maxCode"));
+        }
 
-        java.put("model",model);
-        return Result.success(java);
+        if(menus.isEmpty()){
+            Map<String,Object> menu = new HashMap<>();
+            maxCode ++;
+            menu.put("menuCode",StringUtil.getAddCode(maxCode+"","0",2));
+            menu.put("menuName",tableInfo.getTableComment());
+            menu.put("menuType","1");
+            menu.put("url",url);
+            menu.put("seq",maxCode);
+            jdbcService.saveOrUpdate(menu,"sys_menu");
+        }
+        return Result.success();
     }
 }

@@ -113,13 +113,15 @@ AMIS_JSON={
                                 "name": "field",
                                 "label": "字段",
                                 "required": true,
+                                "fixed": "left"
                                 //"disabled":true
                             },
                             {
                                 "type":"input-text",
                                 "name": "label",
                                 "label": "名称",
-                                "required": true
+                                "required": true,
+                                "fixed": "left"
                             },
                             {
                                 "type":"input-number",
@@ -421,7 +423,7 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title": "条件搜索",
+            "title": "条件搜索<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
             "submitText": "",
             "body": [
                 {

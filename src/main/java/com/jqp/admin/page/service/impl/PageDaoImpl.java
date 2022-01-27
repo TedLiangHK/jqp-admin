@@ -26,6 +26,9 @@ public class PageDaoImpl implements PageDao {
     @Override
     public Page get(String pageCode) {
         Page page = jdbcService.findOne(Page.class,"code",pageCode);
+        if(page == null){
+            return null;
+        }
         this.get(page);
         return page;
     }

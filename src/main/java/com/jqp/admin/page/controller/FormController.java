@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/form")
@@ -62,48 +64,7 @@ public class FormController {
 
     @RequestMapping("/formFields")
     public Result formFields(@RequestBody Form form){
-        form.getFormFields().clear();
-
-
-        List<ColumnMeta> columnMetas = jdbcService.columnMeta(StrUtil.format("select * from {} ",form.getTableName()));
-        for(ColumnMeta columnMeta:columnMetas){
-            FormField field = new FormField();
-            field.setField(StringUtil.toFieldColumn(columnMeta.getColumnLabel()));
-            field.setLabel(columnMeta.getColumnComment());
-            if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("id")){
-                field.setHidden("YES");
-            }
-
-            if(columnMeta.getColumnClassName().equalsIgnoreCase(String.class.getCanonicalName())){
-                //字符串类型
-                if(columnMeta.getColumnType().toLowerCase().contains("longtext")){
-                    if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("sql")){
-                        field.setType(DataType.SQL);
-                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("js")){
-                        field.setType(DataType.JS);
-                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("article")){
-                        field.setType(DataType.ARTICLE);
-                    }else{
-                        field.setType(DataType.LONG_TEXT);
-                    }
-
-                }else{
-                    field.setType(DataType.STRING);
-                }
-            }else if(columnMeta.getColumnClassName().toLowerCase().contains("date")){
-                field.setType(DataType.DATE);
-                field.setFormat("yyyy-MM-dd");
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Integer.class.getCanonicalName())){
-                field.setType(DataType.INT);
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Long.class.getCanonicalName())){
-                field.setType(DataType.LONG);
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Float.class.getCanonicalName())
-                    || columnMeta.getColumnClassName().equalsIgnoreCase(Double.class.getCanonicalName())){
-                field.setType(DataType.DOUBLE);
-            }
-            form.getFormFields().add(field);
-        }
-
+        formService.reload(form);
         return Result.success(form,"已刷新");
     }
 }

@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.db.data.ColumnMeta;
-import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
@@ -19,6 +18,7 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -54,6 +54,14 @@ public class PageController {
     public Result<PageData<Page>> query(@RequestBody PageParam pageParam){
         String sql = "select * from page where 1=1 ";
         List<Object> values = new ArrayList<>();
+        if(StringUtils.isNotBlank(pageParam.getStr("code"))){
+            sql += " and code like ? ";
+            values.add("%"+pageParam.getStr("code")+"%");
+        }
+        if(StringUtils.isNotBlank(pageParam.getStr("name"))){
+            sql += " and name like ? ";
+            values.add("%"+pageParam.getStr("name")+"%");
+        }
         return jdbcService.query(pageParam,Page.class,sql,values.toArray());
     }
     @RequestMapping("/copyPage")
@@ -81,49 +89,7 @@ public class PageController {
     }
     @RequestMapping("/resultFields")
     public Result resultFields(@RequestBody Page page){
-        page.getResultFields().clear();
-
-        List<ColumnMeta> columnMetas = jdbcService.columnMeta(page.getQuerySql());
-        for(ColumnMeta columnMeta:columnMetas){
-            PageResultField field = new PageResultField();
-            field.setField(columnMeta.getColumnLabel());
-            field.setLabel(columnMeta.getColumnComment());
-            if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("id")){
-                field.setHidden("YES");
-            }
-
-            if(columnMeta.getColumnClassName().equalsIgnoreCase(String.class.getCanonicalName())){
-                //字符串类型
-                if(columnMeta.getColumnType().toLowerCase().contains("longtext")){
-                    if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("sql")){
-                        field.setType(DataType.SQL);
-                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("js")){
-                        field.setType(DataType.JS);
-                    }else if(columnMeta.getColumnName() != null && columnMeta.getColumnName().toLowerCase().contains("article")){
-                        field.setType(DataType.ARTICLE);
-                    }else{
-                        field.setType(DataType.LONG_TEXT);
-                    }
-
-                }else{
-                    field.setType(DataType.STRING);
-                }
-            }else if(columnMeta.getColumnClassName().toLowerCase().contains("date")){
-                field.setType(DataType.DATE);
-                field.setFormat("yyyy-MM-dd");
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Integer.class.getCanonicalName())){
-                field.setType(DataType.INT);
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Long.class.getCanonicalName())){
-                field.setType(DataType.LONG);
-            }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Float.class.getCanonicalName())
-                    || columnMeta.getColumnClassName().equalsIgnoreCase(Double.class.getCanonicalName())){
-                field.setType(DataType.DOUBLE);
-            }
-            page.getResultFields().add(field);
-        }
-
-        log.info("元数据信息:{}",columnMetas);
-
+        pageService.reload(page);
         return Result.success(page,"已刷新");
     }
 

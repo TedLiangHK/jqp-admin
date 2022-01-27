@@ -142,6 +142,12 @@ AMIS_JSON={
                                 },{
                                     "label":"数据字典",
                                     "value":"dic"
+                                },{
+                                    "label":"图片",
+                                    "value":"image"
+                                },{
+                                    "label":"文件",
+                                    "value":"file"
                                 }]
                             },
                             {
@@ -184,13 +190,15 @@ AMIS_JSON={
                                 "type":"input-text",
                                 "name": "field",
                                 "label": "字段",
-                                "required": true
+                                "required": true,
+                                "fixed": "left"
                             },
                             {
                                 "type":"input-text",
                                 "name": "label",
                                 "label": "名称",
-                                "required": true
+                                "required": true,
+                                "fixed": "left"
                             },
 
                             {
@@ -305,7 +313,7 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "must",
                                 "label": "是否必填",
-                                "required": true,
+                                "required": false,
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -329,7 +337,7 @@ AMIS_JSON={
                                 "source":"/options/componentType",
                                 "searchable":true,
                                 "clearable":true,
-                                "name": "format",
+                                "name": "componentType",
                                 "label": "组件类型"
                             },
                             {
@@ -507,7 +515,7 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title": "条件搜索",
+            "title": "条件搜索<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
             "submitText": "",
             "body": [
                 {
@@ -536,10 +544,10 @@ AMIS_JSON={
                 "label": "名称",
                 "width":200
             },
-            {
-                "name": "querySql",
-                "label": "查询sql"
-            },
+            // {
+            //     "name": "querySql",
+            //     "label": "查询sql"
+            // },
             {
                 "name": "pageType",
                 "label": "页面类型",
