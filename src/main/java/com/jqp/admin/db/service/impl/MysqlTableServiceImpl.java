@@ -43,6 +43,7 @@ public class MysqlTableServiceImpl implements TableService {
             sql += " and table_comment like ? ";
             args.add(StrUtil.format("%{}%",pageParam.getStr("tableComment")));
         }
+        sql += " order by table_name asc ";
         Object[] params = args.toArray();
 
         Result<PageData<TableInfo>> result = jdbcDao.query(pageParam, TableInfo.class, sql, params);
