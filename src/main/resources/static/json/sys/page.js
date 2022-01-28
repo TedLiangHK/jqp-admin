@@ -323,6 +323,19 @@ AMIS_JSON={
                                 }]
                             },
                             {
+                                "type":"select",
+                                "name": "ref",
+                                "label": "是否关联字段",
+                                "required": false,
+                                "options":[{
+                                    "label":"YES",
+                                    "value":"YES"
+                                },{
+                                    "label":"NO",
+                                    "value":"NO"
+                                }]
+                            },
+                            {
                                 "type":"input-number",
                                 "name": "width",
                                 "label": "宽度(1~12)"

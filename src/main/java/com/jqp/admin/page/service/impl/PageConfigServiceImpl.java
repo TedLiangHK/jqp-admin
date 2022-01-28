@@ -57,7 +57,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 
         List<Map<String,Object>> queryConfigs = new ArrayList<>();
         for(PageQueryField field:page.getQueryFields()){
-            Map<String,Object> queryConfig = inputFieldService.buildInputField(field,false);
+            Map<String,Object> queryConfig = inputFieldService.buildInputField(field,selector);
             queryConfigs.add(queryConfig);
         }
         return queryConfigs;

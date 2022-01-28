@@ -1,6 +1,7 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.thread.lock.LockUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.data.ColumnInfo;
@@ -81,6 +82,7 @@ public class CommonController {
         Map<String, Object> obj = jdbcService.getById(tableName, id);
 
         List<FormField> formFields = form.getFormFields();
+        Map<String,Object> data = new HashMap<>();
         for(FormField formField:formFields){
             Object value = obj.get(formField.getField());
             if(value == null){
@@ -91,8 +93,9 @@ public class CommonController {
                 String realValue = DateUtil.format((LocalDateTime) value, format);
                 obj.put(formField.getField(),realValue);
             }
+            data.put(formField.getField(),obj.get(formField.getField()));
         }
-        return Result.success(obj);
+        return Result.success(data);
     }
 
 
