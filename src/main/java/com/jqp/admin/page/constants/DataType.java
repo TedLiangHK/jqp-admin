@@ -17,6 +17,8 @@ public class DataType {
     public static final String DIC = "dic";
     //选择器
     public static final String Selector = "selector";
+    //弹出选择器
+    public static final String SelectorPop = "selector-pop";
     //长字符串
     public static final String LONG_STRING = "long-string";
     //大文本

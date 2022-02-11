@@ -18,11 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin/common")
@@ -69,6 +67,45 @@ public class CommonController {
     public Result delete(@PathVariable("id") Long id, @PathVariable("model") String model) {
         String tableName = StringUtil.toSqlColumn(model);
         jdbcService.delete(id,tableName);
+        return Result.success();
+    }
+
+    //增加关联表数据
+    @RequestMapping("/{model}/addRelation/{mainField}/{relationField}")
+    public Result addRelation(@PathVariable("model") String model,
+                              @PathVariable("mainField") String mainField,
+                              @PathVariable("relationField") String relationField,
+                              @RequestBody Map<String,Object> params) {
+        String tableName = StringUtil.toSqlColumn(model);
+        Long mainId = Long.parseLong(params.get(mainField).toString());
+        String[] relationIds = params.get(relationField).toString().split(",");
+        List<Long> relationIdList = new ArrayList<>();
+        for(String s:relationIds){
+            relationIdList.add(Long.parseLong(s));
+        }
+        if(relationIdList.isEmpty()){
+            return Result.success();
+        }
+
+        String existsSql = StrUtil.format("select {} from {} where {}={} ",
+                StringUtil.toSqlColumn(relationField),
+                tableName,
+                StringUtil.toSqlColumn(mainField),
+                mainId
+                );
+        List<Map<String, Object>> maps = jdbcService.find(existsSql);
+        for (int i = 0; i < maps.size(); i++) {
+            Object o = maps.get(i).get(relationField);
+            relationIdList.remove(Long.parseLong(o.toString()));
+        }
+        List<Map<String,Object>> list = new ArrayList<>();
+        for(Long relationId:relationIdList){
+            Map<String,Object> obj = new HashMap<>();
+            obj.put(mainField,mainId);
+            obj.put(relationField,relationId);
+            list.add(obj);
+        }
+        jdbcService.bathSaveOrUpdate(list,tableName);
         return Result.success();
     }
 

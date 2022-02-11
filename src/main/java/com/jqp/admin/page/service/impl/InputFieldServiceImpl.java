@@ -1,6 +1,5 @@
 package com.jqp.admin.page.service.impl;
 
-import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.data.InputField;
 import com.jqp.admin.page.inputRender.*;
 import com.jqp.admin.page.service.InputFieldService;
@@ -39,6 +38,7 @@ public class InputFieldServiceImpl implements InputFieldService {
         inputRenderMap.put("static",new StaticRender());
         inputRenderMap.put("input-date",new InputDateRender());
         inputRenderMap.put("selector",new SelectorRender());
+        inputRenderMap.put("selector-pop",new SelectorPopRender());
         inputRenderMap.put("input-datetime",new InputDateTimeRender());
         inputRenderMap.put("location-picker",new LocationPickerRender());
         inputRenderMap.put("input-password",new InputPasswordRender());

@@ -133,7 +133,7 @@ public class TableInfoController {
             delete.setLabel("删除");
             delete.setButtonLocation(ButtonLocation.Row);
             delete.setOptionType(ActionType.Ajax);
-            delete.setOptionValue("post:/common/admin/"+pageCode+"/delete/${id}");
+            delete.setOptionValue("post:/admin/common/"+pageCode+"/delete/${id}");
             delete.setLevel("danger");
             delete.setConfirmText("确定删除"+tableInfo.getTableComment()+"${name}吗?");
             page.getPageButtons().add(delete);

@@ -77,7 +77,7 @@ public class InputDefaultRender implements InputRender{
             }
 //            config.put("source",StrUtil.format("/options/{}",field.getFormat()));
             config.put("options",options);
-        }else if(DataType.Selector.equals(field.getType())){
+        }else if(DataType.Selector.equals(field.getType()) || DataType.SelectorPop.equals(field.getType())){
             Map<String, Object> selectorConfig = pageConfigService.getSelectorConfig(field.getFormat(),field.getField());
             config.putAll(selectorConfig);
         }else if(DataType.isNumber(field.getType())){

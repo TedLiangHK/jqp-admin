@@ -12,6 +12,7 @@ import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,14 @@ public class FormController {
     public Result<PageData<Page>> query(@RequestBody PageParam pageParam){
         String sql = "select * from form where 1=1 ";
         List<Object> values = new ArrayList<>();
+        if(StringUtils.isNotBlank(pageParam.getStr("code"))){
+            sql += " and code like ? ";
+            values.add("%"+pageParam.getStr("code")+"%");
+        }
+        if(StringUtils.isNotBlank(pageParam.getStr("name"))){
+            sql += " and name like ? ";
+            values.add("%"+pageParam.getStr("name")+"%");
+        }
         return jdbcService.query(pageParam,Page.class,sql,values.toArray());
     }
 

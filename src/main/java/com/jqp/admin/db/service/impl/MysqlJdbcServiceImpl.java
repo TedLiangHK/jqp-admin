@@ -12,6 +12,7 @@ import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
@@ -176,6 +177,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
     }
 
     @Override
+    @Transactional
     public void bathSaveOrUpdate(List<BaseData> objs) {
         if(objs == null){
             return;
@@ -186,6 +188,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
     }
 
     @Override
+    @Transactional
     public void bathSaveOrUpdate(List<Map<String, Object>> objs, String tableName) {
         if(objs == null){
             return;
