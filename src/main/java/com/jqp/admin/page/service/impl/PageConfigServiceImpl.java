@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.Whether;
@@ -58,6 +59,9 @@ public class PageConfigServiceImpl implements PageConfigService {
         List<Map<String,Object>> queryConfigs = new ArrayList<>();
         for(PageQueryField field:page.getQueryFields()){
             Map<String,Object> queryConfig = inputFieldService.buildInputField(field,selector);
+            if(!field.getField().toLowerCase().contains("id") && !selector){
+                queryConfig.put("name", Constants.QUERY_KEY_START+queryConfig.get("name"));
+            }
             queryConfigs.add(queryConfig);
         }
         return queryConfigs;
@@ -73,6 +77,9 @@ public class PageConfigServiceImpl implements PageConfigService {
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
+            if (!fieldName.toLowerCase().contains("id")){
+                fieldName = Constants.QUERY_KEY_START+fieldName;
+            }
             downloadParam.append("&")
                     .append(fieldName)
                     .append("=${")

@@ -17,4 +17,5 @@ public interface JdbcService extends JdbcDao{
     void delete(BaseData obj);
     void delete(Long id,String tableName);
     void delete(Long id,Class<? extends BaseData> clz);
+    void transactionOption(TransactionOption transactionOption);
 }

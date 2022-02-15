@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import cn.hutool.core.io.FileUtil;
+import com.jqp.admin.common.service.TemplateService;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
@@ -17,6 +18,7 @@ public class TemplateUtil {
 			context.put(en.getKey(), en.getValue());
 		}
 		context.put("jq","$");
+		context.put("service",SpringContextUtil.getBean(TemplateService.class));
 		
 		StringWriter sw = new StringWriter();
 		

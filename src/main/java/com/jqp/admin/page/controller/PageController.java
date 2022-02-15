@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
+import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -95,7 +96,24 @@ public class PageController {
 
     @RequestMapping("/crudQuery/{pageCode}")
     public Result<CrudData<Map<String,Object>>> crudQuery(@RequestBody PageParam pageParam, @PathVariable(name="pageCode") String pageCode){
+        Set<String> keySet = new HashSet<>(pageParam.keySet());
+        keySet.forEach(key->{
+            if(key.startsWith(Constants.QUERY_KEY_START)){
+                Object value = pageParam.remove(key);
+                pageParam.put(key.substring(Constants.QUERY_KEY_START.length()),value);
+            }
+        });
         return pageService.query(pageCode,pageParam);
+    }
+    @RequestMapping("/options/{pageCode}")
+    public Result pageOptions(@PathVariable(name="pageCode") String pageCode){
+        PageParam pageParam = new PageParam();
+        pageParam.put("page",1);
+        pageParam.put("perPage",Integer.MAX_VALUE);
+        Result<CrudData<Map<String, Object>>> result = pageService.query(pageCode, pageParam);
+        Map<String,Object> data = new HashMap<>();
+        data.put("options",result.getData().getRows());
+        return Result.success(data);
     }
     @RequestMapping("/selector/{pageCode}")
     public Result<CrudData<Map<String,Object>>> selector(@RequestBody PageParam pageParam, @PathVariable(name="pageCode") String pageCode, HttpServletRequest request){
@@ -105,9 +123,9 @@ public class PageController {
 
         Set<String> keySet = new HashSet<>(pageParam.keySet());
         keySet.forEach(key->{
-            if(key.startsWith("selector_")){
+            if(key.startsWith(Constants.QUERY_KEY_START)){
                 Object value = pageParam.remove(key);
-                pageParam.put(key.substring("selector_".length()),value);
+                pageParam.put(key.substring(Constants.QUERY_KEY_START.length()),value);
             }
         });
         //过滤树结构当前id,防止循环引用
@@ -123,7 +141,13 @@ public class PageController {
 
     @RequestMapping("/crudExport/{pageCode}")
     public void crudExport(@RequestParam Map<String,Object> pageParam, @PathVariable(name="pageCode") String pageCode,HttpServletResponse response){
-
+        Set<String> keySet = new HashSet<>(pageParam.keySet());
+        keySet.forEach(key->{
+            if(key.startsWith(Constants.QUERY_KEY_START)){
+                Object value = pageParam.remove(key);
+                pageParam.put(key.substring(Constants.QUERY_KEY_START.length()),value);
+            }
+        });
         PageParam param = new PageParam();
         param.putAll(pageParam);
         param.put("page",1);
@@ -220,6 +244,9 @@ public class PageController {
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
+            if(!fieldName.toLowerCase().contains("id")){
+                fieldName = Constants.QUERY_KEY_START+fieldName;
+            }
             downloadParam.append("&")
                     .append(fieldName)
                     .append("=${")
@@ -282,6 +309,9 @@ public class PageController {
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
+            if (!fieldName.toLowerCase().contains("id")){
+                fieldName = Constants.QUERY_KEY_START+fieldName;
+            }
             downloadParam.append("&")
                     .append(fieldName)
                     .append("=${")
@@ -293,6 +323,9 @@ public class PageController {
         StringBuffer childDownloadParam = new StringBuffer("?1=1");
         childPage.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
+            if (!fieldName.toLowerCase().contains("id")){
+                fieldName = Constants.QUERY_KEY_START+fieldName;
+            }
             childDownloadParam.append("&")
                     .append(fieldName)
                     .append("=${")

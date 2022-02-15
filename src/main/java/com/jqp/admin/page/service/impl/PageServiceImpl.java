@@ -2,7 +2,10 @@ package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Session;
 import com.jqp.admin.common.*;
+import com.jqp.admin.common.config.SessionContext;
+import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -15,7 +18,9 @@ import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -34,11 +39,14 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
     @Resource
     PageButtonService pageButtonService;
 
+    @Resource
+    SessionContext sessionContext;
+
 
     @Override
     public Result<CrudData<Map<String, Object>>> query(String pageCode, PageParam pageParam) {
         Page page = get(pageCode);
-        StringBuffer sql = new StringBuffer(StrUtil.format("select * from ({}) t where 1=1 ",page.getQuerySql()));
+        StringBuffer sql = new StringBuffer(StrUtil.format("select * from ({}) t where 1=1 ",this.getQuerySql(page.getQuerySql())));
         List<Object> values = new ArrayList<>();
         List<PageQueryField> queryFields = page.getQueryFields();
         List<String> resultNames = page.getResultFields().stream().map(f -> f.getField()).collect(Collectors.toList());
@@ -122,7 +130,7 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
                         break;
                     }
                     String childSql = StrUtil.format("select id from ({}) t where parent_id in ({})"
-                            ,page.getQuerySql()
+                            ,this.getQuerySql(page.getQuerySql())
                             ,StringUtil.concatStr(childIds.stream().map(i-> "?").collect(Collectors.toList()),","));
                     List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
                     childIds.clear();
@@ -174,7 +182,7 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
                     break;
                 }
                 String childSql = StrUtil.format("select * from ({}) t where parent_id in ({})"
-                        ,page.getQuerySql()
+                        ,this.getQuerySql(page.getQuerySql())
                         ,StringUtil.concatStr(childIds.stream().map(i-> "?").collect(Collectors.toList()),","));
                 List<Map<String, Object>> childs = jdbcService.find(childSql, childIds.toArray());
                 childIds.clear();
@@ -359,7 +367,7 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
         }
         page.getResultFields().clear();
 
-        List<ColumnMeta> columnMetas = jdbcService.columnMeta(page.getQuerySql());
+        List<ColumnMeta> columnMetas = jdbcService.columnMeta(this.getQuerySql(page.getQuerySql()));
         for(ColumnMeta columnMeta:columnMetas){
             if(fieldMap.containsKey(columnMeta.getColumnLabel())){
                 page.getResultFields().add(fieldMap.get(columnMeta.getColumnLabel()));
@@ -403,5 +411,33 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
         }
 
         log.info("元数据信息:{}",columnMetas);
+    }
+
+    @Override
+    public Map<String, Object> optionConfig(String pageCode) {
+        PageParam pageParam = new PageParam();
+        pageParam.put("page",1);
+        pageParam.put("perPage",Integer.MAX_VALUE);
+        Result<CrudData<Map<String, Object>>> result = this.query(pageCode, pageParam);
+
+        Page page = this.get(pageCode);
+
+        Map<String,Object> config = new HashMap<>();
+        config.put("labelField",page.getLabelField());
+        config.put("valueField",page.getValueField());
+        config.put("searchable",true);
+        config.put("withChildren",true);
+        config.put("options",result.getData().getRows());
+        return config;
+    }
+
+    @Override
+    public String getQuerySql(String querySql) {
+        UserSession userSession = sessionContext.getSession(SpringContextUtil.getRequest());
+        Map<String,Object> params = new HashMap<>();
+        params.put("userId",userSession.getUserId());
+        params.put("enterpriseId",userSession.getEnterpriseId());
+        querySql = TemplateUtil.getValue(querySql,params);
+        return querySql;
     }
 }

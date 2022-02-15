@@ -4,10 +4,12 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
+import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,6 +48,10 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
         Map<String, Field> fieldMap = ReflectUtil.getFieldMap(obj.getClass());
         List<Object> values = new ArrayList<>();
+        if(fieldMap.containsKey("enterpriseId") && ReflectUtil.getFieldValue(obj,"enterpriseId") == null){
+            //有企业id
+            ReflectUtil.setFieldValue(obj,fieldMap.get("enterpriseId"), SessionContext.getSession().getEnterpriseId());
+        }
         for(String column:columns){
             Object value = null;
             String fieldName = StringUtil.toFieldColumn(column);
@@ -75,6 +81,9 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         List<String> args = columnInfos.stream().map(columnInfo -> "?").collect(Collectors.toList());
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
         List<Object> values = new ArrayList<>();
+        if(obj.get("enterpriseId") == null){
+            obj.put("enterpriseId",SessionContext.getSession().getEnterpriseId());
+        }
         for(String column:columns){
             Object value = null;
             String fieldName = StringUtil.toFieldColumn(column);
@@ -222,5 +231,11 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             return;
         }
         super.update("删除",StrUtil.format("delete from {} where id = ? ",tableName),id);
+    }
+
+    @Override
+    @Transactional
+    public void transactionOption(TransactionOption transactionOption) {
+        transactionOption.call();
     }
 }

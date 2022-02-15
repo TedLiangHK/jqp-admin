@@ -34,6 +34,10 @@
         .cxd-FileControl .disabled .cxd-Button{
             display: none !important;
         }
+        .cxd-TreeControl{
+            width: 100% !important;
+            max-height: 100% !important;
+        }
     </style>
 </head>
 <body>
@@ -65,7 +69,19 @@
         //         ]
         //     }
         // };
-        let amisScoped = amis.embed('#root', AMIS_JSON);
+        let amisScoped = amis.embed('#root', AMIS_JSON,{},{
+            responseAdaptor: function(api, response, query, request){
+                if(response.status == 1){
+                    //需要登录;
+                    if(window.top){
+                        window.top.location.href="/";
+                    }else{
+                        window.location.href="/";
+                    }
+                }
+                return response;
+            }
+        });
     })();
 </script>
 </body>

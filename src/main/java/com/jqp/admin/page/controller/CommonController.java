@@ -1,13 +1,12 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.thread.lock.LockUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
-import com.jqp.admin.db.data.ColumnInfo;
-import com.jqp.admin.db.data.TableInfo;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
+import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
@@ -18,9 +17,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/common")
@@ -70,6 +71,133 @@ public class CommonController {
         return Result.success();
     }
 
+    //查询管理表id
+    @RequestMapping("/{model}/getRelationIds/{mainField}/{relationField}/{id}")
+    public Result getRelationIds(@PathVariable("model") String model,
+                              @PathVariable("mainField") String mainField,
+                              @PathVariable("relationField") String relationField,
+                              @PathVariable("id") Long id) {
+        String tableName = StringUtil.toSqlColumn(model);
+        String sql = StrUtil.format("select {} from {} where {}={} ",
+                StringUtil.toSqlColumn(relationField),
+                tableName,
+                StringUtil.toSqlColumn(mainField),
+                id
+        );
+        List<Map<String, Object>> maps = jdbcService.find(sql);
+        List<Long> ids = new ArrayList<>();
+        for (int i = 0; i < maps.size(); i++) {
+            Object o = maps.get(i).get(relationField);
+            Long _id = Long.parseLong(o.toString());
+            ids.add(_id);
+        }
+        Map<String,Object> data = new HashMap<>();
+        data.put(relationField,StringUtil.concatStr(ids,","));
+        data.put("id",id);
+        data.put(mainField,id);
+        return Result.success(data);
+    }
+
+    //查询管理表id--增加企业id条件
+    @RequestMapping("/{model}/getRelationIdsForEnterprise/{mainField}/{relationField}/{id}")
+    public Result getRelationIdsForEnterprise(@PathVariable("model") String model,
+                                 @PathVariable("mainField") String mainField,
+                                 @PathVariable("relationField") String relationField,
+                                 @PathVariable("id") Long id) {
+        Long enterpriseId = SessionContext.getSession().getEnterpriseId();
+        String tableName = StringUtil.toSqlColumn(model);
+        String sql = StrUtil.format("select {} from {} where {}={} and enterprise_id = {} ",
+                StringUtil.toSqlColumn(relationField),
+                tableName,
+                StringUtil.toSqlColumn(mainField),
+                id,
+                enterpriseId
+        );
+        List<Map<String, Object>> maps = jdbcService.find(sql);
+        List<Long> ids = new ArrayList<>();
+        for (int i = 0; i < maps.size(); i++) {
+            Object o = maps.get(i).get(relationField);
+            Long _id = Long.parseLong(o.toString());
+            ids.add(_id);
+        }
+        Map<String,Object> data = new HashMap<>();
+        data.put(relationField,StringUtil.concatStr(ids,","));
+        data.put("id",id);
+        data.put(mainField,id);
+        return Result.success(data);
+    }
+
+    //重新保存关联表数据
+    @RequestMapping("/{model}/reSaveRelation/{mainField}/{relationField}")
+    public Result reSaveRelation(@PathVariable("model") String model,
+                              @PathVariable("mainField") String mainField,
+                              @PathVariable("relationField") String relationField,
+                              @RequestBody Map<String,Object> params) {
+        String tableName = StringUtil.toSqlColumn(model);
+        Long mainId = Long.parseLong(params.get(mainField).toString());
+        String[] relationIds = params.get(relationField).toString().split(",");
+        List<Long> relationIdList = new ArrayList<>();
+        for(String s:relationIds){
+            if(StringUtils.isNotBlank(s)){
+                relationIdList.add(Long.parseLong(s));
+            }
+        }
+        List<Map<String,Object>> list = new ArrayList<>();
+        for(Long relationId:relationIdList){
+            Map<String,Object> obj = new HashMap<>();
+            obj.put(mainField,mainId);
+            obj.put(relationField,relationId);
+            list.add(obj);
+        }
+
+        jdbcService.transactionOption(() -> {
+            jdbcService.update(StrUtil.format("delete from {} where {} = {}",
+                    tableName,
+                    StringUtil.toSqlColumn(mainField),
+                    mainId
+            ));
+            jdbcService.bathSaveOrUpdate(list,tableName);
+        });
+        return Result.success("操作成功");
+    }
+
+    //重新保存关联表数据---增加企业id条件
+    @RequestMapping("/{model}/reSaveRelationForEnterprise/{mainField}/{relationField}")
+    public Result reSaveRelationForEnterprise(@PathVariable("model") String model,
+                                 @PathVariable("mainField") String mainField,
+                                 @PathVariable("relationField") String relationField,
+                                 @RequestBody Map<String,Object> params) {
+        Long enterpriseId = SessionContext.getSession().getEnterpriseId();
+        String tableName = StringUtil.toSqlColumn(model);
+        Long mainId = Long.parseLong(params.get(mainField).toString());
+        String[] relationIds = params.get(relationField).toString().split(",");
+        List<Long> relationIdList = new ArrayList<>();
+        for(String s:relationIds){
+            if(StringUtils.isNotBlank(s)){
+                relationIdList.add(Long.parseLong(s));
+            }
+        }
+        List<Map<String,Object>> list = new ArrayList<>();
+        for(Long relationId:relationIdList){
+            Map<String,Object> obj = new HashMap<>();
+            obj.put(mainField,mainId);
+            obj.put(relationField,relationId);
+            obj.put("enterpriseId",enterpriseId);
+            list.add(obj);
+        }
+
+        jdbcService.transactionOption(() -> {
+            jdbcService.update(StrUtil.format("delete from {} where {} = {} and enterprise_id = {}",
+                    tableName,
+                    StringUtil.toSqlColumn(mainField),
+                    mainId,
+                    enterpriseId
+            ));
+            jdbcService.bathSaveOrUpdate(list,tableName);
+        });
+        return Result.success("操作成功");
+    }
+
     //增加关联表数据
     @RequestMapping("/{model}/addRelation/{mainField}/{relationField}")
     public Result addRelation(@PathVariable("model") String model,
@@ -81,7 +209,9 @@ public class CommonController {
         String[] relationIds = params.get(relationField).toString().split(",");
         List<Long> relationIdList = new ArrayList<>();
         for(String s:relationIds){
-            relationIdList.add(Long.parseLong(s));
+            if(StringUtils.isNotBlank(s)){
+                relationIdList.add(Long.parseLong(s));
+            }
         }
         if(relationIdList.isEmpty()){
             return Result.success();
@@ -93,10 +223,15 @@ public class CommonController {
                 StringUtil.toSqlColumn(mainField),
                 mainId
                 );
+        boolean repeated = false;
         List<Map<String, Object>> maps = jdbcService.find(existsSql);
         for (int i = 0; i < maps.size(); i++) {
             Object o = maps.get(i).get(relationField);
-            relationIdList.remove(Long.parseLong(o.toString()));
+            Long _id = Long.parseLong(o.toString());
+            if(relationIdList.contains(_id)){
+                repeated = true;
+                relationIdList.remove(_id);
+            }
         }
         List<Map<String,Object>> list = new ArrayList<>();
         for(Long relationId:relationIdList){
@@ -106,7 +241,11 @@ public class CommonController {
             list.add(obj);
         }
         jdbcService.bathSaveOrUpdate(list,tableName);
-        return Result.success();
+        if(repeated){
+            return Result.success("操作成功,重复添加数据已排除");
+        }else{
+            return Result.success();
+        }
     }
 
     @RequestMapping("/{formCode}/get")

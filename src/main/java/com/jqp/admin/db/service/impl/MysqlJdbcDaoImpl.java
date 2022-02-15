@@ -224,4 +224,9 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     public <T> T findOne(Class<T> clz, String field, Object arg) {
         return this.findOne(clz,new String[]{field},new Object[]{arg});
     }
+
+    @Override
+    public <T> List<T> findForObject(String sql, Class<T> clz, Object... args) {
+        return jdbcTemplate.queryForList(sql,clz,args);
+    }
 }

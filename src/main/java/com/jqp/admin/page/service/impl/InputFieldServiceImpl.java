@@ -1,5 +1,6 @@
 package com.jqp.admin.page.service.impl;
 
+import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.page.data.InputField;
 import com.jqp.admin.page.inputRender.*;
 import com.jqp.admin.page.service.InputFieldService;
@@ -22,7 +23,7 @@ public class InputFieldServiceImpl implements InputFieldService {
         }
         Map<String, Object> config = inputRender.render(field);
         if(selector){
-            config.put("name","selector_"+config.get("name"));
+            config.put("name", Constants.QUERY_KEY_START+config.get("name"));
         }
         return config;
     }
@@ -69,5 +70,7 @@ public class InputFieldServiceImpl implements InputFieldService {
         inputRenderMap.put("formula",new FormulaRender());
         inputRenderMap.put("editor",new EditorRender());
         inputRenderMap.put("input-formula",new InputFormulaRender());
+        inputRenderMap.put("input-tree",new InputTreeRender());
+        inputRenderMap.put("tree-select",new TreeSelectRender());
     }
 }
