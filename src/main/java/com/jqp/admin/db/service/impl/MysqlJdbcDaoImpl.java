@@ -70,12 +70,14 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     @Override
     public <T> Result<PageData<T>> query(PageParam pageParam, Class<T> clz,String sql,Object... args) {
         String countSql = StrUtil.format("select count(*) from ({}) t",sql);
+        log.info("countSql:{},参数{}",countSql,args);
         Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, args);
         int start = (pageParam.getPage() - 1) * pageParam.getPerPage();
         if(start >= count || start < 0){
             start = 0;
         }
         String pageSql = StrUtil.format("{} limit {},{}",sql,start,pageParam.getPerPage());
+        log.info("querySql:{},参数{}",pageSql,args);
         List<T> data = jdbcTemplate.query(pageSql, RowMapperUtil.newRowMapper(clz),args);
         PageData<T> pageData = new PageData();
         pageData.setItems(data);

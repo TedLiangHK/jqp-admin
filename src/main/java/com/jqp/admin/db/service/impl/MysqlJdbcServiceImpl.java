@@ -11,7 +11,9 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -237,5 +239,18 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
     @Transactional
     public void transactionOption(TransactionOption transactionOption) {
         transactionOption.call();
+    }
+
+    @Override
+    public boolean isRepeat(String sql, Map<String, Object> params) {
+        Object id = params.get("id");
+        if(id != null && StringUtils.isNotBlank(id.toString())){
+            Long idValue = Long.parseLong(id.toString());
+            params.put("id",idValue);
+        }else{
+            params.put("id",-1L);
+        }
+        sql = TemplateUtil.getValue(sql,params);
+        return !this.find(sql).isEmpty();
     }
 }

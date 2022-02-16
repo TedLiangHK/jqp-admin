@@ -4,6 +4,7 @@ import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.SpringContextUtil;
+import com.jqp.admin.util.TemplateUtil;
 import com.jqp.admin.util.TokenUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author hyz
@@ -97,6 +100,19 @@ public class SessionContext {
     }
 
     public void deleteSession(HttpServletRequest request){
-        request.getSession().removeAttribute(Constants.USER_SESSION);
+        //request.getSession().removeAttribute(Constants.USER_SESSION);
+        request.getSession().invalidate();
+    }
+
+    public static void putUserSessionParams(Map<String,Object> params){
+        UserSession userSession = getSession();
+        params.put("enterpriseId",userSession.getEnterpriseId());
+        params.put("userId",userSession.getUserId());
+    }
+
+    public static String getTemplateValue(String value){
+        Map<String,Object> params = new HashMap<>();
+        SessionContext.putUserSessionParams(params);
+        return TemplateUtil.getValue(value,params);
     }
 }

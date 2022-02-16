@@ -18,4 +18,5 @@ public interface JdbcService extends JdbcDao{
     void delete(Long id,String tableName);
     void delete(Long id,Class<? extends BaseData> clz);
     void transactionOption(TransactionOption transactionOption);
+    boolean isRepeat(String sql,Map<String,Object> params);
 }

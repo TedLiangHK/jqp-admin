@@ -39,4 +39,15 @@ public class Form extends BaseData {
 
     //是否禁用
     private String disabled = Whether.NO;
+
+    //初始化sql
+    private String initSql = "";
+
+    public String getInitSql() {
+        return initSql == null ? "" : initSql;
+    }
+
+    public String getJs() {
+        return js == null ? "" :js;
+    }
 }

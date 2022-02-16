@@ -60,7 +60,7 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
             if(StrUtil.isBlank(value)){
 
                 if(Whether.YES.equals(field.getRef()) && StrUtil.isNotBlank(field.getValue())){
-                    value = field.getValue();
+                    value = SessionContext.getTemplateValue(field.getValue());
                 }else{
                     continue;
                 }
@@ -338,20 +338,27 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
         Boolean selector = (Boolean) pageParam.get("selector");
         if(!Boolean.TRUE.equals(selector)){
             List<Map<String,Object>> rowButtons = new ArrayList<>();
+            int optionWidth = 0;
+            int fontWidth = 12;
+            int padding = 23;
             List<PageButton> pageButtons = page.getPageButtons();
             for(PageButton pageButton:pageButtons){
                 if("row".equals(pageButton.getButtonLocation())){
+                    optionWidth += pageButton.getLabel().length()*fontWidth+padding;
                     rowButtons.add(pageButtonService.getButton(pageButton));
                 }else if("top".equals(pageButton.getButtonLocation())){
 
                 }
+            }
+            if(optionWidth>400){
+                optionWidth = 400;
             }
             if(!rowButtons.isEmpty()){
                 ColumnData columnData = new ColumnData();
                 columnData.put("type","operation");
                 columnData.put("label","操作");
                 columnData.put("buttons",rowButtons);
-                columnData.put("width",rowButtons.size()*50);
+                columnData.put("width",optionWidth);
                 crudData.getColumns().add(columnData);
             }
         }
@@ -433,10 +440,8 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
 
     @Override
     public String getQuerySql(String querySql) {
-        UserSession userSession = sessionContext.getSession(SpringContextUtil.getRequest());
         Map<String,Object> params = new HashMap<>();
-        params.put("userId",userSession.getUserId());
-        params.put("enterpriseId",userSession.getEnterpriseId());
+        SessionContext.putUserSessionParams(params);
         querySql = TemplateUtil.getValue(querySql,params);
         return querySql;
     }

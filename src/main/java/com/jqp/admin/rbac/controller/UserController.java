@@ -1,16 +1,21 @@
 package com.jqp.admin.rbac.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.rbac.constants.UserType;
 import com.jqp.admin.rbac.data.Enterprise;
+import com.jqp.admin.rbac.data.EnterpriseUser;
 import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.rbac.service.ConfigService;
 import com.jqp.admin.rbac.service.UserService;
@@ -48,6 +53,14 @@ public class UserController {
     @RequestMapping("/{formCode}/save")
     public Result save(@RequestBody User user, @PathVariable("formCode") String formCode){
         user = formService.getObj(user, formCode);
+        Map<String,Object> params = new HashMap<>();
+        params.put("id",user.getId());
+        params.put("userCode",user.getUserCode());
+        boolean repeat = jdbcService.isRepeat("select id from user where user_code = '$userCode' and id <> $id ", params);
+        if(repeat){
+            return Result.error("用户编号重复");
+        }
+
         if(user.getId() == null){
             user.setCreateTime(new Date());
             user.setSalt(UUID.fastUUID().toString());
@@ -153,5 +166,59 @@ public class UserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @PostMapping("/saveEnterpriseUser")
+    public Result saveEnterpriseUser(@RequestBody JSONObject jsonObject){
+
+        Long id = jsonObject.getLong("id");
+        User user = JSONUtil.toBean(jsonObject,User.class);
+        EnterpriseUser enterpriseUser = JSONUtil.toBean(jsonObject,EnterpriseUser.class);
+        if(id == null){
+            user.setCreateTime(new Date());
+            user.setSalt(UUID.fastUUID().toString());
+            user.setUserType(UserType.Common);
+
+            String defaultPassword = configService.getValue("defaultPassword");
+
+            String password = SecureUtil.md5(defaultPassword + user.getSalt());
+            user.setPassword(password);
+
+            enterpriseUser.setEnterpriseId(SessionContext.getSession().getEnterpriseId());
+        }else{
+            enterpriseUser = jdbcService.getById(EnterpriseUser.class,id);
+            User dbUser = jdbcService.getById(User.class,enterpriseUser.getUserId());
+
+            enterpriseUser.setDeptId(jsonObject.getLong("deptId"));
+
+            dbUser.setUserCode(user.getUserCode());
+            dbUser.setName(user.getName());
+            dbUser.setMobile(user.getMobile());
+            dbUser.setUserStatus(user.getUserStatus());
+            dbUser.setOtherFiles(user.getOtherFiles());
+            dbUser.setAvatar(user.getAvatar());
+
+            user = dbUser;
+        }
+        User finalUser = user;
+        finalUser.setUpdateTime(new Date());
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("id",finalUser.getId());
+        params.put("userCode",finalUser.getUserCode());
+        boolean repeat = jdbcService.isRepeat("select id from user where user_code = '$userCode' and id <> $id ", params);
+        if(repeat){
+            return Result.error("用户编号重复");
+        }
+
+        EnterpriseUser finalEnterpriseUser = enterpriseUser;
+        jdbcService.transactionOption(() -> {
+            jdbcService.saveOrUpdate(finalUser);
+            if(finalEnterpriseUser.getUserId() == null){
+                finalEnterpriseUser.setUserId(finalUser.getId());
+            }
+            jdbcService.saveOrUpdate(finalEnterpriseUser);
+        });
+        return Result.success();
     }
 }

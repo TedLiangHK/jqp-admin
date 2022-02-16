@@ -1,4 +1,3 @@
-
 AMIS_JSON={
     "type": "page",
     "definitions":{
@@ -74,6 +73,13 @@ AMIS_JSON={
                             "label":"NO",
                             "value":"NO"
                         }]
+                    },
+                    {
+                        "type": "editor",
+                        "name": "initSql",
+                        "label": "初始化sql",
+                        "language": "sql",
+                        "required": false
                     },
                     {
                         "type": "editor",
@@ -238,7 +244,25 @@ AMIS_JSON={
                                 "type":"input-text",
                                 "name": "value",
                                 "label": "默认值",
-                            }
+                            },
+                            {
+                                "type":"select",
+                                "name": "checkRepeatType",
+                                "label": "校验重复类型",
+                                "required": false,
+                                "source":"/options/checkRepeatType",
+                                "clearable":true
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "checkRepeatConfig",
+                                "label": "校验重复配置"
+                            },
+                            {
+                                "type":"input-text",
+                                "name": "checkRepeatTip",
+                                "label": "校验重复提示"
+                            },
                         ]
                     }
                 ]

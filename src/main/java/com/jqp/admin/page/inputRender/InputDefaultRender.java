@@ -2,6 +2,7 @@ package com.jqp.admin.page.inputRender;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
@@ -45,7 +46,7 @@ public class InputDefaultRender implements InputRender{
 
         boolean isMulti = Whether.YES.equals(field.getMulti());
         if(StrUtil.isNotBlank(field.getValue())){
-            config.put("value",field.getValue());
+            config.put("value", SessionContext.getTemplateValue(field.getValue()));
         }
         if(Whether.YES.equals(field.getMust())){
             config.put("required",true);

@@ -4,15 +4,18 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
+import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.db.service.TransactionOption;
+import com.jqp.admin.page.constants.CheckRepeatType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.TemplateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +62,57 @@ public class CommonController {
                 obj.put(formField.getField(),realValue);
             }
         }
+
+        //校验唯一性
+        for(FormField formField:formFields){
+            String checkSql = null;
+            if(CheckRepeatType.Global.equals(formField.getCheckRepeatType())){
+                checkSql = StrUtil.format("select id from {} where {} = '${}' and id <> $id",
+                        form.getTableName(),
+                        StringUtil.toSqlColumn(formField.getField()),
+                        formField.getField());
+            }else if(CheckRepeatType.Enterprise.equals(formField.getCheckRepeatType())){
+                checkSql = StrUtil.format("select id from {} " +
+                                "where {} = '${}' and id <> $id " +
+                                "and enterprise_id = $enterpriseId ",
+                        form.getTableName(),
+                        StringUtil.toSqlColumn(formField.getField()),
+                        formField.getField());
+            }else if(CheckRepeatType.Fields.equals(formField.getCheckRepeatType())){
+                checkSql = StrUtil.format("select id from {} " +
+                                "where id <> $id " +
+                        form.getTableName());
+                if(StringUtils.isBlank(formField.getCheckRepeatConfig())){
+                    continue;
+                }
+                String[] fields = StringUtil.splitStr(formField.getCheckRepeatConfig(), ",");
+                for(String field:fields){
+                    checkSql += StrUtil.format(" and {}='${}' ",
+                            StringUtil.toSqlColumn(field),
+                            field
+                            );
+                }
+            }else if(CheckRepeatType.Sql.equals(formField.getCheckRepeatType())){
+                if(StringUtils.isBlank(formField.getCheckRepeatConfig())){
+                    continue;
+                }
+                checkSql = formField.getCheckRepeatConfig();
+            }else{
+                continue;
+            }
+
+            Map<String,Object> checkParams = new HashMap<>();
+            checkParams.putAll(obj);
+            SessionContext.putUserSessionParams(checkParams);
+            if(jdbcService.isRepeat(checkSql,checkParams)){
+                String checkTip = formField.getLabel()+"不能重复";
+                if(StringUtils.isNotBlank(formField.getCheckRepeatTip())){
+                    checkTip = formField.getCheckRepeatTip();
+                }
+                return Result.error(checkTip);
+            }
+        }
+
         String tableName = form.getTableName();
         jdbcService.saveOrUpdate(obj,tableName);
         return Result.success(obj);
@@ -254,22 +308,39 @@ public class CommonController {
             return Result.success(new HashMap<>());
         }
         Form form = formService.get(formCode);
-        String tableName = StringUtil.toSqlColumn(form.getTableName());
-        Map<String, Object> obj = jdbcService.getById(tableName, id);
-
-        List<FormField> formFields = form.getFormFields();
         Map<String,Object> data = new HashMap<>();
-        for(FormField formField:formFields){
-            Object value = obj.get(formField.getField());
-            if(value == null){
-                continue;
+        if(StringUtils.isNotBlank(form.getTableName())){
+            String tableName = StringUtil.toSqlColumn(form.getTableName());
+            Map<String, Object> obj = jdbcService.getById(tableName, id);
+
+            List<FormField> formFields = form.getFormFields();
+
+            for(FormField formField:formFields){
+                Object value = obj.get(formField.getField());
+                if(value == null){
+                    continue;
+                }
+                if(value instanceof LocalDateTime){
+                    String format = StrUtil.isBlank(formField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
+                    String realValue = DateUtil.format((LocalDateTime) value, format);
+                    obj.put(formField.getField(),realValue);
+                }
+                data.put(formField.getField(),obj.get(formField.getField()));
             }
-            if(value instanceof LocalDateTime){
-                String format = StrUtil.isBlank(formField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
-                String realValue = DateUtil.format((LocalDateTime) value, format);
-                obj.put(formField.getField(),realValue);
+        }
+        if(StringUtils.isNotBlank(form.getInitSql())){
+            Map<String,Object> params = new HashMap<>();
+            params.put("id",id);
+            SessionContext.putUserSessionParams(params);
+            String initSql = TemplateUtil.getValue(form.getInitSql(),params);
+            String[] sqls = StringUtil.splitStr(initSql, ";");
+            for(String sql:sqls){
+                List<Map<String, Object>> list = jdbcService.find(sql);
+                if(!list.isEmpty()){
+                    Map<String, Object> obj = list.get(0);
+                    data.putAll(obj);
+                }
             }
-            data.put(formField.getField(),obj.get(formField.getField()));
         }
         return Result.success(data);
     }
