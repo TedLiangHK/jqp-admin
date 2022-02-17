@@ -1,5 +1,6 @@
 package com.jqp.admin.page.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
@@ -56,6 +57,9 @@ public class FormController {
 
     @RequestMapping("/save")
     public Result<String> save(@RequestBody Form form){
+        if(jdbcService.isRepeat("select id from form where code = '$code' and id <> $id ", BeanUtil.beanToMap(form))){
+            return Result.error("表单编号重复");
+        }
         formService.save(form);
         return Result.success();
     }

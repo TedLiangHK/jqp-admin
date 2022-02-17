@@ -321,6 +321,12 @@ AMIS_JSON={
                             "required": true
                         },
                         {
+                            "type":"input-text",
+                            "name": "code",
+                            "label": "编号",
+                            "required": false
+                        },
+                        {
                             "type":"select",
                             "name": "optionType",
                             "label": "操作类型",

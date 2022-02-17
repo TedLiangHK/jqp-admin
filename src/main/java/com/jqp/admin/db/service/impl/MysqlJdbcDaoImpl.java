@@ -115,6 +115,12 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     }
 
     @Override
+    public Map<String, Object> findOne(String sql, Object... args) {
+        List<Map<String, Object>> list = this.find(sql, args);
+        return list.isEmpty() ? null :list.get(0);
+    }
+
+    @Override
     public Map<String, Object> getById(String tableName, Long id) {
         if(id == null){
             return null;
@@ -230,5 +236,11 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     @Override
     public <T> List<T> findForObject(String sql, Class<T> clz, Object... args) {
         return jdbcTemplate.queryForList(sql,clz,args);
+    }
+
+    @Override
+    public <T> T findOneForObject(String sql, Class<T> clz, Object... args) {
+        List<T> list = this.findForObject(sql, clz, args);
+        return list.isEmpty() ? null : list.get(0);
     }
 }

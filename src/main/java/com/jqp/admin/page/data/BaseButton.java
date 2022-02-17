@@ -19,4 +19,6 @@ public class BaseButton extends BaseData {
     private int seq;
     //规则
     private String jsRule;
+    //编号,用于按钮权限
+    private String code;
 }

@@ -1,6 +1,9 @@
 package com.jqp.admin.page.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
@@ -85,6 +88,9 @@ public class PageController {
 
     @RequestMapping("/save")
     public Result<String> save(@RequestBody Page page){
+        if(jdbcService.isRepeat("select id from page where code = '$code' and id <> $id ",BeanUtil.beanToMap(page))){
+            return Result.error("页面编号重复");
+        }
         pageService.save(page);
         return Result.success();
     }
