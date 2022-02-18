@@ -7,6 +7,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
@@ -270,6 +271,9 @@ public class PageController {
         topButtons.add("filter-toggler");
         List<PageButton> pageButtons = page.getPageButtons();
         for(PageButton pageButton:pageButtons){
+            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                continue;
+            }
             if("top".equals(pageButton.getButtonLocation())){
                 topButtons.add(pageButtonService.getButton(pageButton));
             }else if("row".equals(pageButton.getButtonLocation())){
@@ -304,6 +308,9 @@ public class PageController {
         topButtons.add("filter-toggler");
         List<PageButton> pageButtons = page.getPageButtons();
         for(PageButton pageButton:pageButtons){
+            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                continue;
+            }
             if("top".equals(pageButton.getButtonLocation())){
                 topButtons.add(pageButtonService.getButton(pageButton));
             }else if("row".equals(pageButton.getButtonLocation())){
@@ -345,6 +352,9 @@ public class PageController {
         topButtons.add("filter-toggler");
         List<PageButton> childPageButtons = childPage.getPageButtons();
         for(PageButton pageButton:childPageButtons){
+            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                continue;
+            }
             if("top".equals(pageButton.getButtonLocation())){
                 childTopButtons.add(pageButtonService.getButton(pageButton));
             }else if("row".equals(pageButton.getButtonLocation())){

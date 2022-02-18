@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
@@ -99,6 +100,9 @@ public class PageConfigServiceImpl implements PageConfigService {
         PageButtonService pageButtonService = SpringUtil.getBean(PageButtonService.class);
         List<PageButton> pageButtons = page.getPageButtons();
         for(PageButton pageButton:pageButtons){
+            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                continue;
+            }
             if("top".equals(pageButton.getButtonLocation())){
                 topButtons.add(pageButtonService.getButton(pageButton));
             }else if("row".equals(pageButton.getButtonLocation())){

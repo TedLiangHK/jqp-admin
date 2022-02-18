@@ -4,6 +4,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -152,6 +153,9 @@ public class FormServiceImpl implements FormService {
         PageButtonService pageButtonService = SpringUtil.getBean(PageButtonService.class);
         List<Map<String,Object>> formButtons = new ArrayList<>();
         f.getFormButtons().forEach(b->{
+            if(!SessionContext.hasButtonPermission(b.getCode())){
+                return;
+            }
             Map<String, Object> config = pageButtonService.getButton(b);
             if(Whether.YES.equals(b.getClose())){
                 config.put("close",true);

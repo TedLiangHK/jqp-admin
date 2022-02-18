@@ -9,6 +9,7 @@ import java.util.Map;
 
 public interface PageService extends PageDao{
     Result<CrudData<Map<String,Object>>> query(String pageCode,PageParam pageParam);
+    Result<CrudData<Map<String,Object>>> queryAll(String pageCode);
     Map<String,Object> optionConfig(String pageCode);
     void reload(Page page);
     String getQuerySql(String querySql);

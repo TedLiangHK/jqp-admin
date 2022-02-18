@@ -1,7 +1,12 @@
 package com.jqp.admin.common.config;
 
+import com.jqp.admin.common.CrudData;
+import com.jqp.admin.common.Result;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.rbac.constants.UserType;
+import com.jqp.admin.rbac.data.EnterpriseUser;
 import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.TemplateUtil;
@@ -9,12 +14,12 @@ import com.jqp.admin.util.TokenUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hyz
@@ -29,6 +34,10 @@ public class SessionContext {
 
     @Resource
     private JdbcService jdbcService;
+
+    @Resource
+    @Lazy
+    private PageService pageService;
 
     static final String SPLIT = "$_$";
 
@@ -65,16 +74,46 @@ public class SessionContext {
         return null;
     }
 
-
+    //判断是否有按钮权限
+    public static boolean hasButtonPermission(String buttonCode){
+        UserSession session = getSession();
+        //没有编号不判断,
+        //关联与有权限
+        //配置的有权限
+        return StringUtils.isBlank(buttonCode)
+                || UserType.Admin.equals(session.getUserType())
+                || session.getButtonCodes().contains(buttonCode);
+    }
 
     public UserSession newSession(HttpServletRequest request, User user,Long enterpriseId){
         UserSession userSession = new UserSession();
         userSession.setUserId(user.getId());
         String token = TokenUtil.getToken(user.getSalt(),user.getMobile()+SPLIT+enterpriseId, user.getPassword(), SessionTimeOut * 1000);
         userSession.setToken(token);
-        userSession.setUserType(user.getUserType());
-        userSession.setEnterpriseId(enterpriseId);
+        String userType = user.getUserType();
+        if(!UserType.Admin.equals(user.getUserType())){
+            Map<String, Object> manager = jdbcService.findOne("select id from enterprise_manager where user_id = ? and enterprise_id = ? ", user.getId(), enterpriseId);
+            if(manager != null){
+                userType = UserType.Admin;
+            }
+        }
 
+        userSession.setUserType(userType);
+        userSession.setEnterpriseId(enterpriseId);
+        request.getSession().setAttribute(Constants.USER_SESSION,userSession);
+
+        Result<CrudData<Map<String, Object>>> currentUserMenu = pageService.queryAll("currentUserMenu");
+        userSession.setCurrentUserMenu(currentUserMenu.getData().getRows());
+
+        if(!UserType.Admin.equals(userType)){
+            Result<CrudData<Map<String, Object>>> currentUserButton = pageService.queryAll("currentUserButton");
+            List<Map<String, Object>> rows = currentUserButton.getData().getRows();
+            Set<String> buttonCodes = new HashSet<>();
+            rows.stream().forEach(btn->{
+                buttonCodes.add((String)btn.get("menuCode"));
+            });
+            userSession.setButtonCodes(buttonCodes);
+        }
 //        List<String> menuCodes = baseService.find(" select distinct m.menuCode from " +
 //                "UserPosition up," +
 //                "PositionPermission pp," +
@@ -89,7 +128,7 @@ public class SessionContext {
 //                Whether.Yes
 //        ));
 //        userSession.setMenuCodes(menuCodes);
-        request.getSession().setAttribute(Constants.USER_SESSION,userSession);
+
         return userSession;
     }
 
@@ -106,8 +145,10 @@ public class SessionContext {
 
     public static void putUserSessionParams(Map<String,Object> params){
         UserSession userSession = getSession();
-        params.put("enterpriseId",userSession.getEnterpriseId());
-        params.put("userId",userSession.getUserId());
+        if(userSession != null){
+            params.put("enterpriseId",userSession.getEnterpriseId());
+            params.put("userId",userSession.getUserId());
+        }
     }
 
     public static String getTemplateValue(String value){

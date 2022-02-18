@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jqp.admin.common.CrudData;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
@@ -83,6 +84,8 @@ public class UserController {
         Map<String,Object> data = new HashMap<>();
         data.put("name", StrUtil.format("{}({})",user.getName(),enterprise.getName()));
         data.put("avatar",user.getAvatar());
+        data.put("menus",session.getCurrentUserMenu());
+
         return Result.success(data);
     }
 

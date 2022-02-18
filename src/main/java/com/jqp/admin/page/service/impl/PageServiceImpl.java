@@ -343,6 +343,9 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
             int padding = 23;
             List<PageButton> pageButtons = page.getPageButtons();
             for(PageButton pageButton:pageButtons){
+                if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                    continue;
+                }
                 if("row".equals(pageButton.getButtonLocation())){
                     optionWidth += pageButton.getLabel().length()*fontWidth+padding;
                     rowButtons.add(pageButtonService.getButton(pageButton));
@@ -444,5 +447,13 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
         SessionContext.putUserSessionParams(params);
         querySql = TemplateUtil.getValue(querySql,params);
         return querySql;
+    }
+
+    @Override
+    public Result<CrudData<Map<String, Object>>> queryAll(String pageCode) {
+        PageParam pageParam = new PageParam();
+        pageParam.put("page",1);
+        pageParam.put("perPage",Integer.MAX_VALUE);
+        return this.query(pageCode,pageParam);
     }
 }

@@ -189,7 +189,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
 
     @Override
     @Transactional
-    public void bathSaveOrUpdate(List<BaseData> objs) {
+    public void bathSaveOrUpdate(List<? extends BaseData> objs) {
         if(objs == null){
             return;
         }
