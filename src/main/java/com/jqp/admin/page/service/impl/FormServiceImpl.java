@@ -243,6 +243,30 @@ public class FormServiceImpl implements FormService {
         return dialog;
     }
 
+
+    @Override
+    public Map<String, Object> getPageJson(String code, BaseButton button) {
+
+        String[] arr = StringUtil.splitStr(code,",");
+        String pageCode = arr[0];
+        String refField = arr[1];
+
+        Map<String,Object> dialog = new HashMap<>();
+        dialog.put("title",button.getLabel());
+        dialog.put("size","xl");
+        List<Map<String,Object>> dialogButtons = new ArrayList<>();
+
+        dialog.put("actions",dialogButtons);
+
+        Map<String,Object> data = new HashMap<>();
+        data.put("id","");
+        data.put(refField,"${id}");
+        Map<String, Object> curdJson = pageConfigService.getCurdJson(pageCode);
+        curdJson.put("data",data);
+        dialog.put("body",curdJson);
+        return dialog;
+    }
+
     @Override
     public <T extends BaseData> T getObj(T obj, String formCode) {
         if(obj.getId() == null){

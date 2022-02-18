@@ -31,6 +31,11 @@ public class PageButtonServiceImpl implements PageButtonService {
 
             Map<String, Object> dialog = formService.getFormJson(baseButton.getOptionValue(),baseButton);
             btn.put("dialog",dialog);
+        }else if(ActionType.PopPage.equals(baseButton.getOptionType())){
+            btn.put("actionType","dialog");
+
+            Map<String, Object> dialog = formService.getPageJson(baseButton.getOptionValue(),baseButton);
+            btn.put("dialog",dialog);
         }else if(ActionType.Ajax.equals(baseButton.getOptionType())){
             btn.put("actionType","ajax");
             btn.put("api",baseButton.getOptionValue());

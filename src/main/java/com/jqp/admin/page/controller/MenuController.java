@@ -54,22 +54,24 @@ public class MenuController {
         List<BaseData> btns = new ArrayList<>();
         List<SysMenu> btnMenus = new ArrayList<>();
         Set<String> btnIds = new HashSet<>();
+        SysMenu sysMenu = null;
         //页面按钮
         for(PageButton btn:pageButtons){
             if(StringUtils.isNotBlank(btn.getCode()) || btnIds.contains("p"+btn.getId())){
-                continue;
+
+            }else{
+                sysMenu = new SysMenu();
+                sysMenu.setMenuName(page.getName()+"-"+btn.getLabel());
+                sysMenu.setSeq(++seq);
+                sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
+                sysMenu.setWhetherButton(Whether.YES);
+                sysMenu.setParentId(menu.getId());
+                sysMenu.setMenuType(menu.getMenuType());
+                btnMenus.add(sysMenu);
+                btn.setCode(sysMenu.getMenuCode());
+                btns.add(btn);
+                btnIds.add("p"+btn.getId());
             }
-            SysMenu sysMenu = new SysMenu();
-            sysMenu.setMenuName(page.getName()+"-"+btn.getLabel());
-            sysMenu.setSeq(++seq);
-            sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
-            sysMenu.setWhetherButton(Whether.YES);
-            sysMenu.setParentId(menu.getId());
-            sysMenu.setMenuType(menu.getMenuType());
-            btnMenus.add(sysMenu);
-            btn.setCode(sysMenu.getMenuCode());
-            btns.add(btn);
-            btnIds.add("p"+btn.getId());
 
             if(ActionType.PopForm.equals(btn.getOptionType())){
                 Form form = formService.get(btn.getOptionValue());
@@ -78,20 +80,22 @@ public class MenuController {
                     //页面表单按钮
                     for(FormButton formButton:formButtons){
                         if(StringUtils.isNotBlank(formButton.getCode()) || btnIds.contains("f"+formButton.getId())){
-                            continue;
+
+                        }else{
+                            sysMenu = new SysMenu();
+                            sysMenu.setMenuName(form.getName()+"-"+formButton.getLabel());
+                            sysMenu.setSeq(++seq);
+                            sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
+                            sysMenu.setWhetherButton(Whether.YES);
+                            sysMenu.setParentId(menu.getId());
+                            sysMenu.setMenuType(menu.getMenuType());
+                            btnMenus.add(sysMenu);
+                            formButton.setCode(sysMenu.getMenuCode());
+                            btns.add(formButton);
+                            btnIds.add("f"+formButton.getId());
                         }
 
-                        sysMenu = new SysMenu();
-                        sysMenu.setMenuName(form.getName()+"-"+formButton.getLabel());
-                        sysMenu.setSeq(++seq);
-                        sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
-                        sysMenu.setWhetherButton(Whether.YES);
-                        sysMenu.setParentId(menu.getId());
-                        sysMenu.setMenuType(menu.getMenuType());
-                        btnMenus.add(sysMenu);
-                        formButton.setCode(sysMenu.getMenuCode());
-                        btns.add(formButton);
-                        btnIds.add("f"+formButton.getId());
+
                     }
                     //表单关联页面按钮
                     List<FormRef> formRefs = form.getFormRefs();
@@ -99,20 +103,21 @@ public class MenuController {
                         Page refPage = pageService.get(formRef.getRefPageCode());
                         for(PageButton refPageBtn:refPage.getPageButtons()){
                             if(StringUtils.isNotBlank(refPageBtn.getCode()) || btnIds.contains("p"+refPageBtn.getId())){
-                                continue;
+
+                            }else{
+                                sysMenu = new SysMenu();
+                                sysMenu.setMenuName(refPage.getName()+"-"+refPageBtn.getLabel());
+                                sysMenu.setSeq(++seq);
+                                sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
+                                sysMenu.setWhetherButton(Whether.YES);
+                                sysMenu.setParentId(menu.getId());
+                                sysMenu.setMenuType(menu.getMenuType());
+                                btnMenus.add(sysMenu);
+                                refPageBtn.setCode(sysMenu.getMenuCode());
+                                btns.add(refPageBtn);
+                                btnIds.add("p"+refPageBtn.getId());
                             }
 
-                            sysMenu = new SysMenu();
-                            sysMenu.setMenuName(refPage.getName()+"-"+refPageBtn.getLabel());
-                            sysMenu.setSeq(++seq);
-                            sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
-                            sysMenu.setWhetherButton(Whether.YES);
-                            sysMenu.setParentId(menu.getId());
-                            sysMenu.setMenuType(menu.getMenuType());
-                            btnMenus.add(sysMenu);
-                            refPageBtn.setCode(sysMenu.getMenuCode());
-                            btns.add(refPageBtn);
-                            btnIds.add("p"+refPageBtn.getId());
                         }
                     }
                 }

@@ -17,5 +17,7 @@ public interface FormService {
 
     Map<String,Object> getFormJson(String code, BaseButton button);
 
+    Map<String,Object> getPageJson(String code, BaseButton button);
+
     <T extends BaseData> T getObj(T t,String formCode);
 }
