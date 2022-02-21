@@ -82,10 +82,15 @@ AMIS_JSON={
                         "required": false
                     },
                     {
-                        "type": "editor",
-                        "name": "js",
-                        "label": "js脚本",
-                        "language": "javascript",
+                        "type": "textarea",
+                        "name": "beforeApi",
+                        "label": "前置接口",
+                        "required": false
+                    },
+                    {
+                        "type": "textarea",
+                        "name": "afterApi",
+                        "label": "后置接口",
                         "required": false
                     }
                 ]
@@ -334,6 +339,9 @@ AMIS_JSON={
                             "options":[{
                                 "label":"弹出表单",
                                 "value":"form"
+                            },{
+                                "label":"弹出Iframe",
+                                "value":"iframe"
                             },{
                                 "label":"弹出页面",
                                 "value":"page"

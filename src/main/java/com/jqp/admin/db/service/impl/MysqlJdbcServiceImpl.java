@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("jdbcService")
@@ -252,5 +250,28 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         sql = TemplateUtil.getValue(sql,params);
         return !this.find(sql).isEmpty();
+    }
+
+    @Override
+    public Set<Long> findChildIds(String parentSql, String childSql) {
+        List<Long> parentIds = this.findForObject(parentSql, Long.class);
+        return this.findChildIds(parentIds,childSql);
+    }
+
+    @Override
+    public Set<Long> findChildIds(Collection<Long> parentIds, String childSql) {
+        Set<Long> allIds = new HashSet<>(parentIds);
+        this._findChildIds(allIds,new HashSet<>(parentIds),childSql);
+        return allIds;
+    }
+
+    private void _findChildIds(Set<Long> allIds,Set<Long> parentIds,String childSql){
+        if(parentIds.isEmpty()){
+            return;
+        }
+        String sql = StrUtil.format(childSql,StringUtil.concatStr(parentIds,","));
+        List<Long> _ids = this.findForObject(sql, Long.class);
+        allIds.addAll(_ids);
+        this._findChildIds(allIds,new HashSet<>(_ids),childSql);
     }
 }

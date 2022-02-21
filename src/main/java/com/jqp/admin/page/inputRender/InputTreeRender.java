@@ -27,6 +27,7 @@ public class InputTreeRender extends InputDefaultRender{
 //            config.putAll(myConfig);
             config.put("initiallyOpen",false);
             config.put("type","input-tree");
+            config.put("width","100%");
         }
     }
 }

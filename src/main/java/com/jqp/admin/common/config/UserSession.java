@@ -17,6 +17,7 @@ public class UserSession implements java.io.Serializable{
     private String token;
     private String userType;
     private Long enterpriseId;
+    private Long deptId;
     private Set<String> buttonCodes;
     List<Map<String, Object>> currentUserMenu;
 

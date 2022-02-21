@@ -9,7 +9,9 @@ import com.jqp.admin.page.service.PageButtonService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service("pageButtonService")
@@ -35,6 +37,23 @@ public class PageButtonServiceImpl implements PageButtonService {
             btn.put("actionType","dialog");
 
             Map<String, Object> dialog = formService.getPageJson(baseButton.getOptionValue(),baseButton);
+            btn.put("dialog",dialog);
+        }else if(ActionType.PopIframe.equals(baseButton.getOptionType())){
+            btn.put("actionType","dialog");
+
+            Map<String,Object> dialog = new HashMap<>();
+            dialog.put("title",baseButton.getLabel());
+            dialog.put("size","full");
+            List<Map<String,Object>> dialogButtons = new ArrayList<>();
+
+            dialog.put("actions",dialogButtons);
+
+            Map<String, Object> iframe = new HashMap<>();
+            iframe.put("type","iframe");
+            iframe.put("src",baseButton.getOptionValue());
+            iframe.put("height","100%");
+            dialog.put("body",iframe);
+
             btn.put("dialog",dialog);
         }else if(ActionType.Ajax.equals(baseButton.getOptionType())){
             btn.put("actionType","ajax");

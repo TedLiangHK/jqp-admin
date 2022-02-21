@@ -44,8 +44,13 @@ public class PageConfigServiceImpl implements PageConfigService {
         params.put("page",page);
         params.put("formField",field);
         params.put("queryConfigs",JSONUtil.toJsonPrettyStr(queryConfigs(page,true)));
+
         String jsonConfig = TemplateUtil.getValue(template,params);
         JSONObject json = JSONUtil.parseObj(jsonConfig);
+        JSONObject body = json.getJSONObject("pickerSchema");
+        if("tree".equals(page.getPageType())){
+            body.set("perPage",100000);
+        }
         return json;
     }
     @Override
@@ -110,6 +115,22 @@ public class PageConfigServiceImpl implements PageConfigService {
             }
         }
         params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
+
+        int perPage = 10;
+        List<Integer> perPageAvailable = new ArrayList<>();
+        perPageAvailable.add(10);
+        perPageAvailable.add(20);
+        perPageAvailable.add(50);
+        perPageAvailable.add(100);
+        perPageAvailable.add(300);
+        perPageAvailable.add(500);
+        if("tree".equals(page.getPageType())){
+            perPage = 10000;
+            perPageAvailable.clear();
+            perPageAvailable.add(10000);
+        }
+        params.put("perPage",perPage);
+        params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
 
         String ui = TemplateUtil.getUi("crud.json.vm", params);
         JSONObject json = JSONUtil.parseObj(ui);

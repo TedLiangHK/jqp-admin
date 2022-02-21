@@ -113,22 +113,18 @@ public class SessionContext {
                 buttonCodes.add((String)btn.get("menuCode"));
             });
             userSession.setButtonCodes(buttonCodes);
-        }
-//        List<String> menuCodes = baseService.find(" select distinct m.menuCode from " +
-//                "UserPosition up," +
-//                "PositionPermission pp," +
-//                "PermissionMenu pm, " +
-//                "Menu m " +
-//                "where up.userId = ?0 " +
-//                "and up.positionId = pp.positionId " +
-//                "and pp.permissionId = pm.permissionId " +
-//                "and pm.menuId = m.id " +
-//                "and m.isButton = ?1 ", ObjUtil.newList(
-//                user.getId(),
-//                Whether.Yes
-//        ));
-//        userSession.setMenuCodes(menuCodes);
 
+            EnterpriseUser enterpriseUser = jdbcService.findOne(EnterpriseUser.class, new String[]{
+                "userId",
+                "enterpriseId"
+            }, new Object[]{
+                user.getId(),
+                enterpriseId
+            });
+            if(enterpriseUser != null){
+                userSession.setDeptId(enterpriseUser.getDeptId());
+            }
+        }
         return userSession;
     }
 
@@ -148,6 +144,7 @@ public class SessionContext {
         if(userSession != null){
             params.put("enterpriseId",userSession.getEnterpriseId());
             params.put("userId",userSession.getUserId());
+            params.put("deptId",userSession.getDeptId());
         }
     }
 

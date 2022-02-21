@@ -2,8 +2,10 @@ package com.jqp.admin.db.service;
 
 import com.jqp.admin.common.BaseData;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface JdbcService extends JdbcDao{
     void insert(BaseData obj);
@@ -19,4 +21,6 @@ public interface JdbcService extends JdbcDao{
     void delete(Long id,Class<? extends BaseData> clz);
     void transactionOption(TransactionOption transactionOption);
     boolean isRepeat(String sql,Map<String,Object> params);
+    Set<Long> findChildIds(String parentSql,String childSql);
+    Set<Long> findChildIds(Collection<Long> parentIds, String childSql);
 }

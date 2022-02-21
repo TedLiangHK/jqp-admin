@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
+import com.jqp.admin.common.constants.ResultCode;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.db.service.TransactionOption;
@@ -16,8 +17,12 @@ import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.ssssssss.magicapi.model.JsonBean;
+import org.ssssssss.magicapi.provider.MagicAPIService;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -28,6 +33,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/common")
+@Slf4j
 public class CommonController {
 
     @Resource
@@ -38,6 +44,9 @@ public class CommonController {
 
     @Resource
     private FormService formService;
+
+    @Resource
+    private MagicAPIService magicAPIService;
 
     @PostMapping("/{formCode}/saveOrUpdate")
     public Result saveOrUpdate(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
@@ -114,7 +123,51 @@ public class CommonController {
         }
 
         String tableName = form.getTableName();
-        jdbcService.saveOrUpdate(obj,tableName);
+        Map<String,Object> context = new HashMap<>();
+        context.put("obj",obj);
+        context.put("tableName",tableName);
+        context.put("form",form);
+        if(StringUtils.isNotBlank(form.getBeforeApi())){
+            String[] apis = StringUtil.splitStr(form.getBeforeApi(), "\n");
+            for(String api:apis){
+                if(StringUtils.isNotBlank(api)){
+                    JsonBean<String> result = magicAPIService.call("post", api, context);
+                    if(result.getCode() != 0){
+                        return Result.error(result.getMessage());
+                    }
+                    String data = result.getData();
+                    if(StringUtils.isNotBlank(data)){
+                        return Result.error(data);
+                    }
+
+                }
+            }
+        }
+
+        final Map<String,Object> dbObj = obj;
+        try{
+            jdbcService.transactionOption(()->{
+                jdbcService.saveOrUpdate(dbObj,tableName);
+                if(StringUtils.isNotBlank(form.getAfterApi())){
+                    String[] apis = StringUtil.splitStr(form.getAfterApi(), "\n");
+                    for(String api:apis){
+                        if(StringUtils.isNotBlank(api)){
+                            JsonBean<String> result = magicAPIService.call("post", api, context);
+                            if(result.getCode() != 1){
+                                throw new RuntimeException(result.getMessage());
+                            }
+                            String data = result.getData();
+                            if(StringUtils.isNotBlank(data)){
+                                throw new RuntimeException(data);
+                            }
+                        }
+                    }
+                }
+            });
+        }catch (Exception e){
+            log.error("保存异常",e);
+            return Result.error(e.getMessage());
+        }
         return Result.success(obj);
     }
 

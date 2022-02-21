@@ -280,6 +280,22 @@ public class PageController {
 
             }
         }
+
+        int perPage = 10;
+        List<Integer> perPageAvailable = new ArrayList<>();
+        perPageAvailable.add(10);
+        perPageAvailable.add(20);
+        perPageAvailable.add(50);
+        perPageAvailable.add(100);
+        perPageAvailable.add(300);
+        perPageAvailable.add(500);
+        if("tree".equals(page.getPageType())){
+            perPage = 10000;
+            perPageAvailable.clear();
+            perPageAvailable.add(10000);
+        }
+        params.put("perPage",perPage);
+        params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
         params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
 
         js = TemplateUtil.getValue(js,params);

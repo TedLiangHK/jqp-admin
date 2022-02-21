@@ -429,6 +429,9 @@ AMIS_JSON={
                                 "label":"弹出表单",
                                 "value":"form"
                             },{
+                                "label":"弹出Iframe",
+                                "value":"iframe"
+                            },{
                                 "label":"弹出页面",
                                 "value":"page"
                             },{

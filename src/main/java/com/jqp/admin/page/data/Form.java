@@ -15,8 +15,6 @@ public class Form extends BaseData {
     private String name;
     //主表
     private String tableName;
-    //js
-    private String js = "";
 
     //初始化接口
     private String initApi;
@@ -43,11 +41,20 @@ public class Form extends BaseData {
     //初始化sql
     private String initSql = "";
 
+    //前置接口
+    private String beforeApi = "";
+    //后置接口
+    private String afterApi = "";
+
     public String getInitSql() {
         return initSql == null ? "" : initSql;
     }
 
-    public String getJs() {
-        return js == null ? "" :js;
+    public String getBeforeApi() {
+        return beforeApi == null ? "" : beforeApi;
+    }
+
+    public String getAfterApi() {
+        return afterApi == null ? "" : afterApi;
     }
 }
