@@ -25,6 +25,7 @@ public class PageButtonServiceImpl implements PageButtonService {
         btn.put("type","button");
         btn.put("label",baseButton.getLabel());
         btn.put("level",baseButton.getLevel());
+        btn.put("reload","mainTable");
         if(StrUtil.isNotBlank(baseButton.getJsRule())){
             btn.put("disabledOn",baseButton.getJsRule());
         }

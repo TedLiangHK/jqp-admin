@@ -357,7 +357,8 @@ AMIS_JSON={
                             "type":"input-text",
                             "name": "optionValue",
                             "label": "操作配置",
-                            "required": false
+                            "required": false,
+                            "size": "lg"
                         },
                         {
                             "type":"select",
@@ -417,7 +418,8 @@ AMIS_JSON={
                         {
                             "type":"input-text",
                             "name": "jsRule",
-                            "label": "规则"
+                            "label": "规则",
+                            "size": "lg"
                         }
                     ]
                 }]

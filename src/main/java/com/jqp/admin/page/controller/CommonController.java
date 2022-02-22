@@ -4,25 +4,20 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
-import com.jqp.admin.common.config.UserSession;
-import com.jqp.admin.common.constants.ResultCode;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
-import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.constants.CheckRepeatType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.ssssssss.magicapi.model.JsonBean;
-import org.ssssssss.magicapi.provider.MagicAPIService;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -46,7 +41,7 @@ public class CommonController {
     private FormService formService;
 
     @Resource
-    private MagicAPIService magicAPIService;
+    private ApiService apiService;
 
     @PostMapping("/{formCode}/saveOrUpdate")
     public Result saveOrUpdate(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
@@ -89,7 +84,7 @@ public class CommonController {
                         formField.getField());
             }else if(CheckRepeatType.Fields.equals(formField.getCheckRepeatType())){
                 checkSql = StrUtil.format("select id from {} " +
-                                "where id <> $id " +
+                                "where id <> $id " ,
                         form.getTableName());
                 if(StringUtils.isBlank(formField.getCheckRepeatConfig())){
                     continue;
@@ -127,41 +122,18 @@ public class CommonController {
         context.put("obj",obj);
         context.put("tableName",tableName);
         context.put("form",form);
-        if(StringUtils.isNotBlank(form.getBeforeApi())){
-            String[] apis = StringUtil.splitStr(form.getBeforeApi(), "\n");
-            for(String api:apis){
-                if(StringUtils.isNotBlank(api)){
-                    JsonBean<String> result = magicAPIService.call("post", api, context);
-                    if(result.getCode() != 0){
-                        return Result.error(result.getMessage());
-                    }
-                    String data = result.getData();
-                    if(StringUtils.isNotBlank(data)){
-                        return Result.error(data);
-                    }
-
-                }
-            }
+        Result<String> call = apiService.call(form.getBeforeApi(), context);
+        if(!call.isSuccess()){
+            return call;
         }
 
         final Map<String,Object> dbObj = obj;
         try{
             jdbcService.transactionOption(()->{
                 jdbcService.saveOrUpdate(dbObj,tableName);
-                if(StringUtils.isNotBlank(form.getAfterApi())){
-                    String[] apis = StringUtil.splitStr(form.getAfterApi(), "\n");
-                    for(String api:apis){
-                        if(StringUtils.isNotBlank(api)){
-                            JsonBean<String> result = magicAPIService.call("post", api, context);
-                            if(result.getCode() != 1){
-                                throw new RuntimeException(result.getMessage());
-                            }
-                            String data = result.getData();
-                            if(StringUtils.isNotBlank(data)){
-                                throw new RuntimeException(data);
-                            }
-                        }
-                    }
+                Result<String> r = apiService.call(form.getBeforeApi(), context);
+                if(!r.isSuccess()){
+                    throw new RuntimeException(r.getMsg());
                 }
             });
         }catch (Exception e){
