@@ -1,5 +1,6 @@
 package com.jqp.admin.util;
 
+import com.jqp.admin.rbac.service.DynamicTaskService;
 import com.jqp.admin.rbac.service.TimerTaskService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -40,6 +41,12 @@ public class ApplicationEventListener implements ApplicationListener {
             TimerTaskService taskService = SpringContextUtil.getBean(TimerTaskService.class);
             taskService.start();
             log.info("结束初始化定时任务");
+
+            log.info("开始初始化动态任务");
+            DynamicTaskService dynamicTaskService = SpringContextUtil.getBean(DynamicTaskService.class);
+            dynamicTaskService.start();
+            log.info("结束初始化动态任务");
+
         } else if (event instanceof ContextStartedEvent) {
             log.info("应用启动！！");
         } else if (event instanceof ContextStoppedEvent) {
