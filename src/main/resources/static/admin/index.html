@@ -12,6 +12,13 @@
 <link href="css/materialdesignicons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="js/bootstrap-multitabs/multitabs.min.css">
 <link href="css/style.min.css" rel="stylesheet">
+
+<script>
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        //该页面是在移动端打开的，
+        window.location.href="/admin/mobile.html?t="+new Date().getTime();
+    }
+</script>
 </head>
   
 <body data-logobg="color_8" data-headerbg="default" data-sidebarbg="color_8">
