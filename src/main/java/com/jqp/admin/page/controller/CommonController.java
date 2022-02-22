@@ -131,7 +131,7 @@ public class CommonController {
         try{
             jdbcService.transactionOption(()->{
                 jdbcService.saveOrUpdate(dbObj,tableName);
-                Result<String> r = apiService.call(form.getBeforeApi(), context);
+                Result<String> r = apiService.call(form.getAfterApi(), context);
                 if(!r.isSuccess()){
                     throw new RuntimeException(r.getMsg());
                 }

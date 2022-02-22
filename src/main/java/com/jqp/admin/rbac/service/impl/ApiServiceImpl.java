@@ -24,7 +24,7 @@ public class ApiServiceImpl implements ApiService {
             for(String a:apis){
                 if(StringUtils.isNotBlank(a)){
                     JsonBean<String> result = magicAPIService.call("post", a, context);
-                    if(result.getCode() != 0){
+                    if(result.getCode() != 1){
                         return Result.error(result.getMessage());
                     }
                     String data = result.getData();

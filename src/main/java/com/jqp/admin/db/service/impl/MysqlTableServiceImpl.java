@@ -159,7 +159,7 @@ public class MysqlTableServiceImpl implements TableService {
                 if(columnInfo.getColumnName().equalsIgnoreCase("id")){
                     continue;
                 }else{
-                    sql += columnInfo.getColumnName()+" "+columnInfo.getColumnType() + " comment '"+columnInfo.getColumnComment()+"'";
+                    sql += columnInfo.getColumnName()+" "+columnInfo.getColumnType() + (!"YES".equalsIgnoreCase(columnInfo.getIsNullable()) ? " NOT NULL" : "") + " comment '"+columnInfo.getColumnComment()+"'";
                 }
                 sql += i == tableInfo.getColumnInfos().size() -1 ? "\n" : ",\n";
             }
