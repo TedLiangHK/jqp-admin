@@ -11,6 +11,7 @@ import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.TemplateUtil;
 import com.jqp.admin.util.TokenUtil;
+import com.jqp.admin.util.UrlUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,6 +86,25 @@ public class SessionContext {
                 || session.getButtonCodes().contains(buttonCode);
     }
 
+    //判断是否有按钮权限
+    public static boolean hasUrlPermission(String url){
+        UserSession session = getSession();
+        //没有编号不判断,
+        //关联与有权限
+        //配置的有权限
+        if(StringUtils.isBlank(url)
+                || UserType.Admin.equals(session.getUserType())){
+            return true;
+        }
+        Set<String> urls = session.getUrls();
+        for(String pattern:urls){
+            if(UrlUtil.match(url, pattern)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public UserSession newSession(HttpServletRequest request, User user,Long enterpriseId){
         UserSession userSession = new UserSession();
         userSession.setUserId(user.getId());
@@ -113,6 +133,14 @@ public class SessionContext {
                 buttonCodes.add((String)btn.get("menuCode"));
             });
             userSession.setButtonCodes(buttonCodes);
+
+            Result<CrudData<Map<String, Object>>> currentUserUrl = pageService.queryAll("currentUserUrl");
+            List<Map<String, Object>> urlRows = currentUserUrl.getData().getRows();
+            Set<String> urls = new HashSet<>();
+            urlRows.stream().forEach(btn->{
+                urls.add((String)btn.get("url"));
+            });
+            userSession.setUrls(urls);
 
             EnterpriseUser enterpriseUser = jdbcService.findOne(EnterpriseUser.class, new String[]{
                 "userId",

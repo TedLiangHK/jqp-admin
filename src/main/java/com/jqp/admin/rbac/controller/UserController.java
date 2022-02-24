@@ -101,7 +101,7 @@ public class UserController {
         if(StringUtils.isBlank(captcha)){
             return Result.error("验证码不能为空");
         }
-        if(StringUtils.isBlank(captchaCode) || captchaTimeout == null || captchaTimeout < System.currentTimeMillis() || !captchaCode.equals(captcha)){
+        if(StringUtils.isBlank(captchaCode) || captchaTimeout == null || captchaTimeout < System.currentTimeMillis() || !captchaCode.equalsIgnoreCase(captcha)){
             return Result.error("验证码错误");
         }
 

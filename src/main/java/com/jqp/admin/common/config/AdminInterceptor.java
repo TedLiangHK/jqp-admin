@@ -24,7 +24,8 @@ public class AdminInterceptor implements HandlerInterceptor {
     SessionContext sessionContext;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //logger.info("拦截url:"+request.getRequestURI());
+        log.info("拦截url:"+request.getRequestURI());
+        String uri = request.getRequestURI();
         UserSession userSession = sessionContext.getSession(request);
         if(userSession == null){
             if(isAjax(request)){
@@ -36,16 +37,30 @@ public class AdminInterceptor implements HandlerInterceptor {
             }
             return false;
         }
+        if(!SessionContext.hasUrlPermission(uri)){
+            if(isAjax(request)){
+                response.setContentType("application/json");
+                response.getWriter().println(JSONUtil.toJsonStr(new Result(ResultCode.NoAuth,"无此权限",null)));
+            }else{
+                response.sendRedirect("/admin/lyear_pages_error.html?url="+uri);
+            }
+            return false;
+        }
         //logger.info(userSession.getToken());
         return true;
     }
 
     protected boolean isAjax(HttpServletRequest request){
         String header = request.getHeader("X-Requested-With");
-        String contentType = request.getContentType();
-        if(header != null && header.equals("XMLHttpRequest") || "application/json".equals(contentType)){
-            return true;
+        String dest = request.getHeader("Sec-Fetch-Dest");
+        String requestURI = request.getRequestURI();
+        if(requestURI.contains(".") || "iframe".equals(dest)|| "document".equals(dest)){
+            return false;
         }
-        return false;
+//        String contentType = request.getContentType();
+//        if(header != null && header.equals("XMLHttpRequest") || "application/json".equals(contentType)){
+//            return true;
+//        }
+        return true;
     }
 }

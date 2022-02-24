@@ -45,6 +45,9 @@ public class SpringContextUtil implements ApplicationContextAware {
      * @time: 2018-12-26 10:46:31
      */
     public static <T> T getBean(Class<T> beanClass) {
+        if(applicationContext==null){
+            return null;
+        }
         return applicationContext.getBean(beanClass);
     }
 
@@ -57,6 +60,9 @@ public class SpringContextUtil implements ApplicationContextAware {
      * @time: 2018-12-26 10:47:45
      */
     public static <T> T getBean(String beanName, Class<T> beanClass){
+        if(applicationContext==null){
+            return null;
+        }
         return applicationContext.getBean(beanName,beanClass);
     }
 
