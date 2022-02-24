@@ -224,4 +224,36 @@ public class UserController {
         });
         return Result.success();
     }
+    @PostMapping("/updatePwd")
+    @ResponseBody
+    public Result updatePwd(String oldPwd,String newPwd,String confirmPwd,HttpServletRequest request){
+        UserSession session = SessionContext.getSession();
+        User user = jdbcService.getById(User.class, session.getUserId());
+        if(StringUtils.isBlank(oldPwd) || StringUtils.isBlank(newPwd)|| StringUtils.isBlank(confirmPwd)){
+            return Result.error("请填完表单后提交");
+        }
+        if(!newPwd.equals(confirmPwd)){
+            return Result.error("新密码两次输入密码不一致");
+        }
+        if(!user.getPassword().equals(SecureUtil.md5(oldPwd + user.getSalt()))){
+            return Result.error("原密码错误");
+        }
+        user.setPassword(SecureUtil.md5(newPwd + user.getSalt()));
+        jdbcService.update(user);
+        sessionContext.deleteSession(request);
+        return Result.success("重新登录");
+    }
+
+    @RequestMapping("/resetPwd/{id}")
+    @ResponseBody
+    public Result resetPwd(@PathVariable Long id){
+        User user = jdbcService.getById(User.class, id);
+
+        String defaultPassword = configService.getValue("defaultPassword");
+
+        String password = SecureUtil.md5(defaultPassword + user.getSalt());
+        user.setPassword(password);
+        jdbcService.update(user);
+        return Result.success("重置后用户需要重新登录");
+    }
 }
