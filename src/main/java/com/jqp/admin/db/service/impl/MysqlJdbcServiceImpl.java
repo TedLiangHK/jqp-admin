@@ -5,6 +5,9 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
+import com.jqp.admin.common.data.GlobalLog;
+import com.jqp.admin.common.data.Obj;
+import com.jqp.admin.common.service.LogService;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
@@ -29,6 +32,9 @@ import java.util.stream.Collectors;
 public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcService {
     @Resource
     private TableService tableService;
+
+    @Resource
+    private LogService logService;
 
     @Override
     public void insert(BaseData obj) {
@@ -64,6 +70,8 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
 
         Long id = this.insert("执行" + tableName + "insert", sql, values.toArray());
         obj.setId(id);
+
+        logService.log(null,obj);
     }
 
     @Override
@@ -95,6 +103,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
 
         Long id = this.insert("执行" + tableName + "insert", sql, values.toArray());
         obj.put("id",id);
+        logService.log(null,obj,tableName);
     }
 
     @Override
@@ -129,7 +138,10 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             values.add(value);
         }
         values.add(obj.getId());
+
+        BaseData beforeObj = getById(obj.getClass(), obj.getId());
         this.update(StrUtil.format("更新{},{}",tableName,obj.getId()),sql,values.toArray());
+        logService.log(beforeObj,obj);
     }
 
     @Override
@@ -158,7 +170,9 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             values.add(value);
         }
         values.add(id);
+        Map<String, Object> beforeObj = getById(tableName, id);
         this.update(StrUtil.format("更新{},{}",tableName,id),sql,values.toArray());
+        logService.log(beforeObj,obj,tableName);
     }
 
     @Override
@@ -230,7 +244,9 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         if(id == null || StrUtil.isBlank(tableName)){
             return;
         }
+        Map<String, Object> beforeObj = getById(tableName, id);
         super.update("删除",StrUtil.format("delete from {} where id = ? ",tableName),id);
+        logService.log(beforeObj,null,tableName);
     }
 
     @Override
@@ -273,5 +289,18 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         List<Long> _ids = this.findForObject(sql, Long.class);
         allIds.addAll(_ids);
         this._findChildIds(allIds,new HashSet<>(_ids),childSql);
+    }
+
+    @Override
+    public void delete(String sql, Object... args) {
+        String pre = "delete from ";
+        sql = sql.toLowerCase();
+        String end = sql.substring(sql.indexOf(pre) + pre.length());
+        String tableName = end.substring(0, end.indexOf(" ")).trim();
+
+        List<Long> list = this.findForObject("select id from " + end,Long.class, args);
+        for(Long id:list){
+            this.delete(id,tableName);
+        }
     }
 }

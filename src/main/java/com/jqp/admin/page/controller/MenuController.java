@@ -208,7 +208,15 @@ public class MenuController {
                 this.pageButtons(btnIds,btns,page,btnMenus,menu,seq,btn.getCode(),menuUrls);
             }
         }else if(ActionType.PopIframe.equals(btn.getOptionType())){
-            add(btn.getCode(),parentName+"-"+btn.getLabel(),btn.getOptionValue(),menuUrls);
+            String logPrefix = "/admin/operationLog/page/";
+            if(btn.getOptionValue() != null && btn.getOptionValue().contains(logPrefix)){
+                String end = btn.getOptionValue().substring(btn.getOptionValue().indexOf(logPrefix) + logPrefix.length());
+                add(btn.getCode(),parentName+"-日志页面",btn.getOptionValue(),menuUrls);
+                add(btn.getCode(),parentName+"-日志JS","/admin/operationLog/js/"+end+".js",menuUrls);
+                add(btn.getCode(),parentName+"-日志数据","/admin/operationLog/data/"+end,menuUrls);
+            }else{
+                add(btn.getCode(),parentName+"-"+btn.getLabel(),btn.getOptionValue(),menuUrls);
+            }
         }else if(ActionType.Ajax.equals(btn.getOptionType())){
             add(btn.getCode(),parentName+"-"+btn.getLabel(),btn.getOptionValue(),menuUrls);
         }

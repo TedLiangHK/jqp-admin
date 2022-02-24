@@ -230,7 +230,7 @@ public class CommonController {
         }
 
         jdbcService.transactionOption(() -> {
-            jdbcService.update(StrUtil.format("delete from {} where {} = {}",
+            jdbcService.delete(StrUtil.format("delete from {} where {} = {}",
                     tableName,
                     StringUtil.toSqlColumn(mainField),
                     mainId
@@ -266,7 +266,7 @@ public class CommonController {
         }
 
         jdbcService.transactionOption(() -> {
-            jdbcService.update(StrUtil.format("delete from {} where {} = {} and enterprise_id = {}",
+            jdbcService.delete(StrUtil.format("delete from {} where {} = {} and enterprise_id = {}",
                     tableName,
                     StringUtil.toSqlColumn(mainField),
                     mainId,

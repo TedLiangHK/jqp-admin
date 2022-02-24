@@ -75,7 +75,7 @@ public class PermissionController {
         }
         jdbcService.transactionOption(()->{
             if(ref.equals("position")){
-                jdbcService.update("delete from position_permission " +
+                jdbcService.delete("delete from position_permission " +
                                 "where position_id = ? and permission_id = ? and enterprise_id = ? "
                         ,
                         refId,
@@ -83,7 +83,7 @@ public class PermissionController {
                         enterpriseId);
                 jdbcService.bathSaveOrUpdate(list,"position_permission");
             }else if(ref.equals("dept")){
-                jdbcService.update("delete from dept_permission " +
+                jdbcService.delete("delete from dept_permission " +
                                 "where dept_id = ? and permission_id = ? "
                         ,
                         refId,

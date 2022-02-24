@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
+@Service("tableService")
 @ConditionalOnProperty(value="db.type",havingValue = "mysql")
 @Slf4j
 public class MysqlTableServiceImpl implements TableService {

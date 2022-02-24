@@ -46,8 +46,7 @@ public class PageDaoImpl implements PageDao {
     @Transactional
     public void save(Page page) {
         jdbcService.saveOrUpdate(page);
-
-        jdbcService.update("delete from page_result_field where page_id = ? ",page.getId());
+        jdbcService.delete("delete from page_result_field where page_id = ? ",page.getId());
         int seq = 0;
         for (PageResultField field:
                 page.getResultFields()) {
@@ -56,7 +55,7 @@ public class PageDaoImpl implements PageDao {
             field.setSeq(++seq);
             jdbcService.saveOrUpdate(field);
         }
-        jdbcService.update("delete from page_query_field where page_id = ? ",page.getId());
+        jdbcService.delete("delete from page_query_field where page_id = ? ",page.getId());
         seq = 0;
         for (PageQueryField field:
                 page.getQueryFields()) {
@@ -66,7 +65,7 @@ public class PageDaoImpl implements PageDao {
             jdbcService.saveOrUpdate(field);
         }
 
-        jdbcService.update("delete from page_button where page_id = ? ",page.getId());
+        jdbcService.delete("delete from page_button where page_id = ? ",page.getId());
         seq = 0;
         for (PageButton button:
                 page.getPageButtons()) {

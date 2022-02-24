@@ -39,7 +39,7 @@ public class FormServiceImpl implements FormService {
     @Transactional
     public void save(Form form) {
         jdbcService.saveOrUpdate(form);
-        jdbcService.update("delete from form_field where form_id = ? ",form.getId());
+        jdbcService.delete("delete from form_field where form_id = ? ",form.getId());
         int seq = 0;
         for(FormField item:form.getFormFields()){
             item.setId(null);
@@ -48,7 +48,7 @@ public class FormServiceImpl implements FormService {
             jdbcService.saveOrUpdate(item);
         }
 
-        jdbcService.update("delete from form_ref where form_id = ? ",form.getId());
+        jdbcService.delete("delete from form_ref where form_id = ? ",form.getId());
         seq = 0;
         for(FormRef item:form.getFormRefs()){
             item.setId(null);
@@ -57,7 +57,7 @@ public class FormServiceImpl implements FormService {
             jdbcService.saveOrUpdate(item);
         }
 
-        jdbcService.update("delete from form_button where form_id = ? ",form.getId());
+        jdbcService.delete("delete from form_button where form_id = ? ",form.getId());
         seq = 0;
         for(FormButton item:form.getFormButtons()){
             item.setId(null);
