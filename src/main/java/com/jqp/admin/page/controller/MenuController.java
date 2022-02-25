@@ -7,6 +7,7 @@ import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.constants.DataType;
+import com.jqp.admin.page.constants.RefType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
@@ -160,6 +161,28 @@ public class MenuController {
             this.buttonButtons(page.getName(),btnIds,btns,btn,btnMenus,menu,seq,btn.getCode(),menuUrls);
         }
         this.add(menuCode,page.getQueryFields(),menuUrls);
+
+        for(PageRef pageRef:page.getPageRefs()){
+            String refType = pageRef.getRefType();
+            if(RefType.Page.equals(refType)){
+                Page refPage = pageService.get(pageRef.getRefPageCode());
+                this.pageButtons(btnIds,btns,refPage,btnMenus,menu,seq,menuCode,menuUrls);
+            }else if(RefType.Form.equals(refType)){
+                Form form = formService.get(pageRef.getRefPageCode());
+                this.formButtons(btnIds,btns,form,btnMenus,menu,seq,menuCode,menuUrls);
+            }else if(RefType.Iframe.equals(refType)){
+                String url = pageRef.getRefPageCode();
+                String logPrefix = "/admin/operationLog/page/";
+                if(url != null && url.contains(logPrefix)){
+                    String end = url.substring(url.indexOf(logPrefix) + logPrefix.length());
+                    add(menuCode,page.getName()+"-日志页面",url,menuUrls);
+                    add(menuCode,page.getName()+"-日志JS","/admin/operationLog/js/"+end+".js",menuUrls);
+                    add(menuCode,page.getName()+"-日志数据","/admin/operationLog/data/"+end,menuUrls);
+                }else{
+                    add(menuCode,page.getName()+"-"+pageRef.getRefName(),url,menuUrls);
+                }
+            }
+        }
     }
 
 

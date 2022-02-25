@@ -52,7 +52,7 @@ public class PageButtonServiceImpl implements PageButtonService {
             Map<String, Object> iframe = new HashMap<>();
             iframe.put("type","iframe");
             iframe.put("src",baseButton.getOptionValue());
-            iframe.put("height","100%");
+            iframe.put("height","90%");
             dialog.put("body",iframe);
 
             btn.put("dialog",dialog);

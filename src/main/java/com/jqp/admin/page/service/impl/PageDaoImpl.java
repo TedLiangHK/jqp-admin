@@ -1,10 +1,7 @@
 package com.jqp.admin.page.service.impl;
 
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButton;
-import com.jqp.admin.page.data.PageQueryField;
-import com.jqp.admin.page.data.PageResultField;
+import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.PageDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +38,9 @@ public class PageDaoImpl implements PageDao {
 
         List<PageButton> pageButtons = jdbcService.find(PageButton.class,"pageId",page.getId());
         page.setPageButtons(pageButtons);
+
+        List<PageRef> pageRefs = jdbcService.find(PageRef.class,"pageId",page.getId());
+        page.setPageRefs(pageRefs);
     }
     @Override
     @Transactional
@@ -73,6 +73,16 @@ public class PageDaoImpl implements PageDao {
             button.setPageId(page.getId());
             button.setSeq(++seq);
             jdbcService.saveOrUpdate(button);
+        }
+
+        jdbcService.delete("delete from page_ref where page_id = ? ",page.getId());
+        seq = 0;
+        for (PageRef ref:
+                page.getPageRefs()) {
+            ref.setId(null);
+            ref.setPageId(page.getId());
+            ref.setSeq(++seq);
+            jdbcService.saveOrUpdate(ref);
         }
     }
 }

@@ -59,6 +59,12 @@ AMIS_JSON={
                         "label": "js脚本",
                         "language": "javascript",
                         "required": false
+                    },{
+                        "type": "input-number",
+                        "name": "width",
+                        "label": "页面宽度",
+                        "placeholder":"一对多页面占比左侧宽度,最大为12,默认值为6",
+                        "required": false
                     }
                 ]
             },{
@@ -499,6 +505,57 @@ AMIS_JSON={
                         }
                     ]
                 }]
+            },{
+                title:"页面关联",
+                body:[{
+                    "type": "input-table",
+                    "name": "pageRefs",
+                    "addable": true,
+                    "removable": true,
+                    "needConfirm":false,
+                    "draggable": true,
+                    "strictMode":true,
+                    //"copyable": true,
+                    //"editable": true,
+                    "label":"页面关联",
+                    "required": false,
+                    "columns": [
+                        {
+                            "type":"select",
+                            "name": "refType",
+                            "label": "关联类型",
+                            "required": true,
+                            "options":[{
+                                "label":"页面",
+                                "value":"page"
+                            },{
+                                "label":"表单",
+                                "value":"form"
+                            },{
+                                "label":"iframe",
+                                "value":"iframe"
+                            }]
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "refField",
+                            "label": "关联字段",
+                            "required": true
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "refPageCode",
+                            "label": "关联配置",
+                            "required": true
+                        },
+                        {
+                            "type":"input-text",
+                            "name": "refName",
+                            "label": "名称",
+                            "required": false
+                        }
+                    ]
+                }]
             }]
         },
         "form":{
@@ -607,6 +664,20 @@ AMIS_JSON={
                         "actionType": "dialog",
                         "dialog": {
                             "$ref":"copyForm"
+                        }
+                    },{
+                        "label": "预览",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "title": "预览-${name}",
+                            "size": "full",
+                            "body": {
+                                "type":"iframe",
+                                "src":"/crud/${code}",
+                                "height":"98%"
+                            },
+                            "actions":[]
                         }
                     },{
                         "type": "button",

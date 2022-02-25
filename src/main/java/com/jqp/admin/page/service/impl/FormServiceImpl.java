@@ -195,7 +195,13 @@ public class FormServiceImpl implements FormService {
             f.getFormRefs().forEach(ref->{
                 Map<String,Object> data = new HashMap<>();
                 data.put("id","");
-                data.put(ref.getRefField(),"${id}");
+
+                String[] arr = StringUtil.splitStr(ref.getRefField(), "&");
+                for(String p:arr){
+                    String[] kv = StringUtil.splitStr(p, "=");
+                    data.put(kv[0],kv[1]);
+                }
+
                 Map<String, Object> curdJson = pageConfigService.getCurdJson(ref.getRefPageCode());
                 curdJson.put("data",data);
 

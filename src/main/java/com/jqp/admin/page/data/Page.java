@@ -28,8 +28,14 @@ public class Page extends BaseData {
     //页面按钮
     private List<PageButton> pageButtons = new ArrayList<>();
 
+    //页面关联
+    private List<PageRef> pageRefs = new ArrayList<>();
+
     //名称字段
     private String labelField;
     //值字段
     private String valueField;
+
+    //宽度
+    private Integer width;
 }
