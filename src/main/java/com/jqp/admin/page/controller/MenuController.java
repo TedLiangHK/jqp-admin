@@ -39,14 +39,12 @@ public class MenuController {
         SysMenu menu = jdbcService.getById(SysMenu.class, menuId);
         String url = menu.getUrl();
         String prefix = "/crud/";
-        if(StringUtils.isBlank(url) || !url.startsWith(prefix)){
-            return Result.error("只能初始化地址为["+prefix+"]开头的菜单");
+        String oneToMany = "/oneToMany/";
+        if(StringUtils.isBlank(url) || (!url.startsWith(prefix) && !url.startsWith(oneToMany))){
+            return Result.error("只能初始化地址为["+prefix+","+oneToMany+"]开头的菜单");
         }
-        String pageCode = url.substring(url.indexOf(prefix)+prefix.length());
-        Page page = pageService.get(pageCode);
-        if(page == null){
-            return Result.error("页面["+pageCode+"]不存在");
-        }
+
+
         Integer seq = jdbcService.findOneForObject("select max(seq) from sys_menu where parent_id = ? ", Integer.class, menu.getId());
         if(seq == null){
             seq = 0;
@@ -54,10 +52,29 @@ public class MenuController {
         List<BaseData> btns = new ArrayList<>();
         List<SysMenu> btnMenus = new ArrayList<>();
         Set<String> btnIds = new HashSet<>();
+        Obj<Integer> objSeq = new Obj<>(seq);
+
         //页面按钮
         Map<String,Set<MenuUrl>> menuUrls = new HashMap<>();
-        this.pageButtons(btnIds,btns,page,btnMenus,menu,new Obj<>(seq),menu.getMenuCode(),menuUrls);
 
+        if(url.startsWith(prefix)){
+            String pageCode = url.substring(url.indexOf(prefix)+prefix.length());
+            Page page = pageService.get(pageCode);
+            if(page == null){
+                return Result.error("页面["+pageCode+"]不存在");
+            }
+            this.pageButtons(btnIds,btns,page,btnMenus,menu,objSeq,menu.getMenuCode(),menuUrls);
+        }else if(url.startsWith(oneToMany)){
+            String pageCodes = url.substring(url.indexOf(oneToMany)+oneToMany.length());
+            String[] arr = pageCodes.split("/");
+            for(String pageCode:arr){
+                Page page = pageService.get(pageCode);
+                if(page == null){
+                    continue;
+                }
+                this.pageButtons(btnIds,btns,page,btnMenus,menu,objSeq,menu.getMenuCode(),menuUrls);
+            }
+        }
         jdbcService.transactionOption(() -> {
             jdbcService.bathSaveOrUpdate(btnMenus);
             jdbcService.bathSaveOrUpdate(btns);

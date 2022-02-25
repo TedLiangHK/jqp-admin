@@ -60,6 +60,7 @@ public class TemplateServiceImpl implements TemplateService {
             return " and 1=-1 \n -- 权限编号错误"+permissionCode+" \n";
         }
         List<String> configValues = jdbcService.findForObject("select distinct t.config_value from (" +
+                        //岗位数据权限
                         "select config_value from position_permission " +
                         "where permission_id = ? " +
                         "and enterprise_id = ? " +
@@ -70,19 +71,33 @@ public class TemplateServiceImpl implements TemplateService {
                         "select id from enterprise_user where user_id = ? and enterprise_id = ? " +
                         ")" +
                         ") union all " +
+                        // 部门数据权限
                         "select config_value from dept_permission " +
                         "where permission_id = ? " +
                         "and dept_id in (" +
                         "select dept_id from enterprise_user where user_id = ? and enterprise_id = ? " +
                         "and dept_id is not null" +
+                        ") union all " +
+                        //用户数据权限
+                        "select config_value from user_permission " +
+                        "where permission_id = ? " +
+                        "and enterprise_user_id in (" +
+                        "select id from enterprise_user where user_id = ? and enterprise_id = ? " +
+                        "and dept_id is not null" +
                         ")" +
+
                         ") t"
                 , String.class,
+                //岗位数据权限
                 permission.getId(),
                 session.getEnterpriseId(),
                 session.getUserId(),
                 session.getEnterpriseId(),
-
+                //部门数据权限
+                permission.getId(),
+                session.getUserId(),
+                session.getEnterpriseId(),
+                //用户数据权限
                 permission.getId(),
                 session.getUserId(),
                 session.getEnterpriseId()

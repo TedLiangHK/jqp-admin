@@ -72,6 +72,14 @@ public class PermissionController {
                 item.put("configValue",v);
                 list.add(item);
             }
+        }else if(ref.equals("user")){
+            for(String v:configValues){
+                Map<String,Object> item = new HashMap<>();
+                item.put("enterpriseUserId",refId);
+                item.put("permissionId",id);
+                item.put("configValue",v);
+                list.add(item);
+            }
         }
         jdbcService.transactionOption(()->{
             if(ref.equals("position")){
@@ -89,6 +97,13 @@ public class PermissionController {
                         refId,
                         id);
                 jdbcService.bathSaveOrUpdate(list,"dept_permission");
+            }else if(ref.equals("user")){
+                jdbcService.delete("delete from user_permission " +
+                                "where enterprise_user_id = ? and permission_id = ? "
+                        ,
+                        refId,
+                        id);
+                jdbcService.bathSaveOrUpdate(list,"user_permission");
             }
         });
         return Result.success();
@@ -133,6 +148,15 @@ public class PermissionController {
         }else if("dept".equals(ref)){
             List<String> list = jdbcService.findForObject("select config_value from dept_permission " +
                             "where dept_id = ? and permission_id = ? "
+                    , String.class,
+                    refId,
+                    id);
+            if(!list.isEmpty()){
+                inputField.setValue(StringUtil.concatStr(list,","));
+            }
+        }else if("user".equals(ref)){
+            List<String> list = jdbcService.findForObject("select config_value from user_permission " +
+                            "where enterprise_user_id = ? and permission_id = ? "
                     , String.class,
                     refId,
                     id);
