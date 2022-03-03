@@ -62,6 +62,9 @@ public class PageButtonServiceImpl implements PageButtonService {
 
             String confirmText = StrUtil.isBlank(baseButton.getConfirmText()) ? "确定" + baseButton.getLabel()+"操作吗?" : baseButton.getConfirmText();
             btn.put("confirmText",confirmText);
+        }else if(ActionType.OpenNew.equals(baseButton.getOptionType())){
+            btn.put("actionType","url");
+            btn.put("url",baseButton.getOptionValue());
         }
         return btn;
     }
