@@ -1,8 +1,15 @@
 package com.jqp.admin.activity.data;
 
+import com.jqp.admin.common.BaseData;
+import lombok.Data;
+
 import java.util.Date;
 
-public class AuditRecord {
+/***
+ * 审核记录
+ */
+@Data
+public class AuditRecord extends BaseData {
     //表
     private String tableName;
     //主表id
