@@ -16,6 +16,7 @@ public interface FormService {
     void reload(Form form);
 
     Map<String,Object> getFormJson(String code, BaseButton button);
+    Map<String,Object> getFormJson(Form form, BaseButton button);
 
     Map<String,Object> getPageJson(String code, BaseButton button);
 

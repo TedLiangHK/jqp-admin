@@ -38,6 +38,17 @@ public class StaticPageController {
         return "page";
     }
 
+    @RequestMapping("/taskAudit/{taskId}")
+    public String taskAudit(Model model,@PathVariable("taskId") String taskId){
+        model.addAttribute("js","/admin/models/task/js/"+taskId+".js?_rt="+System.currentTimeMillis());
+        return "page";
+    }
+    @RequestMapping("/auditRecord/{modelName}/{id}")
+    public String auditRecord(Model model,@PathVariable("modelName") String modelName,@PathVariable("id") String id ){
+        model.addAttribute("js","/admin/models/auditRecord/js/"+modelName+"/"+id+".js?_rt="+System.currentTimeMillis());
+        return "page";
+    }
+
     @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response){
         try {

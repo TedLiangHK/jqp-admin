@@ -330,9 +330,9 @@ public class MysqlTableServiceImpl implements TableService {
         querySql += "\nselect";
         exportSql += "\nselect";
 
-        querySql += "\n\tid, -- 主键";
-        exportSql += "\n\tid,-- 主键";
         String alis = StringUtil.getAlis(tableName);
+        querySql += "\n\t"+alis+".id, -- 主键";
+        exportSql += "\n\t"+alis+".id,-- 主键";
         String lastColumnName = columnInfos.get(columnInfos.size() - 1).getColumnName();
         for(ColumnInfo columnInfo:columnInfos){
             Map<String,Object> column = new HashMap<>();

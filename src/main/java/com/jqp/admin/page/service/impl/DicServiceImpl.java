@@ -20,4 +20,11 @@ public class DicServiceImpl implements DicService {
                 ") order by seq asc,id asc ", code);
         return options;
     }
+
+    @Override
+    public String getLabel(String code, String value) {
+        return jdbcService.findOneForObject("select label from dic_item where parent_id in(" +
+                "select id from dic where dic_code = ? " +
+                ") and value = ?",String.class, code,value);
+    }
 }

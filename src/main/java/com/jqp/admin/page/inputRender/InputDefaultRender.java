@@ -45,9 +45,9 @@ public class InputDefaultRender implements InputRender{
         }
 
         boolean isMulti = Whether.YES.equals(field.getMulti());
-        if(StrUtil.isNotBlank(field.getValue())){
-            config.put("value", SessionContext.getTemplateValue(field.getValue()));
-        }
+//        if(StrUtil.isNotBlank(field.getValue())){
+//            config.put("value", SessionContext.getTemplateValue(field.getValue()));
+//        }
         if(Whether.YES.equals(field.getMust())){
             config.put("required",true);
         }

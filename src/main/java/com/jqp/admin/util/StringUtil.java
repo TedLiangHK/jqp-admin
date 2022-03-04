@@ -551,7 +551,11 @@ public class StringUtil {
 				name.append(array[i]);
 			}
 		}
-		return name.toString().toLowerCase();
+		String alis = name.toString().toLowerCase();
+		if(MySQLUtil.isKeyword(alis)){
+			alis += "_";
+		}
+		return alis;
 	}
 	
 	

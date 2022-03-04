@@ -329,30 +329,37 @@ public class CommonController {
 
     @RequestMapping("/{formCode}/get")
     public Result get(Long id, @PathVariable("formCode") String formCode) {
-        if(id == null){
-            return Result.success(new HashMap<>());
-        }
-        Form form = formService.get(formCode);
         Map<String,Object> data = new HashMap<>();
-        if(StringUtils.isNotBlank(form.getTableName())){
-            String tableName = StringUtil.toSqlColumn(form.getTableName());
-            Map<String, Object> obj = jdbcService.getById(tableName, id);
-
+        Form form = formService.get(formCode);
+        if(id == null){
             List<FormField> formFields = form.getFormFields();
-
             for(FormField formField:formFields){
-                Object value = obj.get(formField.getField());
-                if(value == null){
-                    continue;
+                if(StringUtils.isNotBlank(formField.getValue())){
+                    data.put(formField.getField(),SessionContext.getTemplateValue(formField.getValue()));
                 }
-                if(value instanceof LocalDateTime){
-                    String format = StrUtil.isBlank(formField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
-                    String realValue = DateUtil.format((LocalDateTime) value, format);
-                    obj.put(formField.getField(),realValue);
+            }
+        }else{
+            if(StringUtils.isNotBlank(form.getTableName())){
+                String tableName = StringUtil.toSqlColumn(form.getTableName());
+                Map<String, Object> obj = jdbcService.getById(tableName, id);
+
+                List<FormField> formFields = form.getFormFields();
+
+                for(FormField formField:formFields){
+                    Object value = obj.get(formField.getField());
+                    if(value == null){
+                        continue;
+                    }
+                    if(value instanceof LocalDateTime){
+                        String format = StrUtil.isBlank(formField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
+                        String realValue = DateUtil.format((LocalDateTime) value, format);
+                        obj.put(formField.getField(),realValue);
+                    }
+                    data.put(formField.getField(),obj.get(formField.getField()));
                 }
-                data.put(formField.getField(),obj.get(formField.getField()));
             }
         }
+
         if(StringUtils.isNotBlank(form.getInitSql())){
             Map<String,Object> params = new HashMap<>();
             params.put("id",id);

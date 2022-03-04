@@ -18,25 +18,17 @@
   <script src="js/ProcessDiagramGenerator.js" type="text/javascript" charset="utf-8"></script>
   <script src="js/ProcessDiagramCanvas.js" type="text/javascript" charset="utf-8"></script>
   
-  <style type="text/css">
-    .diagram{
-      border:none !important;
-      padding:0 !important;
-      margin:0 !important;
-      width:100% !important;
-    }
-    svg{
-      background: none !important;
-    }
+  <style type="text/css" media="screen">
+    
   </style>
 </head>
 <body>
-<div class="wrapper" style="background:white;">
-  <div id="pb1" style="display: none;"></div>
-  <div id="overlayBox">
-    <div id="diagramBreadCrumbs" style="display: none;" class="diagramBreadCrumbs" onmousedown="return false" onselectstart="return false"></div>
-    <div id="diagramHolder" class="diagramHolder" style="width:100%;padding:0;border:none;"></div>
-    <div class="diagram-info" id="diagramInfo" style="display: none;"></div>
+<div class="wrapper">
+  <div id="pb1"></div>
+  <div id="overlayBox" >
+    <div id="diagramBreadCrumbs" class="diagramBreadCrumbs" onmousedown="return false" onselectstart="return false"></div>
+    <div id="diagramHolder" class="diagramHolder"></div>
+    <div class="diagram-info" id="diagramInfo"></div>
   </div>
 </div>
 <script language='javascript'>

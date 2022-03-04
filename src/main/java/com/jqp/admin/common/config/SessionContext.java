@@ -1,5 +1,6 @@
 package com.jqp.admin.common.config;
 
+import cn.hutool.core.date.DateUtil;
 import com.jqp.admin.common.CrudData;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.constants.Constants;
@@ -161,6 +162,12 @@ public class SessionContext {
         HttpServletRequest request = SpringContextUtil.getRequest();
         return sessionContext.getSession(request);
     }
+    public static User getUser(){
+        UserSession session = getSession();
+        JdbcService jdbcService = SpringContextUtil.getBean(JdbcService.class);
+        return jdbcService.getById(User.class, session.getUserId());
+    }
+
 
     public void deleteSession(HttpServletRequest request){
         //request.getSession().removeAttribute(Constants.USER_SESSION);
@@ -168,6 +175,10 @@ public class SessionContext {
     }
 
     public static void putUserSessionParams(Map<String,Object> params){
+        params.put("curYear", DateUtil.format(new Date(),"yyyy"));
+        params.put("curMonth", DateUtil.format(new Date(),"yyyy-MM"));
+        params.put("curDate", DateUtil.format(new Date(),"yyyy-MM-dd"));
+        params.put("curDateTime", DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss"));
         UserSession userSession = getSession();
         if(userSession != null){
             params.put("enterpriseId",userSession.getEnterpriseId());

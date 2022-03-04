@@ -6,27 +6,28 @@ import lombok.Data;
 import java.util.Date;
 
 /***
- * 审核记录
+ * @date 2022-03-04 09:37:57
+ * @remark 审核记录
  */
 @Data
 public class AuditRecord extends BaseData {
-    //表
+    //表名
     private String tableName;
-    //主表id
+    //关联id
     private Long refId;
     //流程实例id
     private String processInstanceId;
-    //流程名称
+    //流程实例名称
     private String processInstanceName;
     //流程部署id
     private String deploymentId;
     //流程定义id
     private String processDefinitionId;
-    //当前任务id
+    //任务id
     private String taskId;
-    //当前任务名称
+    //任务名称
     private String taskName;
-    //流程key
+    //流程编号
     private String processKey;
     //审核结果
     private String resultName;
@@ -34,15 +35,15 @@ public class AuditRecord extends BaseData {
     private String imgs;
     //附件
     private String files;
-    //备注
+    //审核备注
     private String remark;
-    //前状态值
+    //上一个状态
     private String prevStatus;
-    //前状态名称
+    //上一个状态名称
     private String prevStatusName;
-    //后状态值
+    //下一个状态
     private String nextStatus;
-    //后状态名称
+    //下一个状态名称
     private String nextStatusName;
     //状态字典
     private String statusDic;
@@ -50,4 +51,10 @@ public class AuditRecord extends BaseData {
     private Date startTime;
     //结束时间
     private Date endTime;
+    //审核人id
+    private Long auditUserId;
+    //审核人姓名
+    private String auditUserName;
+    //企业id
+    private Long enterpriseId;
 }

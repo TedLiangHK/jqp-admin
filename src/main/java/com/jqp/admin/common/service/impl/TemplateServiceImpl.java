@@ -3,6 +3,7 @@ package com.jqp.admin.common.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
+import com.jqp.admin.common.service.SerialNumberService;
 import com.jqp.admin.common.service.TemplateService;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.service.PageService;
@@ -21,6 +22,8 @@ public class TemplateServiceImpl implements TemplateService {
     private JdbcService jdbcService;
     @Resource
     private PageService pageService;
+    @Resource
+    private SerialNumberService serialNumberService;
     @Override
     public String findAllParent(String childSql, String tableName) {
         childSql = pageService.getQuerySql(childSql);
@@ -177,5 +180,10 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public String permissionTree(String permissionCode, String field, String tableName) {
         return this.permission(permissionCode,field,tableName);
+    }
+
+    @Override
+    public String serial(String code) {
+        return serialNumberService.nextSerial(code);
     }
 }

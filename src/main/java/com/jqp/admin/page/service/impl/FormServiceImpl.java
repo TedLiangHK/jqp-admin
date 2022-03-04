@@ -97,12 +97,13 @@ public class FormServiceImpl implements FormService {
         form.setFormButtons(formButtons);
         return form;
     }
-
-
     @Override
     public Map<String, Object> getFormJson(String code, BaseButton button) {
+        return getFormJson(get(code),button);
+    }
+    @Override
+    public Map<String, Object> getFormJson(Form f, BaseButton button) {
 
-        Form f = this.get(code);
         Map<String,Object> form = new HashMap<>();
         form.put("type","form");
         if(StrUtil.isNotBlank(f.getTableName())){
