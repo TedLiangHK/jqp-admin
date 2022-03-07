@@ -56,7 +56,8 @@ public class MysqlTableServiceImpl implements TableService {
     }
 
     private String getTableSql(){
-        return "select t.TABLE_NAME,t.TABLE_COMMENT,t.TABLE_ROWS from "+dbConfig.getManageSchema()+".`TABLES` t where t.TABLE_SCHEMA = '"+dbConfig.getSchema()+"'";
+        //排除工作流表
+        return "select t.TABLE_NAME,t.TABLE_COMMENT,t.TABLE_ROWS from "+dbConfig.getManageSchema()+".`TABLES` t where t.TABLE_SCHEMA = '"+dbConfig.getSchema()+"' and t.table_name not like 'act_%'";
     }
 
     @Override

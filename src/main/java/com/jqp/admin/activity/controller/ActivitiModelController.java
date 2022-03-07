@@ -293,7 +293,7 @@ public class ActivitiModelController {
             Map<String,Object> json = new HashMap<>();
             json.put("type","page");
             json.put("body","暂无审核记录");
-            return "AMIS_JSON={}";
+            return "AMIS_JSON="+JSONUtil.toJsonPrettyStr(json);
         }
         return auditJs(null,processInstanceId);
     }
@@ -531,12 +531,13 @@ public class ActivitiModelController {
     }
 
     @RequestMapping("/getDeploymentMeta/{id}")
-    public Object getDeploymentMeta(@PathVariable String id){
+    public String getDeploymentMeta(@PathVariable String id){
         JSONObject metaInfo = activityService.getMetaInfo(id);
         if(metaInfo == null){
             metaInfo = new JSONObject();
         }
-        return Result.success(metaInfo);
+
+        return JSONUtil.toJsonPrettyStr(Result.success(metaInfo));
     }
 
     @RequestMapping("/getNextNode/{id}")
@@ -608,9 +609,18 @@ public class ActivitiModelController {
                 AuditRecord record = createRecord(obj, refId, tableName, statusDic, processInstance,processDefinition, task, node);
                 record.setProcessInstanceName(processInstance.getName());
 
-                record.setRemark((String)body.get("auditRemark"));
-                record.setImgs((String)body.get("auditImgs"));
-                record.setFiles((String)body.get("auditFiles"));
+                String auditRemark = (String)body.get("auditRemark");
+                String auditImgs = (String)body.get("auditImgs");
+                String auditFiles = (String)body.get("auditFiles");
+                if(StringUtils.isNotBlank(auditRemark)){
+                    record.setRemark(auditRemark);
+                }
+                if(StringUtils.isNotBlank(auditImgs)){
+                    record.setImgs(auditImgs);
+                }
+                if(StringUtils.isNotBlank(auditImgs)){
+                    record.setFiles(auditFiles);
+                }
                 jdbcService.saveOrUpdate(record);
 
                 Result<String> _call = apiService.call(afterApi, params);
