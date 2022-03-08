@@ -54,7 +54,7 @@ public class AdminInterceptor implements HandlerInterceptor {
         String header = request.getHeader("X-Requested-With");
         String dest = request.getHeader("Sec-Fetch-Dest");
         String requestURI = request.getRequestURI();
-        if(requestURI.contains(".") || "iframe".equals(dest)|| "document".equals(dest) || "requestURI".endsWith("/")){
+        if(requestURI.contains(".") || "iframe".equals(dest)|| "document".equals(dest) || requestURI.endsWith("/")){
             return false;
         }
 //        String contentType = request.getContentType();
