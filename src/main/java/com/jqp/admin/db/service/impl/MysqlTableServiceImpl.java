@@ -118,7 +118,7 @@ public class MysqlTableServiceImpl implements TableService {
             String keyName = (String) index.get("keyName");
             String columnName = (String) index.get("columnName");
             String indexComment = (String) index.get("indexComment");
-            Long nonUnique = (Long)index.get("nonUnique");
+            Long nonUnique = Long.valueOf(index.get("nonUnique").toString());
             //排除唯一索引和主键
             if(Long.valueOf(0).equals(nonUnique)){
                 continue;
