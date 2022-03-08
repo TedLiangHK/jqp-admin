@@ -38,7 +38,7 @@ public class PageConfigServiceImpl implements PageConfigService {
     public Map<String, Object> getSelectorConfig(String code,String field) {
         Page page = pageDao.get(code);
 
-        URL url = getClass().getClassLoader().getResource("ui-json-template/selector.json.vm");
+        URL url = PageConfigServiceImpl.class.getClassLoader().getResource("ui-json-template/selector.json.vm");
         String template = FileUtil.readUtf8String(url.getFile());
         Map<String,Object> params = new HashMap<>();
         params.put("page",page);

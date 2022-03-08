@@ -373,7 +373,7 @@ public class PageController {
 
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
-        URL url = getClass().getClassLoader().getResource("ui-json-template/oneToMany.js.vm");
+        URL url = PageController.class.getClassLoader().getResource("ui-json-template/oneToMany.js.vm");
         List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
         String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
         Map<String,Object> params = new HashMap<>();
