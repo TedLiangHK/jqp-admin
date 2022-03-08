@@ -2,6 +2,7 @@ package com.jqp.admin.page.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -246,9 +248,9 @@ public class PageController {
             template = "ui-json-template/crudTabs.js.vm";
         }
 
-        URL url = getClass().getClassLoader().getResource(template);
-        List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
-        String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
+        InputStream in = getClass().getClassLoader().getResourceAsStream(template);
+        String js = IoUtil.readUtf8(in);
+        IoUtil.close(in);
         Map<String,Object> params = new HashMap<>();
         params.put("pageCode",pageCode);
 
@@ -373,9 +375,9 @@ public class PageController {
 
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
-        URL url = PageController.class.getClassLoader().getResource("ui-json-template/oneToMany.js.vm");
-        List<String> lines = FileUtil.readLines(url, Charset.forName("UTF-8"));
-        String js = lines.stream().map(line -> line + "\n").collect(Collectors.joining());
+        InputStream in = PageController.class.getClassLoader().getResourceAsStream("ui-json-template/oneToMany.js.vm");
+        String js = IoUtil.readUtf8(in);
+        IoUtil.close(in);
         Map<String,Object> params = new HashMap<>();
         params.put("pageCode",pageCode);
         params.put("childPageCode",childPageCode);

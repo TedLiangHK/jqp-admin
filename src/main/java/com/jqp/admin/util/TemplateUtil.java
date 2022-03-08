@@ -1,11 +1,13 @@
 package com.jqp.admin.util;
 
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import com.jqp.admin.common.service.TemplateService;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -33,8 +35,9 @@ public class TemplateUtil {
 	}
 
 	public static String getUi(String path,Map<String,? extends Object> params){
-		URL url = TemplateUtil.class.getClassLoader().getResource("ui-json-template/"+path);
-		String template = FileUtil.readUtf8String(url.getFile());
+		InputStream in = TemplateUtil.class.getClassLoader().getResourceAsStream("ui-json-template/"+path);
+		String template = IoUtil.readUtf8(in);
+		IoUtil.close(in);
 		return TemplateUtil.getValue(template,params);
 	}
 }

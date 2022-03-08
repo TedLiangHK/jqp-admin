@@ -1,6 +1,7 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
@@ -22,6 +23,7 @@ import com.jqp.admin.util.TemplateUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +40,9 @@ public class PageConfigServiceImpl implements PageConfigService {
     public Map<String, Object> getSelectorConfig(String code,String field) {
         Page page = pageDao.get(code);
 
-        URL url = PageConfigServiceImpl.class.getClassLoader().getResource("ui-json-template/selector.json.vm");
-        String template = FileUtil.readUtf8String(url.getFile());
+        InputStream in = PageConfigServiceImpl.class.getClassLoader().getResourceAsStream("ui-json-template/selector.json.vm");
+        String template = IoUtil.readUtf8(in);
+        IoUtil.close(in);
         Map<String,Object> params = new HashMap<>();
         params.put("page",page);
         params.put("formField",field);
