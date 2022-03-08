@@ -27,8 +27,8 @@ import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.bpmn.model.*;
+import org.activiti.bpmn.model.Process;
 import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ProcessEngine;
@@ -130,9 +130,34 @@ public class ActivitiModelController {
         }
         JsonNode modelNode = new ObjectMapper().readTree(bytes);
 
+
+
         BpmnModel model = new BpmnJsonConverter().convertToBpmnModel(modelNode);
+
         if(model.getProcesses().size()==0){
             return Result.error("数据模型不符要求，请至少设计一条主线流程。");
+        }
+
+        List<Process> processes = model.getProcesses();
+        for(Process process:processes){
+            for(FlowElement element:process.getFlowElements()){
+                if(element instanceof UserTask){
+                    UserTask task = (UserTask) element;
+                    if(StringUtils.isBlank(task.getDocumentation())){
+                        return Result.error("任务["+task.getName()+"]没有设置状态值");
+                    }
+                    for(SequenceFlow node:task.getOutgoingFlows()){
+                        if(StringUtils.isBlank(node.getDocumentation())){
+                            return Result.error("任务["+task.getName()+"]流转["+node.getName()+"]没有设置状态值");
+                        }
+                        if(task.getOutgoingFlows().size() > 1){
+                            if(StringUtils.isBlank(node.getConditionExpression())){
+                                return Result.error("任务["+task.getName()+"]流转["+node.getName()+"]没有设置流转条件");
+                            }
+                        }
+                    }
+                }
+            }
         }
         byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
 
