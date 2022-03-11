@@ -14,14 +14,18 @@
 3.  maven
 4.  使用idea开发的
 
-#### 使用说明
 
-系统启动后,管理员账号密码为 admin,1
-在线演示地址为  http://jqp.hyz792901324.com/ 
+####演示  
+1.    http://jqp.hyz792901324.com/ 
+2.    账号密码admin,1
 
 # 统一说明
 1. table_name为表名 比如dic_item
 2. model为实体名字会自动进行驼峰转换,比如dic_item会转换为 DicItem,反过来也可以
+
+#### 使用说明
+
+系统启动后,管理员账号密码为 admin,1
 
 # 更新/保存
 /admin/common/{formCode}/saveOrUpdate
@@ -108,18 +112,18 @@
 
  
 
-#### 参与贡献
+# 参与贡献
 
 1.  Fork 本仓库
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
 
-### 联系方式
+# 联系方式
 1.  讨论qq群 550662264
 2.  微信![输入图片说明](https://images.gitee.com/uploads/images/2022/0311/102556_86cf9a17_358006.png "屏幕截图.png")
 
-#### 参考
+# 参考
 
 1.  百度amis https://aisuda.bce.baidu.com/amis/zh-CN/docs/index
 2.  magic-api https://www.ssssssss.org/magic-api
