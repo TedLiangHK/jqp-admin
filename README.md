@@ -23,7 +23,7 @@
 1. table_name为表名 比如dic_item
 2. model为实体名字会自动进行驼峰转换,比如dic_item会转换为 DicItem,反过来也可以
 
-#### 使用说明
+# 使用说明
 
 系统启动后,管理员账号密码为 admin,1
 
@@ -130,7 +130,7 @@
 3.  activiti 5.22
 4.  spring boot2.6
 
-### 捐献,开源不易,希望大家多多支持
+# 捐献,开源不易,希望大家多多支持
 1.  支付宝![输入图片说明](https://images.gitee.com/uploads/images/2022/0311/102808_973a01cf_358006.png "屏幕截图.png")
 2.  微信![输入图片说明](https://images.gitee.com/uploads/images/2022/0311/102821_ba8b4cfe_358006.png "屏幕截图.png")
 
