@@ -176,7 +176,7 @@ public class PermissionController {
         }
         Map<String, Object> inputConfig = inputFieldService.buildInputField(inputField, selector);
 
-
+        inputConfig.put("value",inputField.getValue());
         body.add(inputConfig);
 
         String h = ";" +
