@@ -129,8 +129,8 @@
 4.  新建 Pull Request
 
 # 联系方式
-1.  讨论qq群 550662264
-2.  微信![输入图片说明](https://images.gitee.com/uploads/images/2022/0311/102556_86cf9a17_358006.png "屏幕截图.png")
+1.  qq 792901324
+2.  微信 hyz792901324
 
 # 参考
 
@@ -138,10 +138,5 @@
 2.  magic-api https://www.ssssssss.org/magic-api
 3.  activiti 5.22
 4.  spring boot2.6
-
-# 捐献,开源不易,希望大家多多支持
-1.  支付宝![输入图片说明](7d221c9c64946c48d47ad6e556e8791.jpg)
-2.  微信![输入图片说明](d1e90d37c43028b399f60ec62349f29.jpg)
-
 
 
