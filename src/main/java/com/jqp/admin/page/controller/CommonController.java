@@ -362,7 +362,7 @@ public class CommonController {
 
         if(StringUtils.isNotBlank(form.getInitSql())){
             Map<String,Object> params = new HashMap<>();
-            params.put("id",id);
+            params.put("id", id==null? "null": id);
             SessionContext.putUserSessionParams(params);
             String initSql = TemplateUtil.getValue(form.getInitSql(),params);
             String[] sqls = StringUtil.splitStr(initSql, ";");
