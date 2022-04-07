@@ -51,7 +51,7 @@ public class PageServiceImpl  implements PageService {
     @Override
     public void save(Page page) {
         Page oPage = jdbcService.getById(Page.class, page.getId());
-        if(oPage!=null && page.getCode().equals(oPage.getCode())){
+        if(oPage!=null && !page.getCode().equals(oPage.getCode())){
             pageDao.delOldPageCache(oPage.getCode());
         }
         pageDao.save(page);
