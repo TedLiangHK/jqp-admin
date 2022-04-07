@@ -2,10 +2,8 @@ package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Session;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
-import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -19,7 +17,6 @@ import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageService;
-import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +50,10 @@ public class PageServiceImpl  implements PageService {
 
     @Override
     public void save(Page page) {
+        Page oPage = jdbcService.getById(Page.class, page.getId());
+        if(oPage!=null && page.getCode().equals(oPage.getCode())){
+            pageDao.delOldPageCache(oPage.getCode());
+        }
         pageDao.save(page);
     }
 
