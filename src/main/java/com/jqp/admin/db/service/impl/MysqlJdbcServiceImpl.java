@@ -13,6 +13,7 @@ import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.db.service.TransactionOption;
+import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,11 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
 
     @Resource
     private LogService logService;
+
+    @Override
+    public User getUser(Long id){
+        return  this.getById(User.class, id);
+    }
 
     @Override
     public void insert(BaseData obj) {
@@ -219,6 +225,14 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         objs.forEach(obj->{
             this.saveOrUpdate(obj,tableName);
         });
+    }
+
+    @Override
+    public void deletePage(String code,Long id) {
+        if (code == null) {
+            return;
+        }
+        delete(id, "page");
     }
 
     @Override

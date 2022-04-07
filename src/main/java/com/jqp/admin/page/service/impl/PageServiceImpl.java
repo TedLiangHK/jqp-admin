@@ -17,6 +17,7 @@ import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.data.PageResultField;
 import com.jqp.admin.page.service.PageButtonService;
+import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service("pageService")
-public class PageServiceImpl extends PageDaoImpl implements PageService {
+public class PageServiceImpl  implements PageService {
 
     @Resource
     JdbcService jdbcService;
@@ -41,6 +42,24 @@ public class PageServiceImpl extends PageDaoImpl implements PageService {
 
     @Resource
     SessionContext sessionContext;
+
+    @Resource
+    PageDao pageDao;
+
+    @Override
+    public Page get(String pageCode) {
+        return pageDao.get(pageCode);
+    }
+
+    @Override
+    public void save(Page page) {
+        pageDao.save(page);
+    }
+
+    @Override
+    public Page get(Long id) {
+        return pageDao.get(id);
+    }
 
 
     @Override

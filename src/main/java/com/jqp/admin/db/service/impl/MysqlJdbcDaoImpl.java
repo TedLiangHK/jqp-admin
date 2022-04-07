@@ -209,7 +209,6 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public <T> List<T> find(Class<T> clz, String[] fields, Object[] args) {
-        ;
         String sql = StrUtil.format("select * from {} where 1=1 {} ",
                 getTableName(clz),
                 StringUtil.concatStr(Arrays.asList(fields).stream().map(field->StrUtil.format(" and {} = ? ",StringUtil.toSqlColumn(field))).collect(Collectors.toList()), " ")

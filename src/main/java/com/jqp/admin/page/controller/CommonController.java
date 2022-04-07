@@ -11,6 +11,7 @@ import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
+import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
@@ -146,6 +147,11 @@ public class CommonController {
     @RequestMapping("/{model}/delete/{id}")
     public Result delete(@PathVariable("id") Long id, @PathVariable("model") String model) {
         String tableName = StringUtil.toSqlColumn(model);
+        if ("page".equals(model.toLowerCase())) {
+            Page page = jdbcService.getById(Page.class, id);
+            jdbcService.deletePage(page.getCode(), id);
+            return Result.success();
+        }
         jdbcService.delete(id,tableName);
         return Result.success();
     }
