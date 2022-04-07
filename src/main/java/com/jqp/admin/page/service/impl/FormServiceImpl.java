@@ -10,10 +10,7 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
-import com.jqp.admin.page.service.FormService;
-import com.jqp.admin.page.service.InputFieldService;
-import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,73 +27,27 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FormServiceImpl implements FormService {
     @Resource
+    FormDao formDao;
+    @Resource
     JdbcService jdbcService;
     @Resource
     PageConfigService pageConfigService;
     @Resource
     InputFieldService inputFieldService;
-    @Override
-    @Transactional
-    public void save(Form form) {
-        jdbcService.saveOrUpdate(form);
-        jdbcService.delete("delete from form_field where form_id = ? ",form.getId());
-        int seq = 0;
-        for(FormField item:form.getFormFields()){
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(seq);
-            jdbcService.saveOrUpdate(item);
-        }
-
-        jdbcService.delete("delete from form_ref where form_id = ? ",form.getId());
-        seq = 0;
-        for(FormRef item:form.getFormRefs()){
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(seq);
-            jdbcService.saveOrUpdate(item);
-        }
-
-        jdbcService.delete("delete from form_button where form_id = ? ",form.getId());
-        seq = 0;
-        for(FormButton item:form.getFormButtons()){
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(seq);
-            jdbcService.saveOrUpdate(item);
-        }
-    }
 
     @Override
-    public Form get(Long id) {
-        Form form = jdbcService.getById(Form.class, id);
-        List<FormField> formFields = jdbcService.find(FormField.class, "formId", id);
-        form.setFormFields(formFields);
-
-        List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", id);
-        form.setFormRefs(formRefs);
-
-        List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", id);
-        form.setFormButtons(formButtons);
-        return form;
+    public void save(Form form){
+        formDao.save(form);
     }
-
     @Override
-    public Form get(String code) {
-        Form form = jdbcService.findOne(Form.class,"code",code);
-        if(form == null){
-            return null;
-        }
-        List<FormField> formFields = jdbcService.find(FormField.class, "formId", form.getId());
-        form.setFormFields(formFields);
-
-        List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", form.getId());
-        form.setFormRefs(formRefs);
-
-        List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", form.getId());
-        form.setFormButtons(formButtons);
-        return form;
+    public Form get(Long id){
+        return formDao.get(id);
     }
+    @Override
+    public Form get(String code){
+        return formDao.get(code);
+    }
+
     @Override
     public Map<String, Object> getFormJson(String code, BaseButton button) {
         return getFormJson(get(code),button);

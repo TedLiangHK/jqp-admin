@@ -47,7 +47,8 @@ public class SessionContext {
         UserSession userSession = (UserSession) request.getSession().getAttribute(Constants.USER_SESSION);
         if(userSession != null){
 
-            User user = jdbcService.getById(User.class, userSession.getUserId());
+            // User user = jdbcService.getById(User.class, userSession.getUserId());
+            User user = jdbcService.getUser(userSession.getUserId());
             if(!TokenUtil.verify(user.getSalt(),userSession.getToken(),user.getPassword())){
                 //log.info("token失效,超时或者修改密码");
                 return null;
