@@ -20,4 +20,5 @@ public interface PageService {
     void save(Page page);
     Page get(Long id);
     Page get(String pageCode);
+    void del(Page page);
 }

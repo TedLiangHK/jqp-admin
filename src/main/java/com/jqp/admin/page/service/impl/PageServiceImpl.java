@@ -49,10 +49,15 @@ public class PageServiceImpl  implements PageService {
     }
 
     @Override
+    public void del(Page page) {
+        pageDao.del(page);
+    }
+
+    @Override
     public void save(Page page) {
         Page oPage = jdbcService.getById(Page.class, page.getId());
         if(oPage!=null && !page.getCode().equals(oPage.getCode())){
-            pageDao.delOldPageCache(oPage.getCode());
+            pageDao.delCache(oPage); //修改页面code之后 ，删除原code页面缓存
         }
         pageDao.save(page);
     }

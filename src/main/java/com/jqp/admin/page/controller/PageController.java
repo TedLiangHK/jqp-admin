@@ -243,6 +243,9 @@ public class PageController {
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
         Page page = pageService.get(pageCode);
+        if(page == null){
+            return "location.href='/admin/lyear_pages_error.html?url=crud/"+pageCode+"';";
+        }
         String template = "ui-json-template/crud.js.vm";
         if(!page.getPageRefs().isEmpty()){
             template = "ui-json-template/crudTabs.js.vm";

@@ -24,11 +24,6 @@ public interface JdbcService extends JdbcDao{
     void delete(Long id,Class<? extends BaseData> clz);
     void delete(String sql,Object ... args);
 
-    @CacheEvict(value="page",key = "#code")
-    public void deletePage(String code, Long id);
-    @Cacheable(value="user", key="#id", unless = "#result==null")
-    public User getUser(Long id);
-
     void transactionOption(TransactionOption transactionOption);
     boolean isRepeat(String sql,Map<String,Object> params);
     Set<Long> findChildIds(String parentSql,String childSql);

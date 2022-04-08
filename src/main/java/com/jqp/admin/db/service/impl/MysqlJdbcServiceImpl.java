@@ -38,11 +38,6 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
     private LogService logService;
 
     @Override
-    public User getUser(Long id){
-        return  this.getById(User.class, id);
-    }
-
-    @Override
     public void insert(BaseData obj) {
         if(obj == null){
             return;
@@ -225,14 +220,6 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         objs.forEach(obj->{
             this.saveOrUpdate(obj,tableName);
         });
-    }
-
-    @Override
-    public void deletePage(String code,Long id) {
-        if (code == null) {
-            return;
-        }
-        delete(id, "page");
     }
 
     @Override

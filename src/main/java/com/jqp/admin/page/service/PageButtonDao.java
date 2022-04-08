@@ -1,18 +1,18 @@
 package com.jqp.admin.page.service;
 
-
-import com.jqp.admin.page.data.BaseButton;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
 
 import java.util.List;
-import java.util.Map;
 
-public interface PageButtonService {
-    Map<String, Object> getButton(BaseButton baseButton);
-
-    List<PageButton> byPageCode(String pageCode);
+/**
+ * com.jqp.admin.page.service.impl
+ *
+ * @author Leo Liu
+ * @created 2022/4/8 2:36 PM
+ */
+public interface PageButtonDao {
 
     void save(PageButton pageButton);
 
@@ -22,5 +22,5 @@ public interface PageButtonService {
 
     List<PageButton> getByForm(Form form);
 
-    Page getPage(PageButton pageButton);
+    void del(PageButton pageButton);
 }

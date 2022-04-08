@@ -15,6 +15,9 @@ public interface PageDao {
     @Cacheable(value = "page", key = "#pageCode", unless = "#result == null")
     Page get(String pageCode);
 
-    @CacheEvict(value = "page", key = "#code")
-    void delOldPageCache(String code);
+    @Caching(evict = {@CacheEvict(value = "page", key = "#page.getCode()"), @CacheEvict(value = "page", key = "#page.getId()"),})
+    void delCache(Page page);
+
+    @Caching(evict = {@CacheEvict(value = "page", key = "#page.getCode()"), @CacheEvict(value = "page", key = "#page.getId()"),})
+    void del(Page page);
 }

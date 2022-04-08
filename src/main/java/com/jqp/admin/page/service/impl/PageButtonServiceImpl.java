@@ -3,9 +3,13 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.data.BaseButton;
+import com.jqp.admin.page.data.Form;
+import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageButtonService;
+import com.jqp.admin.page.service.PageDao;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -19,6 +23,13 @@ public class PageButtonServiceImpl implements PageButtonService {
 
     @Resource
     private FormService formService;
+
+    @Resource
+    private PageDao pageDao;
+
+    @Resource
+    PageButtonDao pageButtonDao;
+
     @Override
     public Map<String,Object> getButton(BaseButton baseButton){
         Map<String,Object> btn = new HashMap<>();
@@ -67,5 +78,40 @@ public class PageButtonServiceImpl implements PageButtonService {
             btn.put("url",baseButton.getOptionValue());
         }
         return btn;
+    }
+
+
+    @Override
+    public List<PageButton> byPageCode(String pageCode) {
+        Page page = pageDao.get(pageCode);
+        if (page == null) {
+            return new ArrayList<>();
+        }
+        return pageButtonDao.byPage(page);
+    }
+
+    @Override
+    public void save(PageButton pageButton) {
+        pageButtonDao.save(pageButton);
+    }
+
+    @Override
+    public List<PageButton> byPageId(Long id) {
+        return pageButtonDao.byPageId(id);
+    }
+
+    @Override
+    public List<PageButton> byPage(Page page) {
+        return pageButtonDao.byPage(page);
+    }
+
+    @Override
+    public List<PageButton> getByForm(Form form) {
+        return pageButtonDao.getByForm(form);
+    }
+
+    @Override
+    public Page getPage(PageButton pageButton){
+        return pageDao.get(pageButton.getPageId());
     }
 }

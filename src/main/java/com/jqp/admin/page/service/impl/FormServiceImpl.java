@@ -14,7 +14,6 @@ import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -35,8 +34,28 @@ public class FormServiceImpl implements FormService {
     @Resource
     InputFieldService inputFieldService;
 
+    @Resource
+    PageButtonDao pageButtonDao;
+
+    @Resource
+    PageDao pageDao;
+
     @Override
     public void save(Form form){
+       Form oForm = jdbcService.getById(Form.class, form.getId());
+        if(oForm!=null && !form.getCode().equals(oForm.getCode())){
+            //修改表单code之后， 修改按钮关联表单的code
+            pageButtonDao.getByForm(oForm).forEach(pageButton -> {
+                pageButton.setOptionValue(form.getCode());
+                pageButtonDao.save(pageButton);
+                Page page = pageDao.get(pageButton.getPageId());
+                if(page != null){
+                    pageDao.delCache(page); //删除页面缓存
+                }
+            });
+
+        }
+
         formDao.save(form);
     }
     @Override
@@ -46,6 +65,13 @@ public class FormServiceImpl implements FormService {
     @Override
     public Form get(String code){
         return formDao.get(code);
+    }
+
+    @Override
+    public void del(Form form) {
+        //删除表单表时未删除， 页面上关联该表单的按钮， 请手工删除
+        // pageButtonDao.getByForm(form).forEach(pageButton -> pageButtonDao.del(pageButton));
+        formDao.del(form);
     }
 
     @Override
