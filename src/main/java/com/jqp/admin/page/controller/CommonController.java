@@ -13,6 +13,7 @@ import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
@@ -36,7 +37,7 @@ public class CommonController {
     private JdbcService jdbcService;
 
     @Resource
-    private TableService tableService;
+    private PageService pageService;
 
     @Resource
     private FormService formService;
@@ -148,11 +149,14 @@ public class CommonController {
     public Result delete(@PathVariable("id") Long id, @PathVariable("model") String model) {
         String tableName = StringUtil.toSqlColumn(model);
         if ("page".equals(model.toLowerCase())) {
-            Page page = jdbcService.getById(Page.class, id);
-            jdbcService.deletePage(page.getCode(), id);
-            return Result.success();
+            Page page = pageService.get(id);
+            pageService.del(page);
+        }else if("form".equals(model.toLowerCase())){
+            Form form = formService.get(id);
+            formService.del(form);
+        }else{
+            jdbcService.delete(id,tableName);
         }
-        jdbcService.delete(id,tableName);
         return Result.success();
     }
 

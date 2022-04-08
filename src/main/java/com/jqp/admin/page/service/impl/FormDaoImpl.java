@@ -6,6 +6,8 @@ import com.jqp.admin.page.data.FormButton;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.FormRef;
 import com.jqp.admin.page.service.FormDao;
+import com.jqp.admin.page.service.PageButtonDao;
+import com.jqp.admin.page.service.PageDao;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class FormDaoImpl implements FormDao {
     @Transactional
     public void save(Form form) {
         jdbcService.saveOrUpdate(form);
+
+
         jdbcService.delete("delete from form_field where form_id = ? ", form.getId());
         int seq = 0;
         for (FormField item : form.getFormFields()) {
@@ -53,6 +57,11 @@ public class FormDaoImpl implements FormDao {
             item.setSeq(seq);
             jdbcService.saveOrUpdate(item);
         }
+    }
+
+    @Override
+    public void save(Form form, String oldCode) {
+        save(form);
     }
 
     @Override
@@ -84,5 +93,14 @@ public class FormDaoImpl implements FormDao {
         List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", form.getId());
         form.setFormButtons(formButtons);
         return form;
+    }
+
+    @Override
+    public void del(Form form) {
+        if (form == null || form.getId() == null) {
+            return;
+        }
+        //删除表单时， 未删除页面上关联此表单的按钮
+        jdbcService.delete(form.getId(), "form");
     }
 }

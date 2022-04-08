@@ -31,7 +31,17 @@ public class PageDaoImpl implements PageDao {
     }
 
     @Override
-    public void delOldPageCache(String code) {
+    public void delCache(Page page) {
+
+    }
+
+
+    @Override
+    public void del(Page page) {
+        if(page==null || page.getId()==null){
+            return;
+        }
+        jdbcService.delete(page.getId(),"page");
     }
 
     private void get(Page page) {

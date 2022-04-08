@@ -9,6 +9,7 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.constants.UserType;
 import com.jqp.admin.rbac.data.EnterpriseUser;
 import com.jqp.admin.rbac.data.User;
+import com.jqp.admin.rbac.service.UserService;
 import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.TemplateUtil;
 import com.jqp.admin.util.TokenUtil;
@@ -38,6 +39,9 @@ public class SessionContext {
     private JdbcService jdbcService;
 
     @Resource
+    private UserService userService;
+
+    @Resource
     @Lazy
     private PageService pageService;
 
@@ -48,7 +52,7 @@ public class SessionContext {
         if(userSession != null){
 
             // User user = jdbcService.getById(User.class, userSession.getUserId());
-            User user = jdbcService.getUser(userSession.getUserId());
+            User user = userService.get(userSession.getUserId());
             if(!TokenUtil.verify(user.getSalt(),userSession.getToken(),user.getPassword())){
                 //log.info("token失效,超时或者修改密码");
                 return null;
