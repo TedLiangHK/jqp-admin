@@ -5,12 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.page.constants.CheckRepeatType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
+import com.jqp.admin.page.data.InputField;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/common")
@@ -57,6 +58,10 @@ public class CommonController {
                 obj = dbObj;
             }
         }
+        //过滤掉表单不存在的field.
+        List<String>        collect  = formFields.stream().map(InputField::getField).collect(Collectors.toList());
+        obj = obj.entrySet().stream().filter(dbObjA-> collect.contains(dbObjA.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         for(FormField formField:formFields){
             String type = formField.getType();
             Object value = obj.get(formField.getField());

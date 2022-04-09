@@ -5,15 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
-import com.jqp.admin.common.data.GlobalLog;
-import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.common.service.LogService;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.db.service.TransactionOption;
-import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +47,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         TableInfo table = tableInfo.getData();
         List<ColumnInfo> columnInfos = table.getColumnInfos();
-        List<String> columns = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()).collect(Collectors.toList());
+        List<String> columns = columnInfos.stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
         List<String> args = columnInfos.stream().map(columnInfo -> "?").collect(Collectors.toList());
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
         Map<String, Field> fieldMap = ReflectUtil.getFieldMap(obj.getClass());
@@ -58,6 +55,12 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         if(fieldMap.containsKey("enterpriseId") && ReflectUtil.getFieldValue(obj,"enterpriseId") == null){
             //有企业id
             ReflectUtil.setFieldValue(obj,fieldMap.get("enterpriseId"), SessionContext.getSession().getEnterpriseId());
+        }
+        if(fieldMap.containsKey("updatedAt") && ReflectUtil.getFieldValue(obj,"updatedAt") == null){
+            ReflectUtil.setFieldValue(obj,fieldMap.get("updatedAt"), new Date());
+        }
+        if(fieldMap.containsKey("createAt") && ReflectUtil.getFieldValue(obj,"createAt") == null){
+            ReflectUtil.setFieldValue(obj,fieldMap.get("createAt"), new Date());
         }
         for(String column:columns){
             Object value = null;
@@ -86,13 +89,21 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         TableInfo table = tableInfo.getData();
         List<ColumnInfo> columnInfos = table.getColumnInfos();
-        List<String> columns = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()).collect(Collectors.toList());
-        List<String> args = columnInfos.stream().map(columnInfo -> "?").collect(Collectors.toList());
+        // List<String> columns = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()).collect(Collectors.toList());
+        List<String> columns = columnInfos.stream().filter(
+                columnInfo -> obj.containsKey(StringUtil.toFieldColumn(columnInfo.getColumnName()))
+                              || "updated_at".equals(columnInfo.getColumnName())
+                              || "created_at".equals(columnInfo.getColumnName())
+                                                          ).map(ColumnInfo::getColumnName).collect(Collectors.toList());
+        List<String> args = columns.stream().map(columnInfo -> "?").collect(Collectors.toList());
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
         List<Object> values = new ArrayList<>();
         if(obj.get("enterpriseId") == null){
             obj.put("enterpriseId",SessionContext.getSession().getEnterpriseId());
         }
+
+        obj.computeIfAbsent("updatedAt", k -> new Date());
+        obj.computeIfAbsent("createdAt", k -> new Date());
         for(String column:columns){
             Object value = null;
             String fieldName = StringUtil.toFieldColumn(column);
@@ -161,12 +172,18 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
 
         TableInfo table = tableInfo.getData();
         List<ColumnInfo> columnInfos = table.getColumnInfos();
-        List<String> columns = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()).collect(Collectors.toList());
-        List<String> args = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()+"=?").collect(Collectors.toList());
+        List<String> columns = columnInfos.stream().filter(columnInfo ->
+            obj.containsKey(StringUtil.toFieldColumn(columnInfo.getColumnName())) || "updated_at".equals(columnInfo.getColumnName())
+        ).map(ColumnInfo::getColumnName).collect(Collectors.toList());
+        List<String> args = columns.stream().map(c->c+"=?").collect(Collectors.toList());
         String sql = StrUtil.format("update {} set {} where id = ? ",table.getTableName(),StringUtil.concatStr(args,","),args);
         List<Object> values = new ArrayList<>();
         for(String column:columns){
             String fieldName = StringUtil.toFieldColumn(column);
+            if("updatedAt".equals(fieldName)){ //如果有updated_at列， 更新时自动更新时间
+                values.add(new Date());
+                continue;
+            }
             Object value = obj.get(fieldName);
             values.add(value);
         }

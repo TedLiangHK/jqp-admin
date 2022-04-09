@@ -2,11 +2,9 @@ package com.jqp.admin.util;
 
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import com.jqp.admin.common.service.TemplateService;
 import org.apache.velocity.VelocityContext;
@@ -23,7 +21,7 @@ public class TemplateUtil {
 		context.put("service",SpringContextUtil.getBean(TemplateService.class));
 		
 		StringWriter sw = new StringWriter();
-		
+
 		try {
 			Velocity.evaluate(context, sw, "velocity", template);
 			sw.close();
