@@ -456,6 +456,10 @@ https://aisuda.bce.baidu.com/amis/
 
 在展现配置里面引用`${data0},${data1}`
 
+菜单配置为
+
+/admin/chart/{code}
+
 参考截图
 
 ![image.png](./assets/image.png)
