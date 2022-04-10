@@ -71,6 +71,9 @@ public class PageServiceImpl  implements PageService {
     @Override
     public Result<CrudData<Map<String, Object>>> query(String pageCode, PageParam pageParam) {
         Page page = get(pageCode);
+        if(page == null){
+            return Result.error("页面已被删除");
+        }
         StringBuffer sql = new StringBuffer(StrUtil.format("select * from ({}) t where 1=1 ",this.getQuerySql(page.getQuerySql())));
         List<Object> values = new ArrayList<>();
         List<PageQueryField> queryFields = page.getQueryFields();

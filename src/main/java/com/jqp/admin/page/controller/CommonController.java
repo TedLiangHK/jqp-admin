@@ -15,6 +15,7 @@ import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
+import com.jqp.admin.util.CollectionUtil;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -231,13 +232,25 @@ public class CommonController {
         Long mainId = Long.parseLong(params.get(mainField).toString());
         String[] relationIds = params.get(relationField).toString().split(",");
         List<Long> relationIdList = new ArrayList<>();
+        List<Long> oldIds = jdbcService.findForObject(StrUtil.format("select {} from {} where {} = {}",
+                StringUtil.toSqlColumn(relationField),
+                tableName,
+                StringUtil.toSqlColumn(mainField),
+                mainId
+        ),Long.class);
         for(String s:relationIds){
             if(StringUtils.isNotBlank(s)){
-                relationIdList.add(Long.parseLong(s));
+                Long id = Long.parseLong(s);
+                relationIdList.add(id);
             }
         }
+
+        //新-旧=需要新增的
+        //旧-新=需要删除的
+        List<Long> addIds = CollectionUtil.remove(relationIdList,oldIds);
+        List<Long> delIds = CollectionUtil.remove(oldIds,relationIdList);
         List<Map<String,Object>> list = new ArrayList<>();
-        for(Long relationId:relationIdList){
+        for(Long relationId:addIds){
             Map<String,Object> obj = new HashMap<>();
             obj.put(mainField,mainId);
             obj.put(relationField,relationId);
@@ -245,12 +258,18 @@ public class CommonController {
         }
 
         jdbcService.transactionOption(() -> {
-            jdbcService.delete(StrUtil.format("delete from {} where {} = {}",
-                    tableName,
-                    StringUtil.toSqlColumn(mainField),
-                    mainId
-            ));
-            jdbcService.bathSaveOrUpdate(list,tableName);
+            if(!delIds.isEmpty()){
+                jdbcService.delete(StrUtil.format("delete from {} where {} = {} and {} in ({})",
+                        tableName,
+                        StringUtil.toSqlColumn(mainField),
+                        mainId,
+                        StringUtil.toSqlColumn(relationField),
+                        StringUtil.concatStr(delIds,",")
+                ));
+            }
+            if(!addIds.isEmpty()){
+                jdbcService.bathSaveOrUpdate(list,tableName);
+            }
         });
         return Result.success("操作成功");
     }
@@ -266,13 +285,25 @@ public class CommonController {
         Long mainId = Long.parseLong(params.get(mainField).toString());
         String[] relationIds = params.get(relationField).toString().split(",");
         List<Long> relationIdList = new ArrayList<>();
+        List<Long> oldIds = jdbcService.findForObject(StrUtil.format("select {} from {} where {} = {} and enterprise_id = {} ",
+                StringUtil.toSqlColumn(relationField),
+                tableName,
+                StringUtil.toSqlColumn(mainField),
+                mainId,
+                SessionContext.getSession().getEnterpriseId()
+        ),Long.class);
+
+        //新-旧=需要新增的
+        //旧-新=需要删除的
+        List<Long> addIds = CollectionUtil.remove(relationIdList,oldIds);
+        List<Long> delIds = CollectionUtil.remove(oldIds,relationIdList);
         for(String s:relationIds){
             if(StringUtils.isNotBlank(s)){
                 relationIdList.add(Long.parseLong(s));
             }
         }
         List<Map<String,Object>> list = new ArrayList<>();
-        for(Long relationId:relationIdList){
+        for(Long relationId:addIds){
             Map<String,Object> obj = new HashMap<>();
             obj.put(mainField,mainId);
             obj.put(relationField,relationId);
@@ -281,13 +312,19 @@ public class CommonController {
         }
 
         jdbcService.transactionOption(() -> {
-            jdbcService.delete(StrUtil.format("delete from {} where {} = {} and enterprise_id = {}",
+            if(!delIds.isEmpty()){
+                jdbcService.delete(StrUtil.format("delete from {} where {} = {} and enterprise_id = {} and {} in ({})",
                     tableName,
                     StringUtil.toSqlColumn(mainField),
                     mainId,
-                    enterpriseId
-            ));
-            jdbcService.bathSaveOrUpdate(list,tableName);
+                    enterpriseId,
+                    StringUtil.toSqlColumn(relationField),
+                    StringUtil.concatStr(delIds,",")
+                ));
+            }
+            if(!addIds.isEmpty()){
+                jdbcService.bathSaveOrUpdate(list,tableName);
+            }
         });
         return Result.success("操作成功");
     }
@@ -391,6 +428,15 @@ public class CommonController {
         }
         return Result.success(data);
     }
-
-
+    @RequestMapping("/{formCode}/copy")
+    public Result copy(Long copyId, @PathVariable("formCode") String formCode) {
+        if(copyId == null){
+            return Result.success();
+        }
+        Result result = this.get(copyId, formCode);
+        Map<String,Object> data = (Map<String, Object>) result.getData();
+        data.put("id","");
+        data.put("copyId",copyId);
+        return result;
+    }
 }
