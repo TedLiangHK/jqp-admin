@@ -14,4 +14,5 @@ public interface SysFileService {
     SysFile upload(MultipartFile file);
     void download(Long id, HttpServletRequest request, HttpServletResponse response);
     void deleteFile(SysFile sysFile);
+    void shutdown();
 }

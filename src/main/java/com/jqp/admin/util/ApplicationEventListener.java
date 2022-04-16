@@ -1,5 +1,6 @@
 package com.jqp.admin.util;
 
+import com.jqp.admin.common.service.SysFileService;
 import com.jqp.admin.rbac.service.DynamicTaskService;
 import com.jqp.admin.rbac.service.TimerTaskService;
 import lombok.extern.log4j.Log4j2;
@@ -56,6 +57,10 @@ public class ApplicationEventListener implements ApplicationListener {
             TimerTaskService taskService = SpringContextUtil.getBean(TimerTaskService.class);
             taskService.stop();
             log.info("关闭定时任务");
+
+            SysFileService sysFileService = SpringContextUtil.getBean(SysFileService.class);
+            sysFileService.shutdown();
+            log.info("关闭文件传输客户端");
         }
     }
 

@@ -14,4 +14,5 @@ public class FileConfig {
     private String ossKey;
     private String ossSecret;
     private String ossBucketName;
+    private String domain;
 }

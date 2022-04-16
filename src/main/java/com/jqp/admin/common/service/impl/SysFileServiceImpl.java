@@ -9,6 +9,9 @@ import com.jqp.admin.common.config.FileConfig;
 import com.jqp.admin.common.data.SysFile;
 import com.jqp.admin.common.service.SysFileService;
 import com.jqp.admin.db.service.JdbcService;
+import io.minio.MinioClient;
+import io.minio.errors.InvalidEndpointException;
+import io.minio.errors.InvalidPortException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,42 @@ public class SysFileServiceImpl implements SysFileService {
     private FileConfig fileConfig;
     private static final String TYPE_LOCAL = "local";
     private static final String TYPE_OSS = "oss";
+    private static final String TYPE_MINIO = "minio";
+
+    private MinioClient minioClient;
+    private OSS oss;
+
+
+    public MinioClient getMinioClient() {
+        if(minioClient == null){
+            synchronized (this){
+                if(minioClient == null){
+                    try {
+                        minioClient = new MinioClient(fileConfig.getOssEndpoint(),fileConfig.getOssKey(),fileConfig.getOssSecret());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.error("minioClient创建失败",e);
+                    }
+                }
+            }
+        }
+        return minioClient;
+    }
+    public OSS getOss() {
+        if(oss == null){
+            synchronized (this){
+                if(oss == null){
+                    try {
+                        oss = new OSSClientBuilder().build(fileConfig.getOssEndpoint(),fileConfig.getOssKey(),fileConfig.getOssSecret());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.error("oss创建失败",e);
+                    }
+                }
+            }
+        }
+        return oss;
+    }
 
     @Override
     @Transactional
@@ -76,17 +115,23 @@ public class SysFileServiceImpl implements SysFileService {
             jdbcService.saveOrUpdate(sysFile);
             return sysFile;
         }else if(TYPE_OSS.equals(fileConfig.getType())){
-
-            OSS oss = new OSSClientBuilder().build(fileConfig.getOssEndpoint(),fileConfig.getOssKey(),fileConfig.getOssSecret());
             try {
-                oss.putObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath(),file.getInputStream());
+                getOss().putObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath(),file.getInputStream());
                 jdbcService.saveOrUpdate(sysFile);
                 return sysFile;
             } catch (IOException e) {
                 e.printStackTrace();
                 log.error("文件上传失败",e);
             }
-            oss.shutdown();
+        }else if(TYPE_MINIO.equals(fileConfig.getType())){
+            try{
+                getMinioClient().putObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath(), file.getInputStream(),file.getContentType());
+                jdbcService.saveOrUpdate(sysFile);
+                return sysFile;
+            }catch (Exception e){
+                e.printStackTrace();
+                log.error("文件上传失败",e);
+            }
         }
         return null;
     }
@@ -104,24 +149,22 @@ public class SysFileServiceImpl implements SysFileService {
             }
             ServletOutputStream out = response.getOutputStream();
             InputStream in = null;
-            OSS oss = null;
             if(TYPE_LOCAL.equals(fileConfig.getType())){
                 File file = new File(fileConfig.getBase()+sysFile.getPath());
                 in = new FileInputStream(file);
             }else if(TYPE_OSS.equals(fileConfig.getType())){
-                oss = new OSSClientBuilder().build(fileConfig.getOssEndpoint(),fileConfig.getOssKey(),fileConfig.getOssSecret());
-                OSSObject ossObject = oss.getObject(fileConfig.getOssBucketName(), fileConfig.getBase() + sysFile.getPath());
+                OSSObject ossObject = getOss().getObject(fileConfig.getOssBucketName(), fileConfig.getBase() + sysFile.getPath());
                 in = ossObject.getObjectContent();
+            }else if(TYPE_MINIO.equals(fileConfig.getType())){
+                in = getMinioClient().getObject(fileConfig.getOssBucketName(), fileConfig.getBase()+sysFile.getPath());
             }
-            if(oss != null){
-                oss.shutdown();
+            if(in != null){
+                IoUtil.copy(in,out);
             }
-            IoUtil.copy(in,out);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     @Override
     public void deleteFile(SysFile sysFile) {
         try{
@@ -131,14 +174,21 @@ public class SysFileServiceImpl implements SysFileService {
                     file.delete();
                 }
             }else if(TYPE_OSS.equals(fileConfig.getType())){
-                OSS oss = new OSSClientBuilder().build(fileConfig.getOssEndpoint(),fileConfig.getOssKey(),fileConfig.getOssSecret());
-                oss.deleteObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath());
-                oss.shutdown();
+                getOss().deleteObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath());
+            }else if(TYPE_MINIO.equals(fileConfig.getType())){
+                getMinioClient().removeObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath());
             }
         }catch (Exception e){
             e.printStackTrace();
             log.error("删除文件失败:",e);
         }
         jdbcService.delete(sysFile);
+    }
+
+    @Override
+    public void shutdown() {
+        if(oss != null){
+            oss.shutdown();
+        }
     }
 }
