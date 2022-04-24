@@ -343,6 +343,9 @@ public class PageServiceImpl  implements PageService {
             columnData.setName(StringUtil.toFieldColumn(resultField.getField()));
             columnData.setLabel(resultField.getLabel());
             columnData.put("sortable",true);
+            if(resultField.getWidth() != null){
+                columnData.put("width",resultField.getWidth());
+            }
             if(DataType.DIC.equals(resultField.getType())){
                 columnData.put("type","mapping");
                 Map<String,Object> map = new HashMap<>();
