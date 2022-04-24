@@ -54,9 +54,9 @@ AMIS_JSON={
                         "required": true
                     },
                     {
-                        "type": "editor",
-                        "name": "js",
-                        "label": "js脚本",
+                        "type": "textarea",
+                        "name": "beforeApi",
+                        "label": "前置接口",
                         "language": "javascript",
                         "required": false
                     },{

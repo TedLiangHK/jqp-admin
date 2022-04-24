@@ -38,4 +38,7 @@ public class Page extends BaseData {
 
     //宽度
     private Integer width;
+
+    //前置接口
+    private String beforeApi;
 }

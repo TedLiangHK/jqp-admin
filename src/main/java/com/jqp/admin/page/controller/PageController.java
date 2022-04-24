@@ -21,6 +21,7 @@ import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,9 @@ public class PageController {
 
     @Resource
     private PageButtonService pageButtonService;
+
+    @Resource
+    private ApiService apiService;
 
     @RequestMapping("/query")
     public Result<PageData<Page>> query(@RequestBody PageParam pageParam){
@@ -237,12 +241,32 @@ public class PageController {
         }
     }
 
+    private String checkPage(Page page){
+        Map<String,Object> context = new HashMap<>();
+        context.put("page",page);
+
+        Result<String> beforeApiResult = apiService.call(page.getBeforeApi(), context);
+        if(!beforeApiResult.isSuccess()){
+
+            Map<String,Object> params = new HashMap<>();
+            params.put("errMsg",beforeApiResult.getMsg());
+            return TemplateUtil.getUi("error.js.vm",params);
+        }
+        return null;
+    }
+
     @RequestMapping("/js/{pageCode}.js")
     public String js(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
 
         response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
         Page page = pageService.get(pageCode);
+
+        String checkPage = this.checkPage(page);
+        if(StringUtils.isNotBlank(checkPage)){
+            return checkPage;
+        }
+
         if(page == null){
             return "location.href='/admin/lyear_pages_error.html?url=crud/"+pageCode+"';";
         }
@@ -386,6 +410,12 @@ public class PageController {
         params.put("childPageCode",childPageCode);
 
         Page page = pageService.get(pageCode);
+
+        String checkPage = this.checkPage(page);
+        if(StringUtils.isNotBlank(checkPage)){
+            return checkPage;
+        }
+
         Page childPage = pageService.get(childPageCode);
 
 
