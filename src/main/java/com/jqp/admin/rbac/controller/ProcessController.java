@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.ssssssss.magicapi.model.JsonBean;
-import org.ssssssss.magicapi.provider.MagicAPIService;
 
 import javax.annotation.Resource;
 import java.util.Date;

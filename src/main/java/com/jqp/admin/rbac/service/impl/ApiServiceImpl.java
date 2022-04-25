@@ -5,8 +5,8 @@ import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.ssssssss.magicapi.model.JsonBean;
-import org.ssssssss.magicapi.provider.MagicAPIService;
+import org.ssssssss.magicapi.core.model.JsonBean;
+import org.ssssssss.magicapi.core.service.MagicAPIService;
 
 import javax.annotation.Resource;
 import java.util.Map;

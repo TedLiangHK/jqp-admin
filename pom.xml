@@ -18,7 +18,7 @@
         <poi.version>5.1.0</poi.version>
         <hutool-all.version>5.7.5</hutool-all.version>
         <velocity.version>1.7</velocity.version>
-        <magic-api.version>1.7.5</magic-api.version>
+        <magic-api.version>2.0.1</magic-api.version>
         <java-jwt.version>3.4.0</java-jwt.version>
         <aliyun-oss.version>3.12.0</aliyun-oss.version>
         <activiti.version>5.22.0</activiti.version>

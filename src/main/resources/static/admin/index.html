@@ -260,6 +260,7 @@
                 ul.append(li);
                 buildMenu(childUl,menu.children);
             }else{
+                menu.url += "?v="+new Date().getTime();
                 ul.append('<li class="nav-item"> <a class="multitabs" href="'+menu.url+'">'+icon+'<span>'+menu.menuName+'</span></a> </li>');
             }
         }
