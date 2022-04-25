@@ -14,4 +14,6 @@ public class FormField extends InputField{
     private String checkRepeatConfig;
     //校验重复提示
     private String checkRepeatTip;
+    //表单项校验
+    private String validations;
 }

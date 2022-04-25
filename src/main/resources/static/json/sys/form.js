@@ -138,6 +138,7 @@ AMIS_JSON={
                                 "type":"input-number",
                                 "name": "width",
                                 "label": "宽度",
+                                "placeholder":"宽度",
                                 "required": false
                             },
                             {
@@ -145,6 +146,7 @@ AMIS_JSON={
                                 "name": "type",
                                 "label": "字段类型",
                                 "required": true,
+                                "placeholder":"字段类型",
                                 "options":[{
                                     "label":"字符串",
                                     "value":"string"
@@ -186,6 +188,7 @@ AMIS_JSON={
                             {
                                 "type":"input-text",
                                 "name": "format",
+                                "placeholder":"格式化",
                                 "label": "格式化"
                             },
                             {
@@ -193,6 +196,7 @@ AMIS_JSON={
                                 "source":"/options/componentType",
                                 "searchable":true,
                                 "clearable":true,
+                                "placeholder":"组件类型",
                                 "name": "componentType",
                                 "label": "组件类型"
                             },
@@ -200,6 +204,7 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "hidden",
                                 "label": "是否隐藏",
+                                "placeholder":"是否隐藏",
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -212,6 +217,7 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "multi",
                                 "label": "是否多选",
+                                "placeholder":"是否多选",
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -224,6 +230,7 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "must",
                                 "label": "是否必填",
+                                "placeholder":"是否必填",
                                 "options":[{
                                     "label":"YES",
                                     "value":"YES"
@@ -236,6 +243,7 @@ AMIS_JSON={
                                 "type":"select",
                                 "name": "disabled",
                                 "label": "是否只读",
+                                "placeholder":"是否只读",
                                 "required": false,
                                 "options":[{
                                     "label":"YES",
@@ -248,6 +256,7 @@ AMIS_JSON={
                             {
                                 "type":"input-text",
                                 "name": "value",
+                                "placeholder":"默认值",
                                 "label": "默认值",
                             },
                             {
@@ -255,19 +264,29 @@ AMIS_JSON={
                                 "name": "checkRepeatType",
                                 "label": "校验重复类型",
                                 "required": false,
+                                "placeholder":"校验重复类型",
                                 "source":"/options/checkRepeatType",
                                 "clearable":true
                             },
                             {
                                 "type":"input-text",
                                 "name": "checkRepeatConfig",
+                                "placeholder":"校验重复配置",
                                 "label": "校验重复配置"
                             },
                             {
                                 "type":"input-text",
                                 "name": "checkRepeatTip",
+                                "placeholder":"校验重复提示",
                                 "label": "校验重复提示"
                             },
+                            {
+                                "type":"input-text",
+                                "name": "validations",
+                                "placeholder":"表单项校验,参考amis官方文档",
+                                "size":"lg",
+                                "label": "表单项校验"
+                            }
                         ]
                     }
                 ]

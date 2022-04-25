@@ -13,6 +13,7 @@ import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -119,6 +120,9 @@ public class FormServiceImpl implements FormService {
             }
             if(formDisabled || fieldDisabled){
                 fieldConfig.put("disabled",true);
+            }
+            if(StringUtils.isNotBlank(field.getValidations())){
+                fieldConfig.put("validations",field.getValidations());
             }
             items.add(fieldConfig);
         }
