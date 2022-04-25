@@ -348,6 +348,42 @@ sql校验唯一,写一段sql,放到校验重复配置里面,具体的代码也�
 
 默认数据表更新和插入时间，只需要定义相应的名字即可，不需要额外操作：field名称设置为updatedAt 为数据库更新时间；名称为createdAt为数据表插入时间
 
+#### 字段校验
+
+参考百度amis官方文档,以下是复制的
+
+配置值为  `isNumeric,minimum:10`,多个校验用逗号隔开
+
+支持的格式如下
+
+* `isEmail` 必须是 Email。
+* `isUrl` 必须是 Url。
+* `isNumeric` 必须是 数值。
+* `isAlpha` 必须是 字母。
+* `isAlphanumeric` 必须是 字母或者数字。
+* `isInt` 必须是 整形。
+* `isFloat` 必须是 浮点形。
+* `isLength:length` 是否长度正好等于设定值。
+* `minLength:length` 最小长度。
+* `maxLength:length` 最大长度。
+* `maximum:number` 最大值。
+* `minimum:number` 最小值。
+* `equals:xxx` 当前值必须完全等于 xxx。
+* `equalsField:xxx` 当前值必须与 xxx 变量值一致。
+* `isJson` 是否是合法的 Json 字符串。
+* `isUrlPath` 是 url 路径。
+* `isPhoneNumber` 是否为合法的手机号码
+* `isTelNumber` 是否为合法的电话号码
+* `isZipcode` 是否为邮编号码
+* `isId` 是否为身份证号码，没做校验
+* `matchRegexp:/foo/` 必须命中某个正则。
+* `matchRegexp1:/foo/` 必须命中某个正则。
+* `matchRegexp2:/foo/` 必须命中某个正则。
+* `matchRegexp3:/foo/` 必须命中某个正则。
+* `matchRegexp4:/foo/` 必须命中某个正则。
+
+
+
 ![image-20220405115235669](assets/image-20220405115235669.png)
 
 ![image-20220405115451061](assets/image-20220405115451061.png)
@@ -467,8 +503,6 @@ https://aisuda.bce.baidu.com/amis/
 ![image.png](./assets/1649578835235-image.png)
 
 ![image.png](./assets/1649578919607-image.png)
-
-
 
 # 关键目录
 
