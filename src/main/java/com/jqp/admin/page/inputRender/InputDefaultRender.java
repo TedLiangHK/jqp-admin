@@ -56,10 +56,10 @@ public class InputDefaultRender implements InputRender{
         }
 
         if(Whether.YES.equals(field.getHidden())){
-            config.put("xs",0.0001);
-            config.put("sm",0.0001);
-            config.put("md",0.0001);
-            config.put("lg",0.0001);
+            config.put("xs",12);
+            config.put("sm",12);
+            config.put("md",12);
+            config.put("lg",12);
             config.put("label","");
             config.put("type","hidden");
         }else if(DataType.isDate(field.getType())){

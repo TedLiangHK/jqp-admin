@@ -59,9 +59,9 @@ public class CommonController {
                 obj = dbObj;
             }
         }
-        //过滤掉表单不存在的field.
-        List<String>        collect  = formFields.stream().map(InputField::getField).collect(Collectors.toList());
-        obj = obj.entrySet().stream().filter(dbObjA-> collect.contains(dbObjA.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        //过滤掉表单不存在的field.,二次保存空指针
+//        List<String>        collect  = formFields.stream().map(InputField::getField).collect(Collectors.toList());
+//        obj = obj.entrySet().stream().filter(dbObjA-> collect.contains(dbObjA.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         for(FormField formField:formFields){
             String type = formField.getType();

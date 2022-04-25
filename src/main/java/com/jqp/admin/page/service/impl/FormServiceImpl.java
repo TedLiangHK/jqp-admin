@@ -106,8 +106,12 @@ public class FormServiceImpl implements FormService {
         for(FormField field:formFields){
             boolean fieldDisabled = Whether.YES.equals(field.getDisabled());
             Map<String,Object> fieldConfig = inputFieldService.buildInputField(field,false);
-
-            if(f.getFieldWidth() != null){
+            if(Whether.YES.equals(field.getHidden())){
+                fieldConfig.put("columnClassName","mb-0");
+            }else{
+                fieldConfig.put("columnClassName","mb-3");
+            }
+            if(f.getFieldWidth() != null && !Whether.YES.equals(field.getHidden())){
                 fieldConfig.put("xs",f.getFieldWidth());
                 fieldConfig.put("sm",f.getFieldWidth());
                 fieldConfig.put("md",f.getFieldWidth());
