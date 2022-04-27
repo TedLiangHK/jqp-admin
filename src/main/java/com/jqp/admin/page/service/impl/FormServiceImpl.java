@@ -105,26 +105,7 @@ public class FormServiceImpl implements FormService {
 
         List<FormField> formFields = f.getFormFields();
         for(FormField field:formFields){
-            boolean fieldDisabled = Whether.YES.equals(field.getDisabled());
-            Map<String,Object> fieldConfig = inputFieldService.buildInputField(field,false);
-            if(Whether.YES.equals(field.getHidden())){
-                fieldConfig.put("columnClassName","mb-0");
-            }else{
-                fieldConfig.put("columnClassName","mb-3");
-            }
-            if(f.getFieldWidth() != null && !Whether.YES.equals(field.getHidden())){
-                fieldConfig.put("xs",f.getFieldWidth());
-                fieldConfig.put("sm",f.getFieldWidth());
-                fieldConfig.put("md",f.getFieldWidth());
-                fieldConfig.put("lg",f.getFieldWidth());
-            }
-            if(formDisabled || fieldDisabled){
-                fieldConfig.put("disabled",true);
-            }
-            if(StringUtils.isNotBlank(field.getValidations())){
-                fieldConfig.put("validations",field.getValidations());
-            }
-            items.add(fieldConfig);
+            items.add(this.buildFormField(f,field));
         }
         form.put("body",grid);
 
@@ -235,6 +216,29 @@ public class FormServiceImpl implements FormService {
         return dialog;
     }
 
+    @Override
+    public Map<String, Object> buildFormField(Form f, FormField field) {
+        boolean fieldDisabled = Whether.YES.equals(field.getDisabled());
+        Map<String,Object> fieldConfig = inputFieldService.buildInputField(field,false);
+        if(Whether.YES.equals(field.getHidden())){
+            fieldConfig.put("columnClassName","mb-0");
+        }else{
+            fieldConfig.put("columnClassName","mb-3");
+        }
+        if(f.getFieldWidth() != null && !Whether.YES.equals(field.getHidden())){
+            fieldConfig.put("xs",f.getFieldWidth());
+            fieldConfig.put("sm",f.getFieldWidth());
+            fieldConfig.put("md",f.getFieldWidth());
+            fieldConfig.put("lg",f.getFieldWidth());
+        }
+        if(Whether.YES.equals(f.getDisabled()) || fieldDisabled){
+            fieldConfig.put("disabled",true);
+        }
+        if(StringUtils.isNotBlank(field.getValidations())){
+            fieldConfig.put("validations",field.getValidations());
+        }
+        return fieldConfig;
+    }
 
     @Override
     public Map<String, Object> getPageJson(String code, BaseButton button) {

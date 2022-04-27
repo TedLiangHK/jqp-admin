@@ -36,6 +36,7 @@ public class InputDefaultRender implements InputRender{
         config.put("columnClassName","mb-1");
         config.put("clearable",true);
         config.put("value","");
+        config.put("placeholder",field.getLabel());
 
         if(field.getWidth() != null){
             config.put("xs",field.getWidth());

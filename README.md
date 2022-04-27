@@ -348,6 +348,22 @@ sql校验唯一,写一段sql,放到校验重复配置里面,具体的代码也�
 
 默认数据表更新和插入时间，只需要定义相应的名字即可，不需要额外操作：field名称设置为updatedAt 为数据库更新时间；名称为createdAt为数据表插入时间
 
+#### 子表配置,InputTable
+
+字段类型,随便选,不起作用,组件类型选择表格InputTable,格式化字段填写为 表单编号,关联字段id,例如 字典明细表  dicItemForm,parentId
+
+注意,这里配置的子表必须要加字段名称为seq,类型为number(11),的排序字段,可以通过拖拽排序,后台保存自动填入,参考
+
+![image.png](assets/1651034797744-image.png)
+
+
+![image.png](assets/1651034846254-image.png)
+
+![image.png](assets/1651034882318-image.png)
+
+
+
+
 #### 字段校验
 
 参考百度amis官方文档,以下是复制的
@@ -381,8 +397,6 @@ sql校验唯一,写一段sql,放到校验重复配置里面,具体的代码也�
 * `matchRegexp2:/foo/` 必须命中某个正则。
 * `matchRegexp3:/foo/` 必须命中某个正则。
 * `matchRegexp4:/foo/` 必须命中某个正则。
-
-
 
 ![image-20220405115235669](assets/image-20220405115235669.png)
 

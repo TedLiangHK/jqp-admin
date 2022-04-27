@@ -3,6 +3,7 @@ package com.jqp.admin.page.service;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.page.data.BaseButton;
 import com.jqp.admin.page.data.Form;
+import com.jqp.admin.page.data.FormField;
 
 import java.util.Map;
 
@@ -18,6 +19,7 @@ public interface FormService {
     Map<String,Object> getFormJson(Form form, BaseButton button);
 
     Map<String,Object> getPageJson(String code, BaseButton button);
+    Map<String,Object> buildFormField(Form form, FormField formField);
 
     <T extends BaseData> T getObj(T t,String formCode);
 }

@@ -6,12 +6,10 @@ import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.CheckRepeatType;
+import com.jqp.admin.page.constants.ComponentType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
-import com.jqp.admin.page.data.Form;
-import com.jqp.admin.page.data.FormField;
-import com.jqp.admin.page.data.InputField;
-import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
@@ -63,12 +61,62 @@ public class CommonController {
 //        List<String>        collect  = formFields.stream().map(InputField::getField).collect(Collectors.toList());
 //        obj = obj.entrySet().stream().filter(dbObjA-> collect.contains(dbObjA.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+        //inputTable关联数据
+        List<InputTableData> inputTableDataList = new ArrayList<>();
+
         for(FormField formField:formFields){
             String type = formField.getType();
             Object value = obj.get(formField.getField());
             if(value == null){
                 continue;
             }
+            if(ComponentType.InputTable.equals(formField.getComponentType())){
+                //InputTable
+                String format = formField.getFormat();
+                if(StringUtils.isBlank(format)){
+                    continue;
+                }
+                String[] arr = format.split(",");
+                if(arr.length != 2){
+                    continue;
+                }
+                String refFormCode = arr[0];
+                String refField = arr[1];
+                List<Map<String,Object>> itemDatas = (List<Map<String, Object>>) value;
+                InputTableData inputTableData = new InputTableData();
+                Form refForm = formService.get(refFormCode);
+                if(refForm == null || StringUtils.isBlank(refForm.getTableName())){
+                    continue;
+                }
+                inputTableData.setTableName(refForm.getTableName());
+                inputTableData.setRefField(refField);
+                for(Map<String,Object> itemObj:itemDatas){
+                    Object itemIdStr = itemObj.get("id");
+                    if(itemIdStr!= null && StringUtils.isNotBlank(itemIdStr.toString())){
+                        Long itemId = Long.parseLong(itemIdStr.toString());
+                        Map<String, Object> itemDbObj = jdbcService.getById(refForm.getTableName(), itemId);
+                        if(itemDbObj != null){
+                            itemDbObj.putAll(itemObj);
+                            itemObj = itemDbObj;
+                        }
+                    }
+                    for(FormField itemFormField:refForm.getFormFields()){
+                        Object itemFieldValue = itemObj.get(itemFormField.getField());
+                        if(itemFieldValue == null){
+                            continue;
+                        }
+                        if(!Whether.YES.equals(itemFormField.getMulti())){
+                            Object realValue = DataType.getValue(itemFormField.getType(), itemFieldValue.toString(), itemFormField.getFormat());
+                            itemObj.put(itemFormField.getField(),realValue);
+                        }
+                    }
+                    inputTableData.getItems().add(itemObj);
+                }
+                inputTableDataList.add(inputTableData);
+
+                continue;
+            }
+
             if(!Whether.YES.equals(formField.getMulti())){
                 Object realValue = DataType.getValue(type, value.toString(), formField.getFormat());
                 obj.put(formField.getField(),realValue);
@@ -139,6 +187,23 @@ public class CommonController {
         try{
             jdbcService.transactionOption(()->{
                 jdbcService.saveOrUpdate(dbObj,tableName);
+                for(InputTableData inputTableData:inputTableDataList){
+                    List<Long> ids = new ArrayList<>();
+                    ids.add(-1L);
+                    int i = 0;
+                    for(Map<String,Object> itemObj:inputTableData.getItems()){
+                        itemObj.put("seq",++i);
+                        itemObj.put(inputTableData.getRefField(),dbObj.get("id"));
+                        jdbcService.saveOrUpdate(itemObj,inputTableData.getTableName());
+                        ids.add((Long) itemObj.get("id"));
+                    }
+                    //删除其他数据
+                    jdbcService.update(StrUtil.format("delete from {} where {} = ? and id not in({})",
+                            inputTableData.getTableName(),
+                            StringUtil.toSqlColumn(inputTableData.getRefField()),
+                            StringUtil.concatStr(ids,",")
+                            ),dbObj.get("id"));
+                }
                 Result<String> r = apiService.call(form.getAfterApi(), context);
                 if(!r.isSuccess()){
                     throw new RuntimeException(r.getMsg());
@@ -389,6 +454,10 @@ public class CommonController {
                 if(StringUtils.isNotBlank(formField.getValue())){
                     data.put(formField.getField(),SessionContext.getTemplateValue(formField.getValue()));
                 }
+                if(ComponentType.InputTable.equals(formField.getComponentType())){
+                    //输入表格
+                    data.put(formField.getField(),new ArrayList<>());
+                }
             }
         }else{
             if(StringUtils.isNotBlank(form.getTableName())){
@@ -399,6 +468,53 @@ public class CommonController {
 
                 for(FormField formField:formFields){
                     Object value = obj.get(formField.getField());
+
+                    if(ComponentType.InputTable.equals(formField.getComponentType())){
+                        //输入表格
+                        String format = formField.getFormat();
+
+                        if(StringUtils.isBlank(format)){
+                            continue;
+
+                        }
+                        String[] arr = format.split(",");
+                        if(arr.length != 2){
+                            continue;
+                        }
+                        //表单编号
+                        String fCode = arr[0];
+                        //关联字段
+                        String refField = arr[1];
+                        Form refForm = formService.get(fCode);
+                        List<Map<String,Object>> items = jdbcService.find(
+                                StrUtil.format(
+                                        "select * from {} where {} = ? order by seq asc ",
+                                        StringUtil.toSqlColumn(refForm.getTableName()),
+                                        StringUtil.toSqlColumn(refField)
+                                ),
+                                id
+                        );
+                        List<Map<String,Object>> itemDatas = new ArrayList<>();
+                        for(Map<String,Object> itemObj:items){
+                            Map<String,Object> itemData = new HashMap<>();
+                            for(FormField itemField:refForm.getFormFields()){
+                                Object itemFieldValue = itemObj.get(itemField.getField());
+                                if(itemFieldValue == null){
+                                    continue;
+                                }
+                                if(itemFieldValue instanceof LocalDateTime){
+                                    String itemFormat = StrUtil.isBlank(itemField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
+                                    String itemRealValue = DateUtil.format((LocalDateTime) itemFieldValue, itemFormat);
+                                    itemObj.put(itemField.getField(),itemRealValue);
+                                }
+                                itemData.put(itemField.getField(),itemObj.get(itemField.getField()));
+                            }
+                            itemDatas.add(itemData);
+                        }
+                        data.put(formField.getField(),itemDatas);
+                        continue;
+                    }
+
                     if(value == null){
                         continue;
                     }

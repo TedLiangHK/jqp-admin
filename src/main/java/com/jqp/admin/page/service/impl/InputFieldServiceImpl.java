@@ -72,5 +72,6 @@ public class InputFieldServiceImpl implements InputFieldService {
         inputRenderMap.put("input-formula",new InputFormulaRender());
         inputRenderMap.put("input-tree",new InputTreeRender());
         inputRenderMap.put("tree-select",new TreeSelectRender());
+        inputRenderMap.put("input-table",new InputTableRender());
     }
 }
