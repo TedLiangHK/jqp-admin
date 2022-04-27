@@ -101,7 +101,6 @@ public class DynamicTaskServiceImpl implements DynamicTaskService {
         try{
             Map<String,Object> context = new HashMap<>();
             context.put("id",task.getRefId());
-            context.put("log",log);
             if(StringUtils.isNotBlank(task.getParams())){
                 JSONObject jsonObject = JSONUtil.parseObj(task.getParams());
                 context.putAll(jsonObject);

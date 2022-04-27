@@ -92,7 +92,6 @@ public class TimerTaskServiceImpl implements TimerTaskService {
             jdbcService.saveOrUpdate(record);
 
             Map<String,Object> context = new HashMap<>();
-            context.put("log",log);
             if(StringUtils.isNotBlank(record.getParams())){
                 JSONObject jsonObject = JSONUtil.parseObj(record.getParams());
                 context.putAll(jsonObject);
