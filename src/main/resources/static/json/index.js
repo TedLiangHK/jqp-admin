@@ -1,7 +1,7 @@
 var data = {};
 var menus = [{
     menuName:"首页",
-    url:"/admin/lyear_main.html"
+    url:"/page/static/main"
 }];
 jQuery.ajax({
     method:"post",
@@ -68,8 +68,8 @@ AMIS_JSON={
         }
     ],
     "data":{
-        "src":"/admin/lyear_main.html",
-        "name":"首页",
+        "src":menus[0].url,
+        "name":menus[0].menuName,
         "userName":data.name
     },
     "body": [
@@ -90,6 +90,58 @@ AMIS_JSON={
             {
                 "type": "button",
                 "label": "修改密码",
+                "actionType": "dialog",
+                "primary": true,
+                "dialog":{
+                    "title":"修改密码",
+                    "body":{
+                        "type":"form",
+                        "api":"post:/admin/user/updatePwd",
+                        "body":{
+                            "type":"grid",
+                            "columns":[{
+                                clearable: true,
+                                columnClassName: "mb-3",
+                                label: "旧密码",
+                                lg: 12,
+                                md: 12,
+                                name: "oldPwd",
+                                placeholder: "旧密码",
+                                required: true,
+                                sm: 12,
+                                type: "input-password",
+                                value: "",
+                                xs: 12
+                            },{
+                                clearable: true,
+                                columnClassName: "mb-3",
+                                label: "新密码",
+                                lg: 12,
+                                md: 12,
+                                name: "newPwd",
+                                placeholder: "新密码",
+                                required: true,
+                                sm: 12,
+                                type: "input-password",
+                                value: "",
+                                xs: 12
+                            },{
+                                clearable: true,
+                                columnClassName: "mb-3",
+                                label: "确认新密码",
+                                lg: 12,
+                                md: 12,
+                                name: "confirmPwd",
+                                placeholder: "确认新密码",
+                                required: true,
+                                sm: 12,
+                                type: "input-password",
+                                value: "",
+                                xs: 12
+                            }]
+                        }
+                    }
+                }
             },
             {
                 "actionType":"link",

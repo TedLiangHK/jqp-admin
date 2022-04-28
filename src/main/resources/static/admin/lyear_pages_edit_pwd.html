@@ -56,15 +56,17 @@
 
 <script>
   function updatePwd(){
+    let params = JSON.stringify({
+      oldPwd:$("#old-password").val(),
+      newPwd:$("#new-password").val(),
+      confirmPwd:$("#confirm-password").val()
+    });
     $.ajax({
+      contentType:'application/json;charset=UTF-8',
       url:"/admin/user/updatePwd",
       type:"POST",
       dataType:"json",
-      data:{
-        oldPwd:$("#old-password").val(),
-        newPwd:$("#new-password").val(),
-        confirmPwd:$("#confirm-password").val()
-      },
+      data:params,
       success:function(resp){
         if(resp.status != 0){
           $("#errMsg").text(resp.msg);

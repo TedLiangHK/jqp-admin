@@ -8,9 +8,11 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.CrudData;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.common.Status;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.constants.Constants;
+import com.jqp.admin.common.constants.ResultCode;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.service.FormService;
@@ -226,7 +228,10 @@ public class UserController {
     }
     @PostMapping("/updatePwd")
     @ResponseBody
-    public Result updatePwd(String oldPwd,String newPwd,String confirmPwd,HttpServletRequest request){
+    public Result updatePwd(@RequestBody Map<String,String> params,HttpServletRequest request){
+        String oldPwd = params.get("oldPwd");
+        String newPwd = params.get("newPwd");
+        String confirmPwd = params.get("confirmPwd");
         UserSession session = SessionContext.getSession();
         User user = jdbcService.getById(User.class, session.getUserId());
         if(StringUtils.isBlank(oldPwd) || StringUtils.isBlank(newPwd)|| StringUtils.isBlank(confirmPwd)){
@@ -241,7 +246,7 @@ public class UserController {
         user.setPassword(SecureUtil.md5(newPwd + user.getSalt()));
         jdbcService.update(user);
         sessionContext.deleteSession(request);
-        return Result.success("重新登录");
+        return new Result(ResultCode.NotLogin,"重新登录",null);
     }
 
     @RequestMapping("/resetPwd/{id}")

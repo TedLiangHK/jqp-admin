@@ -1,6 +1,7 @@
 package com.jqp.admin.page.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,10 +43,13 @@ public class StaticPageController {
         return "page";
     }
 
+    @Value("${index-page}")
+    private String indexPage;
+
     @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response){
         try {
-            response.sendRedirect("/admin/index.html?t="+System.currentTimeMillis());
+            response.sendRedirect(indexPage+"?t="+System.currentTimeMillis());
         } catch (IOException e) {
             e.printStackTrace();
         }
