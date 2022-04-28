@@ -10,10 +10,7 @@ import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.PageType;
 import com.jqp.admin.page.constants.Whether;
-import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButton;
-import com.jqp.admin.page.data.PageQueryField;
-import com.jqp.admin.page.data.PageResultField;
+import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageService;
@@ -368,20 +365,15 @@ public class PageServiceImpl  implements PageService {
         }
         Boolean selector = (Boolean) pageParam.get("selector");
         if(!Boolean.TRUE.equals(selector)){
-            List<Map<String,Object>> rowButtons = new ArrayList<>();
             int optionWidth = 0;
             int fontWidth = 12;
             int padding = 23;
-            List<PageButton> pageButtons = page.getPageButtons();
-            for(PageButton pageButton:pageButtons){
-                if(!SessionContext.hasButtonPermission(pageButton.getCode())){
-                    continue;
-                }
-                if("row".equals(pageButton.getButtonLocation())){
-                    optionWidth += pageButton.getLabel().length()*fontWidth+padding;
-                    rowButtons.add(pageButtonService.getButton(pageButton));
-                }else if("top".equals(pageButton.getButtonLocation())){
-
+            PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), true);
+            List<Map<String,Object>> rowButtons = pageButtonData.getRowButtons();
+            for(Map<String,Object> btn:rowButtons){
+                String label = (String) btn.get("label");
+                if(label!= null){
+                    optionWidth += label.length()*fontWidth+padding;
                 }
             }
             if(optionWidth>400){

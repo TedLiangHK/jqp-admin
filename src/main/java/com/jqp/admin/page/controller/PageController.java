@@ -302,19 +302,7 @@ public class PageController {
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
         params.put("downloadParam",downloadParam);
 
-        List<Object> topButtons = new ArrayList<>();
-        topButtons.add("filter-toggler");
-        List<PageButton> pageButtons = page.getPageButtons();
-        for(PageButton pageButton:pageButtons){
-            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
-                continue;
-            }
-            if("top".equals(pageButton.getButtonLocation())){
-                topButtons.add(pageButtonService.getButton(pageButton));
-            }else if("row".equals(pageButton.getButtonLocation())){
-
-            }
-        }
+        PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), false);
 
         int perPage = 10;
         List<Integer> perPageAvailable = new ArrayList<>();
@@ -331,7 +319,8 @@ public class PageController {
         }
         params.put("perPage",perPage);
         params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
-        params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
+        params.put("topButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getTopButtons()));
+        params.put("bulkButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getBulkButtons()));
 
         if(!page.getPageRefs().isEmpty()){
             int width = page.getWidth() != null ? page.getWidth() : 6;
@@ -391,101 +380,6 @@ public class PageController {
             params.put("target",StringUtil.concatStr(targets,","));
             params.put("tabs",JSONUtil.toJsonPrettyStr(tabs));
         }
-        js = TemplateUtil.getValue(js,params);
-        return js;
-    }
-
-
-
-    @RequestMapping("/js/{pageCode}/{childPageCode}.js")
-    public String oneToManyJs(@PathVariable("pageCode") String pageCode,@PathVariable("childPageCode") String childPageCode,HttpServletResponse response){
-
-        response.setContentType("application/javascript");
-        response.addHeader("Cache-Control","no-store");
-        InputStream in = PageController.class.getClassLoader().getResourceAsStream("ui-json-template/oneToMany.js.vm");
-        String js = IoUtil.readUtf8(in);
-        IoUtil.close(in);
-        Map<String,Object> params = new HashMap<>();
-        params.put("pageCode",pageCode);
-        params.put("childPageCode",childPageCode);
-
-        Page page = pageService.get(pageCode);
-
-        String checkPage = this.checkPage(page);
-        if(StringUtils.isNotBlank(checkPage)){
-            return checkPage;
-        }
-
-        Page childPage = pageService.get(childPageCode);
-
-
-        List<Object> topButtons = new ArrayList<>();
-        topButtons.add("filter-toggler");
-        List<PageButton> pageButtons = page.getPageButtons();
-        for(PageButton pageButton:pageButtons){
-            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
-                continue;
-            }
-            if("top".equals(pageButton.getButtonLocation())){
-                topButtons.add(pageButtonService.getButton(pageButton));
-            }else if("row".equals(pageButton.getButtonLocation())){
-
-            }
-        }
-        params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
-
-        StringBuffer downloadParam = new StringBuffer("?1=1");
-        page.getQueryFields().forEach(f->{
-            String fieldName = StringUtil.toFieldColumn(f.getField());
-            if (!fieldName.toLowerCase().contains("id")){
-                fieldName = Constants.QUERY_KEY_START+fieldName;
-            }
-            downloadParam.append("&")
-                    .append(fieldName)
-                    .append("=${")
-                    .append(fieldName)
-                    .append("}");
-        });
-        params.put("downloadParam",downloadParam);
-
-        StringBuffer childDownloadParam = new StringBuffer("?1=1");
-        childPage.getQueryFields().forEach(f->{
-            String fieldName = StringUtil.toFieldColumn(f.getField());
-            if (!fieldName.toLowerCase().contains("id")){
-                fieldName = Constants.QUERY_KEY_START+fieldName;
-            }
-            childDownloadParam.append("&")
-                    .append(fieldName)
-                    .append("=${")
-                    .append(fieldName)
-                    .append("}");
-        });
-        params.put("childDownloadParam",childDownloadParam);
-
-
-        List<Object> childTopButtons = new ArrayList<>();
-        topButtons.add("filter-toggler");
-        List<PageButton> childPageButtons = childPage.getPageButtons();
-        for(PageButton pageButton:childPageButtons){
-            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
-                continue;
-            }
-            if("top".equals(pageButton.getButtonLocation())){
-                childTopButtons.add(pageButtonService.getButton(pageButton));
-            }else if("row".equals(pageButton.getButtonLocation())){
-
-            }
-        }
-        params.put("childTopButtons",JSONUtil.toJsonPrettyStr(childTopButtons));
-
-
-        List<Map<String,Object>> queryConfigs = pageConfigService.queryConfigs(page);
-        List<Map<String,Object>> childQueryConfigs = pageConfigService.queryConfigs(childPage);
-        params.put("pageName",page.getName());
-        params.put("childPageName",childPage.getName());
-        params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
-        params.put("childQueryConfigs", JSONUtil.toJsonPrettyStr(childQueryConfigs));
-
         js = TemplateUtil.getValue(js,params);
         return js;
     }

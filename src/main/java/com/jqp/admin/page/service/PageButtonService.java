@@ -1,10 +1,7 @@
 package com.jqp.admin.page.service;
 
 
-import com.jqp.admin.page.data.BaseButton;
-import com.jqp.admin.page.data.Form;
-import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButton;
+import com.jqp.admin.page.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -23,4 +20,6 @@ public interface PageButtonService {
     List<PageButton> getByForm(Form form);
 
     Page getPage(PageButton pageButton);
+
+    PageButtonData dealPageButton(List<PageButton> pageButtons,boolean isRow);
 }

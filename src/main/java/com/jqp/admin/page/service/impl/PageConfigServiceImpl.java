@@ -13,6 +13,7 @@ import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
+import com.jqp.admin.page.data.PageButtonData;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.service.InputFieldService;
 import com.jqp.admin.page.service.PageButtonService;
@@ -102,22 +103,11 @@ public class PageConfigServiceImpl implements PageConfigService {
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
         params.put("downloadParam",downloadParam);
 
-        List<Object> topButtons = new ArrayList<>();
-        topButtons.add("filter-toggler");
 
         PageButtonService pageButtonService = SpringUtil.getBean(PageButtonService.class);
-        List<PageButton> pageButtons = page.getPageButtons();
-        for(PageButton pageButton:pageButtons){
-            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
-                continue;
-            }
-            if("top".equals(pageButton.getButtonLocation())){
-                topButtons.add(pageButtonService.getButton(pageButton));
-            }else if("row".equals(pageButton.getButtonLocation())){
-
-            }
-        }
-        params.put("topButtons",JSONUtil.toJsonPrettyStr(topButtons));
+        PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), false);
+        params.put("topButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getTopButtons()));
+        params.put("bulkButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getBulkButtons()));
 
         int perPage = 10;
         List<Integer> perPageAvailable = new ArrayList<>();

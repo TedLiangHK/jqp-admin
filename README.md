@@ -174,6 +174,22 @@ ajax请求,可以有get/post请求,点击会自动有二次确认的弹出提示
 
 http://www.baidu.com?id=${id}&name=${abcName}
 
+#### 批量操作
+
+配置值有所不同,然后,位置选择批量操作即可
+
+get:/amis/api/mock2/sample/${ids|raw}
+
+示例
+
+![image.png](assets/1651131531298-image.png)
+
+![image.png](assets/1651131590396-image.png)
+
+![image.png](assets/1651131610436-image.png)
+
+
+
 ## 数据权限配置
 
 ### 整体思路
@@ -356,13 +372,9 @@ sql校验唯一,写一段sql,放到校验重复配置里面,具体的代码也�
 
 ![image.png](assets/1651034797744-image.png)
 
-
 ![image.png](assets/1651034846254-image.png)
 
 ![image.png](assets/1651034882318-image.png)
-
-
-
 
 #### 字段校验
 

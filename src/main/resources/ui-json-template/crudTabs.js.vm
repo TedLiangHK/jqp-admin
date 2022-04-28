@@ -42,6 +42,7 @@ AMIS_JSON={
             },
             "filterTogglable": true,
             "headerToolbar": ${topButtons},
+            "bulkActions": ${bulkButtons},
         },{
             "type":"tabs",
             "md":${tabWidth},

@@ -421,6 +421,9 @@ AMIS_JSON={
                                 "label":"顶部",
                                 "value":"top"
                             },{
+                                "label":"批量操作",
+                                "value":"bulk"
+                            },{
                                 "label":"行按钮",
                                 "value":"row"
                             }]

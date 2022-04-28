@@ -30,13 +30,6 @@ public class StaticPageController {
         model.addAttribute("js","/admin/page/js/"+pageCode+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
-    @RequestMapping("/oneToMany/{pageCode}/{childPageCode}")
-    public String oneToManyPage(Model model,
-                                @PathVariable("pageCode") String pageCode,
-                                @PathVariable("childPageCode") String childPageCode){
-        model.addAttribute("js","/admin/page/js/"+pageCode+"/"+childPageCode+".js?_rt="+System.currentTimeMillis());
-        return "page";
-    }
 
     @RequestMapping("/taskAudit/{taskId}")
     public String taskAudit(Model model,@PathVariable("taskId") String taskId){

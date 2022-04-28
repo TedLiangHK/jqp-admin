@@ -1,11 +1,9 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.page.constants.ActionType;
-import com.jqp.admin.page.data.BaseButton;
-import com.jqp.admin.page.data.Form;
-import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButton;
+import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageButtonService;
@@ -113,5 +111,34 @@ public class PageButtonServiceImpl implements PageButtonService {
     @Override
     public Page getPage(PageButton pageButton){
         return pageDao.get(pageButton.getPageId());
+    }
+
+    @Override
+    public PageButtonData dealPageButton(List<PageButton> pageButtons, boolean isRow) {
+        PageButtonData pageButtonData = new PageButtonData();
+        if(!isRow){
+            pageButtonData.getTopButtons().add("filter-toggler");
+        }
+        for(PageButton pageButton:pageButtons){
+            if(!SessionContext.hasButtonPermission(pageButton.getCode())){
+                continue;
+            }
+            if(isRow){
+                if("row".equals(pageButton.getButtonLocation())){
+                    pageButtonData.getRowButtons().add(getButton(pageButton));
+                }
+            }else{
+                if("top".equals(pageButton.getButtonLocation())){
+                    pageButtonData.getTopButtons().add(getButton(pageButton));
+                }else if("bulk".equals(pageButton.getButtonLocation())){
+                    pageButtonData.getBulkButtons().add(getButton(pageButton));
+                }
+            }
+        }
+
+        if(!pageButtonData.getBulkButtons().isEmpty()){
+            pageButtonData.getTopButtons().add("bulkActions");
+        }
+        return pageButtonData;
     }
 }

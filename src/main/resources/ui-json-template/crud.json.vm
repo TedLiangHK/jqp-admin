@@ -29,6 +29,7 @@
       }]
     },
     "headerToolbar": ${topButtons},
+    "bulkActions": ${bulkButtons},
     "footerToolbar": [
         "statistics",
         "switch-per-page",
