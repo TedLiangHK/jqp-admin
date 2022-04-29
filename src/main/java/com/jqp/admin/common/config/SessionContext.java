@@ -188,7 +188,7 @@ public class SessionContext {
         if(userSession != null){
             params.put("enterpriseId",userSession.getEnterpriseId());
             params.put("userId",userSession.getUserId());
-            params.put("deptId",userSession.getDeptId());
+            params.put("deptId",userSession.getDeptId() == null ? "" :userSession.getDeptId());
         }
     }
 

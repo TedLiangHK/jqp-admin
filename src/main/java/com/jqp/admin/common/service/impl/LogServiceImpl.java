@@ -9,6 +9,7 @@ import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.data.GlobalLog;
+import com.jqp.admin.common.service.DataListenerService;
 import com.jqp.admin.common.service.LogService;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.TableInfo;
@@ -35,6 +36,10 @@ public class LogServiceImpl implements LogService {
     @Resource
     @Lazy
     private JdbcService jdbcService;
+
+    @Resource
+    @Lazy
+    private DataListenerService dataListenerService;
     @Override
     public void log(Map<String, Object> beforeObj, Map<String, Object> afterObj,String tableName) {
         if(beforeObj == null && afterObj == null){
@@ -68,6 +73,7 @@ public class LogServiceImpl implements LogService {
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(afterObj.get("id").toString()));
             jdbcService.saveOrUpdate(globalLog);
+            dataListenerService.newObj(tableName,afterObj);
         }else if(beforeObj != null && afterObj == null){
             operation = "删除";
             globalLog.setBeforeValue(JSONUtil.toJsonPrettyStr(beforeObj));
@@ -75,12 +81,14 @@ public class LogServiceImpl implements LogService {
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(beforeObj.get("id").toString()));
             jdbcService.saveOrUpdate(globalLog);
+            dataListenerService.deleteObj(tableName,beforeObj);
         }else{
             operation = "修改";
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(beforeObj.get("id").toString()));
             Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
             List<ColumnInfo> columnInfos = tableInfo.getData().getColumnInfos();
+            boolean isUpdate = false;
             for(ColumnInfo columnInfo:columnInfos){
                 String field = StringUtil.toFieldColumn(columnInfo.getColumnName());
                 Object beforeValue = beforeObj.get(field);
@@ -100,6 +108,11 @@ public class LogServiceImpl implements LogService {
                 }
                 pLog.setRemark(StrUtil.format("{}在{}将字段{}的值从{}改为{}",pLog.getUserName(),now,columnInfo.getColumnComment(),beforeValue,afterValue));
                 jdbcService.saveOrUpdate(pLog);
+                dataListenerService.updateObjColumn(tableName,columnInfo.getColumnName(),beforeObj,afterObj,beforeValue,afterValue);
+                isUpdate = true;
+            }
+            if(isUpdate){
+                dataListenerService.updateObj(tableName,beforeObj,afterObj);
             }
         }
     }
