@@ -24,7 +24,7 @@ public class CaptchaController {
 //        AbstractCaptcha captcha = CaptchaUtil.createGifCaptcha(100, 37, 4);
 //        AbstractCaptcha captcha = CaptchaUtil.createCircleCaptcha(100, 37, 4,10);
 //        AbstractCaptcha captcha = CaptchaUtil.createLineCaptcha(100, 37, 4,10);
-        AbstractCaptcha captcha = CaptchaUtil.createShearCaptcha(100, 37, 4,3);
+        AbstractCaptcha captcha = CaptchaUtil.createShearCaptcha(100, 25, 4,3);
         String code = captcha.getCode();
         request.getSession().setAttribute(Constants.CAPTCHA_CODE,code);
         request.getSession().setAttribute(Constants.CAPTCHA_TIMEOUT,System.currentTimeMillis()+5*60*1000);
