@@ -188,8 +188,6 @@ get:/amis/api/mock2/sample/${ids|raw}
 
 ![image.png](assets/1651131610436-image.png)
 
-
-
 ## 数据权限配置
 
 ### 整体思路
@@ -463,6 +461,14 @@ sql校验唯一,写一段sql,放到校验重复配置里面,具体的代码也�
 ![image-20220405121443250](assets/image-20220405121443250.png)
 
 ![image-20220405121456549](assets/image-20220405121456549.png)
+
+### 配置审核人
+
+![image.png](assets/1651199282040-image.png)
+
+![image.png](assets/1651199325283-image.png)
+
+![image.png](assets/1651199409118-image.png)
 
 ## 定时任务
 

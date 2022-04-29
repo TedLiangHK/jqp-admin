@@ -213,7 +213,9 @@ public class ActivitiModelController {
         }
         Map<String, Object> obj = jdbcService.getById(tableName, id);
         if(obj != null){
-            params.putAll(obj);
+            obj.entrySet().forEach(entry -> {
+                params.put(entry.getKey(),entry.getValue() == null ? "" : entry.getValue().toString());
+            });
         }else{
             return Result.error("查不到数据");
         }
@@ -274,6 +276,7 @@ public class ActivitiModelController {
                 }
                 params.put("prevStatus",task.getDescription());
                 params.put("nextStatus",node.getDocumentation());
+                processEngine.getTaskService().setOwner(task.getId(),SessionContext.getSession().getUserId().toString());
                 processEngine.getTaskService().complete(task.getId(),params);
 
                 obj.put(statusField,node.getDocumentation());
@@ -461,6 +464,11 @@ public class ActivitiModelController {
         recordColumns.add(col);
 
         col = new HashMap<>();
+        col.put("name","auditUserName");
+        col.put("label","审核人");
+        recordColumns.add(col);
+
+        col = new HashMap<>();
         col.put("name","resultName");
         col.put("label","审核结果");
         recordColumns.add(col);
@@ -617,6 +625,7 @@ public class ActivitiModelController {
 
         try{
             jdbcService.transactionOption(()->{
+                processEngine.getTaskService().setOwner(id,SessionContext.getSession().getUserId().toString());
                 processEngine.getTaskService().complete(id,taskParams);
 
                 obj.put(statusField,result);
