@@ -357,16 +357,15 @@ public class CommonController {
                 mainId,
                 SessionContext.getSession().getEnterpriseId()
         ),Long.class);
-
-        //新-旧=需要新增的
-        //旧-新=需要删除的
-        List<Long> addIds = CollectionUtil.remove(relationIdList,oldIds);
-        List<Long> delIds = CollectionUtil.remove(oldIds,relationIdList);
         for(String s:relationIds){
             if(StringUtils.isNotBlank(s)){
                 relationIdList.add(Long.parseLong(s));
             }
         }
+        //新-旧=需要新增的
+        //旧-新=需要删除的
+        List<Long> addIds = CollectionUtil.remove(relationIdList,oldIds);
+        List<Long> delIds = CollectionUtil.remove(oldIds,relationIdList);
         List<Map<String,Object>> list = new ArrayList<>();
         for(Long relationId:addIds){
             Map<String,Object> obj = new HashMap<>();
