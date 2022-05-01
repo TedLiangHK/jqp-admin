@@ -14,6 +14,7 @@ import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.rbac.data.User;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.SequenceFlow;
@@ -25,6 +26,8 @@ import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("activityService")
+@Slf4j
 public class ActivityServiceImpl implements ActivityService {
     @Resource
     ProcessEngine processEngine;
@@ -203,5 +207,11 @@ public class ActivityServiceImpl implements ActivityService {
         FlowNode flowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(myActivityId);
         List<SequenceFlow> list = flowNode.getOutgoingFlows();
         return list;
+    }
+
+    @Override
+    public void setParams(String processInstanceId, String key, Object value) {
+        log.info("设置流程参数:{},{}={}",processInstanceId,key,value);
+        processEngine.getRuntimeService().setVariable(processInstanceId,key,value == null ? "":value.toString());
     }
 }

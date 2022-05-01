@@ -353,10 +353,10 @@ public class ActivitiModelController {
         baseButton.setLabel("审核");
         if(task != null){
             List<SequenceFlow> nodes = activityService.getNextNode(task.getId());
-            f.setDisabled(Whether.NO);
-            f.getFormFields().forEach(field->{
-                field.setDisabled(Whether.YES);
-            });
+//            f.setDisabled(Whether.NO);
+//            f.getFormFields().forEach(field->{
+//                field.setDisabled(Whether.YES);
+//            });
 
             if(task.getEndTime() == null){
 
@@ -616,6 +616,10 @@ public class ActivitiModelController {
         params.putAll(obj);
         params.put("prevStatus",objStatus);
         params.put("nextStatus",result);
+        params.put("params",body);
+        //executionId 和processInstanceId 是一样的
+        params.put("processInstanceId",task.getProcessInstanceId());
+        params.put("taskId",task.getId());
         Result<String> call = apiService.call(beforeApi, params);
         if(!call.isSuccess()){
             return call;
@@ -625,6 +629,13 @@ public class ActivitiModelController {
 
         try{
             jdbcService.transactionOption(()->{
+
+                //设置动态参数必须在任务完成之前设置,完成任务找不到参数直接报错
+                Result<String> _call = apiService.call(afterApi, params);
+                if(!_call.isSuccess()){
+                    throw new RuntimeException(_call.getMsg());
+                }
+
                 processEngine.getTaskService().setOwner(id,SessionContext.getSession().getUserId().toString());
                 processEngine.getTaskService().complete(id,taskParams);
 
@@ -657,10 +668,7 @@ public class ActivitiModelController {
                 }
                 jdbcService.saveOrUpdate(record);
 
-                Result<String> _call = apiService.call(afterApi, params);
-                if(!_call.isSuccess()){
-                    throw new RuntimeException(_call.getMsg());
-                }
+
             });
         }catch (Exception e){
             log.error("审核失败:"+e.getMessage(),e);

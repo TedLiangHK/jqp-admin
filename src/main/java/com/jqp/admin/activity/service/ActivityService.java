@@ -14,4 +14,5 @@ public interface ActivityService {
     ProcessDefinition getLastVersion(String key);
     JSONObject getMetaInfo(String deploymentId);
     List<SequenceFlow> getNextNode(String taskId);
+    void setParams(String processInstanceId,String key,Object value);
 }
