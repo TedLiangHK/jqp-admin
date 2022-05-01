@@ -321,4 +321,19 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             this.delete(id,tableName);
         }
     }
+
+    @Override
+    public boolean ownerEnterprise(String tableName, Long id, Long userEnterpriseId) {
+        if(id ==null){
+            return true;
+        }
+        Map<String, Object> byId = getById(tableName, id);
+        if (byId.size() > 0 && byId.containsKey("enterpriseId")) {
+            Long dataEnterpriseId = (Long) byId.get("enterpriseId");
+            if (!dataEnterpriseId.equals(userEnterpriseId)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

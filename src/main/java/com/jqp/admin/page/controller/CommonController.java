@@ -48,8 +48,14 @@ public class CommonController {
     @PostMapping("/{formCode}/saveOrUpdate")
     public Result saveOrUpdate(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
         Form form = formService.get(formCode);
-        List<FormField> formFields = form.getFormFields();
+        String tableName = form.getTableName();
         Object id = obj.get("id");
+        Long enterpriseId = SessionContext.getSession().getEnterpriseId();
+
+        if (id!=null && !jdbcService.ownerEnterprise(tableName, ((Integer)id).longValue(), enterpriseId)) {
+            return Result.error("没有数据权限.");
+        }
+        List<FormField> formFields = form.getFormFields();
         if(id != null && StringUtils.isNotBlank(id.toString())){
             Map<String, Object> dbObj = jdbcService.getById(form.getTableName(), Long.parseLong(id.toString()));
             if(dbObj != null){
@@ -173,7 +179,6 @@ public class CommonController {
             }
         }
 
-        String tableName = form.getTableName();
         Map<String,Object> context = new HashMap<>();
         context.put("obj",obj);
         context.put("tableName",tableName);
@@ -219,6 +224,12 @@ public class CommonController {
     @RequestMapping("/{model}/delete/{id}")
     public Result delete(@PathVariable("id") Long id, @PathVariable("model") String model) {
         String tableName = StringUtil.toSqlColumn(model);
+        Long enterpriseId = SessionContext.getSession().getEnterpriseId();
+
+        if (!jdbcService.ownerEnterprise(tableName, id, enterpriseId)) {
+            return Result.error("没有数据权限.");
+        }
+
         if ("page".equals(model.toLowerCase())) {
             Page page = pageService.get(id);
             pageService.del(page);

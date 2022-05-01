@@ -28,4 +28,13 @@ public interface JdbcService extends JdbcDao{
     boolean isRepeat(String sql,Map<String,Object> params);
     Set<Long> findChildIds(String parentSql,String childSql);
     Set<Long> findChildIds(Collection<Long> parentIds, String childSql);
+
+    /**
+     * 对于数据表含有enterprise_id列的数据进行更新和删除操作时验证数据enterprise_id值与操作用户的enterprise_id是否一致。
+     * @param tableName 表名
+     * @param id 数据id
+     * @param userEnterpriseId 登录用户企业
+     * @return boole
+     */
+    boolean ownerEnterprise(String tableName, Long id, Long userEnterpriseId);
 }
