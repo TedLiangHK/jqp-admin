@@ -52,7 +52,7 @@ public class CommonController {
         Object id = obj.get("id");
         Long enterpriseId = SessionContext.getSession().getEnterpriseId();
 
-        if (id!=null && !jdbcService.ownerEnterprise(tableName, ((Integer)id).longValue(), enterpriseId)) {
+        if (id != null && StringUtils.isNotBlank(id.toString()) && !jdbcService.ownerEnterprise(tableName, ((Integer)id).longValue(), enterpriseId)) {
             return Result.error("没有数据权限.");
         }
         List<FormField> formFields = form.getFormFields();
@@ -226,7 +226,7 @@ public class CommonController {
         String tableName = StringUtil.toSqlColumn(model);
         Long enterpriseId = SessionContext.getSession().getEnterpriseId();
 
-        if (!jdbcService.ownerEnterprise(tableName, id, enterpriseId)) {
+        if (id != null && StringUtils.isNotBlank(id.toString()) && !jdbcService.ownerEnterprise(tableName, id, enterpriseId)) {
             return Result.error("没有数据权限.");
         }
 
