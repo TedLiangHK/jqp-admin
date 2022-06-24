@@ -1,7 +1,9 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
@@ -44,7 +46,12 @@ public class CommonController {
 
     @Resource
     private ApiService apiService;
-
+    @PostMapping("/{formCode}/saveJson")
+    public Result saveJson(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
+        String json = (String) obj.get("json");
+        Map<String,Object> map = JSONUtil.toBean(json, Map.class);
+        return this.saveOrUpdate(map,formCode);
+    }
     @PostMapping("/{formCode}/saveOrUpdate")
     public Result saveOrUpdate(@RequestBody Map<String, Object> obj, @PathVariable("formCode") String formCode) {
         Form form = formService.get(formCode);
@@ -453,9 +460,14 @@ public class CommonController {
             return Result.success();
         }
     }
-
+    @RequestMapping("/{formCode}/getJson")
+    public Result getJson(Long id, @PathVariable("formCode") String formCode) {
+        Result<Map<String,Object>> result = this.get(id, formCode);
+        Map<String, Object> data = result.getData();
+        return Result.success(MapUtil.builder().put("json", JSONUtil.toJsonPrettyStr(data)).build());
+    }
     @RequestMapping("/{formCode}/get")
-    public Result get(Long id, @PathVariable("formCode") String formCode) {
+    public Result<Map<String,Object>> get(Long id, @PathVariable("formCode") String formCode) {
         Map<String,Object> data = new HashMap<>();
         Form form = formService.get(formCode);
         if(id == null){
