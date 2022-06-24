@@ -1,6 +1,8 @@
 package com.jqp.admin.db.controller;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
@@ -20,6 +22,7 @@ import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import javafx.scene.control.Tab;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +57,24 @@ public class TableInfoController {
     public Result<TableInfo> tableInfo(String tableName){
         return tableService.tableInfo(tableName);
     }
+
+    @RequestMapping("/getJson")
+    public Result getJson(String tableName){
+        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        String json = JSONUtil.toJsonPrettyStr(tableInfo.getData());
+        return Result.success(MapUtil.builder().put("json",json).build());
+    }
+    @RequestMapping("/saveJson")
+    public Result saveJson(@RequestBody   Map map){
+        String json = (String) map.get("json");
+        TableInfo tableInfo = JSONUtil.toBean(json, TableInfo.class);
+        Result<TableInfo> oldTableInfo = tableService.tableInfo(tableInfo.getTableName());
+        if(oldTableInfo.getData() == null){
+            tableInfo.setOldTableName(null);
+        }
+        return tableService.updateTable(tableInfo);
+    }
+
     @RequestMapping("/copyTableInfo")
     public Result<TableInfo> copyTableInfo(String tableName){
         Result<TableInfo> copyTableInfo = tableService.tableInfo(tableName);

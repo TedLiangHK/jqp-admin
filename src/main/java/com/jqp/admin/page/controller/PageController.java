@@ -12,6 +12,7 @@ import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.data.ColumnMeta;
+import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.RefType;
@@ -91,6 +92,24 @@ public class PageController {
             return Result.success(new Page());
         }
         return Result.success(pageService.get(id));
+    }
+    @RequestMapping("/getJson")
+    public Result getJson(Long id){
+        Page page = pageService.get(id);
+        return Result.success(MapUtil.builder().put("json",JSONUtil.toJsonPrettyStr(page)).build());
+    }
+    @RequestMapping("/saveJson")
+    public Result saveJson(@RequestBody Map<String,Object> map){
+        String json = (String) map.get("json");
+        Page page = JSONUtil.toBean(json, Page.class);
+        Page oldPage = pageService.get(page.getCode());
+        if(oldPage != null){
+            page.setId(oldPage.getId());
+        }else{
+            page.setId(null);
+        }
+        pageService.save(page);
+        return Result.success();
     }
 
     @RequestMapping("/save")

@@ -1,7 +1,9 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
@@ -63,6 +65,26 @@ public class FormController {
         formService.save(form);
         return Result.success();
     }
+
+    @RequestMapping("/getJson")
+    public Result getJson(Long id){
+        Form form = formService.get(id);
+        return Result.success(MapUtil.builder().put("json", JSONUtil.toJsonPrettyStr(form)).build());
+    }
+    @RequestMapping("/saveJson")
+    public Result saveJson(@RequestBody Map<String,Object> map){
+        String json = (String) map.get("json");
+        Form form = JSONUtil.toBean(json, Form.class);
+        Form oldForm = formService.get(form.getCode());
+        if(oldForm != null){
+            form.setId(oldForm.getId());
+        }else{
+            form.setId(null);
+        }
+        formService.save(form);
+        return Result.success();
+    }
+
     @RequestMapping("/copyForm")
     public Result<Form> copyForm(Long id){
         if(id == null){

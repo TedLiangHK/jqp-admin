@@ -217,6 +217,26 @@ AMIS_JSON={
                     ]
                 }]
             }
+        },
+        "jsonForm":{
+            "title": "json-${tableName}",
+            "size": "full",
+            "body": {
+                "type": "form",
+                "initApi": "/tableInfo/getJson?tableName=${tableName}",
+                "api": "/tableInfo/saveJson",
+                "actions":[],
+                "body": [
+                    {
+                        "type": "editor",
+                        "name": "json",
+                        "size":"xxl",
+                        "language": "json",
+                        "disabled": false,
+                        "allowFullscreen":true
+                    }
+                ]
+            }
         }
     },
     "body": {
@@ -234,6 +254,17 @@ AMIS_JSON={
                 "primary": true,
                 "dialog":{
                     "$ref":"form"
+                }
+            },
+            {
+                "type": "button",
+                "actionType": "dialog",
+                "label": "JSON新增",
+                "size":"sm",
+                "icon": "fa fa-plus pull-left",
+                "primary": true,
+                "dialog":{
+                    "$ref":"jsonForm"
                 }
             }
         ],
@@ -312,6 +343,13 @@ AMIS_JSON={
                         //"disabledOn": "tableName=='test'",
                         "confirmText": "您确认要删除${oldTableName}?",
                         "api": "/tableInfo/dropTable?tableName=${oldTableName}"
+                    },{
+                        "label": "编辑JSON",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "$ref":"jsonForm"
+                        }
                     }
                 ]
             }

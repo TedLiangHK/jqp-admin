@@ -580,6 +580,26 @@ AMIS_JSON={
                 "api": "post:/admin/page/save",
                 "$ref":"formTabs"
             }
+        },
+        "jsonForm":{
+            "title": "json-${name}",
+            "size": "full",
+            "body": {
+                "type": "form",
+                "initApi": "/admin/page/getJson?id=${id}",
+                "api": "/admin/page/saveJson",
+                "actions":[],
+                "body": [
+                    {
+                        "type": "editor",
+                        "name": "json",
+                        "size":"xxl",
+                        "language": "json",
+                        "disabled": false,
+                        "allowFullscreen":true
+                    }
+                ]
+            }
         }
     },
     "body": {
@@ -598,6 +618,17 @@ AMIS_JSON={
                 "primary": true,
                 "dialog":{
                     "$ref":"form"
+                }
+            },
+            {
+                "type": "button",
+                "actionType": "dialog",
+                "label": "JSON新增",
+                "size":"sm",
+                "icon": "fa fa-plus pull-left",
+                "primary": true,
+                "dialog":{
+                    "$ref":"jsonForm"
                 }
             }
         ],
@@ -689,6 +720,13 @@ AMIS_JSON={
                         "label": "删除",
                         "confirmText": "您确认要删除${name}?",
                         "api": "/admin/common/page/delete/${id}"
+                    },{
+                        "label": "编辑JSON",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "$ref":"jsonForm"
+                        }
                     }
                 ]
             }
