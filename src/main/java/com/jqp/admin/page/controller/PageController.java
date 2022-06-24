@@ -305,7 +305,7 @@ public class PageController {
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
-            if(!fieldName.toLowerCase().contains("id")){
+            if(!fieldName.toLowerCase().contains("id")&& !Whether.YES.equals(f.getRef())){
                 fieldName = Constants.QUERY_KEY_START+fieldName;
             }
             downloadParam.append("&")

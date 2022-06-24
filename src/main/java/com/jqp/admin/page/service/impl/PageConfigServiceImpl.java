@@ -69,7 +69,7 @@ public class PageConfigServiceImpl implements PageConfigService {
         List<Map<String,Object>> queryConfigs = new ArrayList<>();
         for(PageQueryField field:page.getQueryFields()){
             Map<String,Object> queryConfig = inputFieldService.buildInputField(field,selector);
-            if(!field.getField().toLowerCase().contains("id") && !selector){
+            if(!field.getField().toLowerCase().contains("id") && !selector && !Whether.YES.equals(field.getRef())){
                 queryConfig.put("name", Constants.QUERY_KEY_START+queryConfig.get("name"));
             }
             queryConfigs.add(queryConfig);
@@ -87,7 +87,7 @@ public class PageConfigServiceImpl implements PageConfigService {
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
             String fieldName = StringUtil.toFieldColumn(f.getField());
-            if (!fieldName.toLowerCase().contains("id")){
+            if (!fieldName.toLowerCase().contains("id") && !Whether.YES.equals(f.getRef())){
                 fieldName = Constants.QUERY_KEY_START+fieldName;
             }
             downloadParam.append("&")
