@@ -68,7 +68,12 @@ public class FormController {
 
     @RequestMapping("/getJson")
     public Result getJson(Long id){
-        Form form = formService.get(id);
+        Form form = null;
+        if(id == null){
+            form = new Form();
+        }else{
+            form = formService.get(id);
+        }
         return Result.success(MapUtil.builder().put("json", JSONUtil.toJsonPrettyStr(form)).build());
     }
     @RequestMapping("/saveJson")

@@ -45,6 +45,9 @@ public class PageDaoImpl implements PageDao {
     }
 
     private void get(Page page) {
+        if(page == null){
+            return;
+        }
         List<PageResultField> pageResultFields = jdbcService.find(PageResultField.class, "pageId", page.getId());
         page.setResultFields(pageResultFields);
 

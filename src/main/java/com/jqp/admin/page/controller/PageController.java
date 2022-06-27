@@ -96,6 +96,9 @@ public class PageController {
     @RequestMapping("/getJson")
     public Result getJson(Long id){
         Page page = pageService.get(id);
+        if(page == null){
+            page = new Page();
+        }
         return Result.success(MapUtil.builder().put("json",JSONUtil.toJsonPrettyStr(page)).build());
     }
     @RequestMapping("/saveJson")
