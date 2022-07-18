@@ -2,6 +2,11 @@
 
 ## 默认账号密码
 
+前后端一体演示地址
+http://jqp.hyz792901324.com/
+
+前后端分离演示地址
+http://jqp-admin-page.jqp.hyz792901324.com/
 
 账号 admin
 
