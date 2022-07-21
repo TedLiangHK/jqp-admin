@@ -11,23 +11,26 @@
         "mode": "table",
         "name": "${page.code}Selector",
         "filter": {
-            "title": "${page.name}",
-            "submitText": "查询",
+          "title": ["${page.name}",
+            {
+              "type":"button",
+              "label":"查询",
+              "primary":true,
+              "actionType":"submit",
+              "className":"m-l"
+            },{
+              "type":"button",
+              "label":"重置",
+              "actionType":"reset",
+              "className":"m-l"
+            }
+          ],
+            "submitText": "",
             "mode": "horizontal",
             "body":{
               "type":"grid",
               "columns":${queryConfigs}
-            },
-            "actions":[{
-              "type":"button",
-              "label":"查询",
-              "primary":true,
-              "actionType":"submit"
-            },{
-              "type":"button",
-              "label":"重置",
-              "actionType":"reset"
-            }]
+            }
         }
     }
 }
