@@ -3,6 +3,7 @@ package com.jqp.admin.page.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jqp.admin.common.Result;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.PageKey;
 import com.jqp.admin.page.data.CustomPage;
@@ -44,5 +45,20 @@ public class CustomPageController {
             json.set("data",data);
         }
         return StrUtil.format("{}={}",PageKey.AMIS_JSON,json.toStringPretty());
+    }
+    @RequestMapping("/editor/{code}")
+    public String editor(Model model, @PathVariable String code){
+        model.addAttribute("js","/admin/custom/js/"+code+".js");
+        model.addAttribute("code",code);
+        return "editor";
+    }
+    @RequestMapping("/saveSchema/{code}")
+    @ResponseBody
+    public Result saveSchema(@PathVariable String code, @RequestParam Map<String,Object> data){
+        CustomPage customPage = jdbcService.findOne(CustomPage.class, "code", code);
+        String schema = (String) data.get("schema");
+        customPage.setContent(schema);
+        jdbcService.saveOrUpdate(customPage);
+        return Result.success();
     }
 }
