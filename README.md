@@ -8,6 +8,9 @@ http://jqp.hyz792901324.com/
 前后端分离演示地址
 http://jqp-admin-page.jqp.hyz792901324.com/
 
+单独的编辑器项目,可以自定义哈
+https://gitee.com/hyz79/jqp-amis-editor/
+
 账号 admin
 
 密码 1
