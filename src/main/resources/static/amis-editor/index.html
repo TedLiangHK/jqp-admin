@@ -2,23 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <link rel="icon" href="/amis-editor/favicon.ico"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="theme-color" content="#000000"/>
-    <meta name="description" content="Web site created using create-react-app"/>
-    <link rel="apple-touch-icon" href="/amis-editor/logo192.png"/>
+    <link href="/amis-editor/favicon.ico" rel="icon"/>
+    <meta content="width=device-width,initial-scale=1" name="viewport"/>
+    <meta content="#000000" name="theme-color"/>
+    <meta content="Web site created using create-react-app" name="description"/>
+    <link href="/amis-editor/logo192.png" rel="apple-touch-icon"/>
+    <link href="/amis-editor/manifest.json" rel="manifest"/>
+    <title>React App</title>
+
     <script>
+        //自定义的接口
+        //如果想改变可以自己打包,
+        //package.json 文件中修改homepage即可修改路径,其他的自定义内容主要是在App.tsx文件中
         AMIS_JSON={
-            type:"page",
-            title:"我的编辑器",
-            body:"测试我的编辑器"
+            "type":"body",
+            "title":"标题",
+            "body":"内容"
         }
-        saveAmis=function(schema){
-            console.info("我的保存",schema);
+
+        saveAmis = function(schema){
+            console.info("保存",schema);
         }
     </script>
-    <title>jqp-amis-editor</title>
-    <script defer="defer" src="/amis-editor/static/js/main.abd86db4.js"></script>
+    <script defer="defer" src="/amis-editor/static/js/main.7fc105ce.js"></script>
     <link href="/amis-editor/static/css/main.e542c24e.css" rel="stylesheet">
 </head>
 <body>

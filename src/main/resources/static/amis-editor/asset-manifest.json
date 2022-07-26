@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/amis-editor/static/css/main.e542c24e.css",
-    "main.js": "/amis-editor/static/js/main.abd86db4.js",
+    "main.js": "/amis-editor/static/js/main.7fc105ce.js",
     "static/css/6988.1e6e4ab9.chunk.css": "/amis-editor/static/css/6988.1e6e4ab9.chunk.css",
     "static/js/6988.9a695791.chunk.js": "/amis-editor/static/js/6988.9a695791.chunk.js",
     "static/js/7494.cc9f0a89.chunk.js": "/amis-editor/static/js/7494.cc9f0a89.chunk.js",
@@ -116,6 +116,6 @@
   },
   "entrypoints": [
     "static/css/main.e542c24e.css",
-    "static/js/main.abd86db4.js"
+    "static/js/main.7fc105ce.js"
   ]
 }
