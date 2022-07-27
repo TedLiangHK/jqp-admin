@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 
 /**
  * @author hyz
@@ -12,7 +13,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface SysFileService {
     SysFile upload(MultipartFile file);
+    SysFile upload(InputStream in,String fileName,String contentType);
     void download(Long id, HttpServletRequest request, HttpServletResponse response);
+    InputStream download(Long id);
+    InputStream download(String path);
     void deleteFile(SysFile sysFile);
     void shutdown();
 }

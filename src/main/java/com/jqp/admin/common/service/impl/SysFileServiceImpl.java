@@ -22,10 +22,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.UUID;
@@ -48,7 +45,6 @@ public class SysFileServiceImpl implements SysFileService {
 
     private MinioClient minioClient;
     private OSS oss;
-
 
     public MinioClient getMinioClient() {
         if(minioClient == null){
@@ -82,6 +78,67 @@ public class SysFileServiceImpl implements SysFileService {
     }
 
     @Override
+    public SysFile upload(InputStream in, String fileName,String contentType) {
+        SysFile sysFile = new SysFile();
+        try {
+            sysFile.setSize((long) in.available());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        sysFile.setFileName(fileName);
+        sysFile.setUploadTime(new Date());
+        sysFile.setContentType(contentType);
+        String suffix = "";
+        if(sysFile.getFileName().contains(".")){
+            suffix = sysFile.getFileName().substring(sysFile.getFileName().lastIndexOf(".")+1).toLowerCase();
+        }
+        sysFile.setSuffix(suffix);
+
+        String f1 = DateUtil.format(new Date(),"yyyy/MM/dd");
+        String name = UUID.randomUUID()
+                .toString()
+                .replaceAll("-","")
+                .toLowerCase()
+                +(StringUtils.isBlank(suffix) ? "" : ("."+suffix));
+        sysFile.setPath("/"+f1+"/"+name);
+        if(TYPE_LOCAL.equals(fileConfig.getType())){
+            File folder = new File(fileConfig.getBase()+"/"+f1);
+            folder.mkdirs();
+            File dest = new File(folder,name);
+            try {
+                FileOutputStream out = new FileOutputStream(dest);
+                IoUtil.copy(in,out);
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                log.error("文件上传失败",e);
+            }
+            jdbcService.saveOrUpdate(sysFile);
+            return sysFile;
+        }else if(TYPE_OSS.equals(fileConfig.getType())){
+            try {
+                getOss().putObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath(),in);
+                jdbcService.saveOrUpdate(sysFile);
+                return sysFile;
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("文件上传失败",e);
+            }
+        }else if(TYPE_MINIO.equals(fileConfig.getType())){
+            try{
+                getMinioClient().putObject(fileConfig.getOssBucketName(),fileConfig.getBase()+sysFile.getPath(), in,contentType);
+                jdbcService.saveOrUpdate(sysFile);
+                return sysFile;
+            }catch (Exception e){
+                e.printStackTrace();
+                log.error("文件上传失败",e);
+            }
+        }
+        return null;
+    }
+
+    @Override
     @Transactional
     public SysFile upload(MultipartFile file) {
         SysFile sysFile = new SysFile();
@@ -97,10 +154,10 @@ public class SysFileServiceImpl implements SysFileService {
 
         String f1 = DateUtil.format(new Date(),"yyyy/MM/dd");
         String name = UUID.randomUUID()
-                    .toString()
-                    .replaceAll("-","")
-                    .toLowerCase()
-                    +(StringUtils.isBlank(suffix) ? "" : ("."+suffix));
+                .toString()
+                .replaceAll("-","")
+                .toLowerCase()
+                +(StringUtils.isBlank(suffix) ? "" : ("."+suffix));
         sysFile.setPath("/"+f1+"/"+name);
         if(TYPE_LOCAL.equals(fileConfig.getType())){
             File folder = new File(fileConfig.getBase()+"/"+f1);
@@ -138,8 +195,9 @@ public class SysFileServiceImpl implements SysFileService {
 
     @Override
     public void download(Long id, HttpServletRequest request, HttpServletResponse response) {
-        SysFile sysFile = jdbcService.getById(SysFile.class, id);
+        InputStream in = download(id);
         boolean download = "true".equals(request.getParameter("download"));
+        SysFile sysFile = jdbcService.getById(SysFile.class, id);
         try {
             response.setContentLength(sysFile.getSize().intValue());
             response.setContentType(sysFile.getContentType());
@@ -148,23 +206,42 @@ public class SysFileServiceImpl implements SysFileService {
                 response.addHeader("Content-Disposition","attachment;fileName="+downloadFileName);
             }
             ServletOutputStream out = response.getOutputStream();
-            InputStream in = null;
+            if(in != null){
+                IoUtil.copy(in,out);
+                IoUtil.close(in);
+            }else{
+                response.setStatus(404);
+                response.setContentLength(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public InputStream download(Long id) {
+
+        SysFile sysFile = jdbcService.getById(SysFile.class, id);
+        InputStream in = null;
+        try{
             if(TYPE_LOCAL.equals(fileConfig.getType())){
                 File file = new File(fileConfig.getBase()+sysFile.getPath());
-                in = new FileInputStream(file);
+                if(file.exists()){
+                    in = new FileInputStream(file);
+                }
             }else if(TYPE_OSS.equals(fileConfig.getType())){
                 OSSObject ossObject = getOss().getObject(fileConfig.getOssBucketName(), fileConfig.getBase() + sysFile.getPath());
                 in = ossObject.getObjectContent();
             }else if(TYPE_MINIO.equals(fileConfig.getType())){
                 in = getMinioClient().getObject(fileConfig.getOssBucketName(), fileConfig.getBase()+sysFile.getPath());
             }
-            if(in != null){
-                IoUtil.copy(in,out);
-            }
-        } catch (Exception e) {
+            return in;
+        }catch (Exception e){
             e.printStackTrace();
         }
+        return null;
     }
+
     @Override
     public void deleteFile(SysFile sysFile) {
         try{
@@ -190,5 +267,12 @@ public class SysFileServiceImpl implements SysFileService {
         if(oss != null){
             oss.shutdown();
         }
+    }
+
+    @Override
+    public InputStream download(String path) {
+        //path="/admin/download/{id}/{fileName}";
+        String idStr = path.substring("/admin/download/".length(),path.lastIndexOf("/"));
+        return download(Long.parseLong(idStr));
     }
 }
