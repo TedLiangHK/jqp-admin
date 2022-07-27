@@ -31,10 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin/user")
@@ -260,5 +257,19 @@ public class UserController {
         user.setPassword(password);
         jdbcService.update(user);
         return Result.success("重置后用户需要重新登录");
+    }
+
+    @RequestMapping("/auth.css")
+    public String authCss(HttpServletRequest request){
+        UserSession session = sessionContext.getSession(request);
+        if(UserType.Admin.equals(session.getUserType())){
+            return ".auth {display:inline-block !important};";
+        }
+        Set<String> buttonCodes = session.getButtonCodes();
+        StringBuilder sb = new StringBuilder();
+        for(String code:buttonCodes){
+            sb.append(".auth-").append(code).append(" {display:inline-block !important;}\n");
+        }
+        return sb.toString();
     }
 }
