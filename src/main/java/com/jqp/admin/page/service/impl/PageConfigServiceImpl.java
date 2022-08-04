@@ -21,6 +21,7 @@ import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -71,6 +72,9 @@ public class PageConfigServiceImpl implements PageConfigService {
             Map<String,Object> queryConfig = inputFieldService.buildInputField(field,selector);
             if(!field.getField().toLowerCase().contains("id") && !selector && !Whether.YES.equals(field.getRef())){
                 queryConfig.put("name", Constants.QUERY_KEY_START+queryConfig.get("name"));
+            }
+            if(StringUtils.isNotBlank(field.getValue())){
+                queryConfig.put("value", SessionContext.getTemplateValue(field.getValue()));
             }
             queryConfigs.add(queryConfig);
         }
