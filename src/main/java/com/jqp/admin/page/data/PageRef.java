@@ -1,6 +1,7 @@
 package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
 /***
@@ -8,6 +9,7 @@ import lombok.Data;
  * @remark 页面关联
  */
 @Data
+@OrderBy
 public class PageRef extends BaseData {
     //关联类型
     private String refType;

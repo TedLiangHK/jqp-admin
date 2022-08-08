@@ -1,12 +1,14 @@
 package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
 /***
  * 页面结果字段
  */
 @Data
+@OrderBy
 public class PageResultField extends BaseData {
     //关联页面id
     private Long pageId;

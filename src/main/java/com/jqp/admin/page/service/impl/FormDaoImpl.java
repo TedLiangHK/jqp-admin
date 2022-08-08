@@ -36,7 +36,7 @@ public class FormDaoImpl implements FormDao {
         for (FormField item : form.getFormFields()) {
             item.setId(null);
             item.setFormId(form.getId());
-            item.setSeq(seq);
+            item.setSeq(++seq);
             jdbcService.saveOrUpdate(item);
         }
 
@@ -45,7 +45,7 @@ public class FormDaoImpl implements FormDao {
         for (FormRef item : form.getFormRefs()) {
             item.setId(null);
             item.setFormId(form.getId());
-            item.setSeq(seq);
+            item.setSeq(++seq);
             jdbcService.saveOrUpdate(item);
         }
 
@@ -54,7 +54,7 @@ public class FormDaoImpl implements FormDao {
         for (FormButton item : form.getFormButtons()) {
             item.setId(null);
             item.setFormId(form.getId());
-            item.setSeq(seq);
+            item.setSeq(++seq);
             jdbcService.saveOrUpdate(item);
         }
     }

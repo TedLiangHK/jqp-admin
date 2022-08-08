@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.common.annotations.OrderBy;
 import com.jqp.admin.db.config.DbConfig;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcDao;
@@ -213,6 +214,10 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
                 getTableName(clz),
                 StringUtil.concatStr(Arrays.asList(fields).stream().map(field->StrUtil.format(" and {} = ? ",StringUtil.toSqlColumn(field))).collect(Collectors.toList()), " ")
         );
+        OrderBy orderBy = clz.getAnnotation(OrderBy.class);
+        if(orderBy != null){
+            sql += " order by "+orderBy.value();
+        }
         return this.find(sql,clz,args);
     }
 

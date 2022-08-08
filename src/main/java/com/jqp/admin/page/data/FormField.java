@@ -1,8 +1,10 @@
 package com.jqp.admin.page.data;
 
+import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
 @Data
+@OrderBy
 public class FormField extends InputField{
     //表单id
     private Long formId;

@@ -1,9 +1,11 @@
 package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
+import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
 @Data
+@OrderBy
 public class PageButton extends BaseButton {
     //页面id
     private Long pageId;
