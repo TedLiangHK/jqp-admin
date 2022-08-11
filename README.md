@@ -3,7 +3,7 @@
 ## 默认账号密码
 
 前后端一体演示地址
-https://jqp-admin.com/
+https://www.jqp-admin.com/
 
 前后端分离演示地址
 https://page.jqp-admin.com/
