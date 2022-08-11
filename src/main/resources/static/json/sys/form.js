@@ -583,6 +583,20 @@ AMIS_JSON={
                         "dialog": {
                             "$ref":"jsonForm"
                         }
+                    },{
+                        "label": "字段配置",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "title":"字段配置-${name}",
+                            "size":"full",
+                            "body":{
+                                "type":"iframe",
+                                "src":"/admin/page/fieldConfig.html?id=${id}",
+                                "height":"calc( 100% - 5px )"
+                            },
+                            "actions":[]
+                        }
                     }
                 ]
             }

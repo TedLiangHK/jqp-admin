@@ -3,6 +3,7 @@ package com.jqp.admin.page.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
@@ -106,5 +107,13 @@ public class FormController {
     public Result formFields(@RequestBody Form form){
         formService.reload(form);
         return Result.success(form,"已刷新");
+    }
+
+    @RequestMapping("/saveFields")
+    public Result saveFields(Long id,String fields){
+        Form form = formService.get(id);
+        form.setFormFields(JSONUtil.toList(fields,FormField.class));
+        formService.save(form);
+        return Result.success();
     }
 }
