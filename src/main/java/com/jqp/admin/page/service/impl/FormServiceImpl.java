@@ -132,30 +132,43 @@ public class FormServiceImpl implements FormService {
 
         if(!f.getFormRefs().isEmpty()){
 
-            List<Map<String,Object>> dialogButtons = new ArrayList<>();
+            List<Object> dialogButtons = new ArrayList<>();
+            dialogButtons.add("基本信息");
             Map<String,Object> saveBtn = new HashMap<>();
-            saveBtn.put("label","保存基本信息");
-            saveBtn.put("type","button");
-            saveBtn.put("actionType","submit");
-            saveBtn.put("primary",true);
-            saveBtn.put("close",false);
+            if(!formDisabled && formButtons.isEmpty()){
+                saveBtn.put("label","保存");
+                saveBtn.put("type","button");
+                saveBtn.put("actionType","submit");
+                saveBtn.put("primary",true);
+                saveBtn.put("close",false);
+                saveBtn.put("className","m-l");
 
-            Map<String,Object> closeBtn = new HashMap<>();
-            closeBtn.put("label","取消");
-            closeBtn.put("type","button");
-            closeBtn.put("actionType","close");
-            closeBtn.put("close",true);
+                Map<String,Object> resetBtn = new HashMap<>();
+                resetBtn.put("label","重置");
+                resetBtn.put("type","button");
+                resetBtn.put("actionType","reset");
+                resetBtn.put("close",true);
+                resetBtn.put("className","m-l");
 
-            dialogButtons.add(saveBtn);
-            dialogButtons.add(closeBtn);
+                dialogButtons.add(saveBtn);
+                dialogButtons.add(resetBtn);
+            }
 
-            dialog.put("actions",dialogButtons);
+            if(!formButtons.isEmpty()){
+                dialogButtons.addAll(formButtons);
+                formButtons.clear();
+            }
 
-            form.remove("body");
+//            dialog.put("actions",dialogButtons);
+            dialog.put("actions",new ArrayList<>());
+
+
+
+//            form.remove("body");
 
             List<Map<String,Object>> tabs = new ArrayList<>();
             grid.put("title","基本信息");
-            tabs.add(grid);
+//            tabs.add(grid);
 
             List<String> targets = new ArrayList<>();
             targets.add("mainTable");
@@ -185,22 +198,35 @@ public class FormServiceImpl implements FormService {
                 targets.add(ref.getRefPageCode()+"Table?"+ref.getRefField()+"=${id}");
             });
 
-            form.put("tabs",tabs);
+//            form.put("tabs",tabs);
+
+            List<Map<String,Object>> formBodys = new ArrayList<>();
+
+
+            Map<String,Object> panel = new HashMap<>();
+            panel.put("title","基本信息");
+            panel.put("body",grid);
+            panel.put("type","panel");
+            panel.put("header",dialogButtons);
+
+            formBodys.add(panel);
+
+            form.remove("body");
+
+            Map<String,Object> tab = new HashMap<>();
+            tab.put("type","tabs");
+            tab.put("tabs",tabs);
+            formBodys.add(tab);
+
+            form.put("body",formBodys);
+
             saveBtn.put("reload", StringUtil.concatStr(targets,","));
 
         }
 
-        Map<String,Object> closeBtn = new HashMap<>();
-        closeBtn.put("label","取消");
-        closeBtn.put("type","button");
-        closeBtn.put("actionType","close");
-        closeBtn.put("close",true);
-
-
         if(formDisabled){
             List<Map<String,Object>> dialogButtons = new ArrayList<>();
 
-            dialogButtons.add(closeBtn);
             dialog.put("actions",dialogButtons);
         }
 
@@ -208,7 +234,6 @@ public class FormServiceImpl implements FormService {
             List<Map<String,Object>> dialogButtons = new ArrayList<>();
             dialogButtons.addAll(formButtons);
 
-            dialogButtons.add(closeBtn);
             dialog.put("actions",dialogButtons);
         }
 
@@ -218,7 +243,7 @@ public class FormServiceImpl implements FormService {
 
     @Override
     public Map<String, Object> buildFormField(Form f, FormField field) {
-        boolean fieldDisabled = Whether.YES.equals(field.getDisabled());
+        boolean formDisabled = Whether.YES.equals(f.getDisabled());
         Map<String,Object> fieldConfig = inputFieldService.buildInputField(field,false);
         if(Whether.YES.equals(field.getHidden())){
             fieldConfig.put("columnClassName","mb-0");
@@ -231,7 +256,7 @@ public class FormServiceImpl implements FormService {
             fieldConfig.put("md",f.getFieldWidth());
             fieldConfig.put("lg",f.getFieldWidth());
         }
-        if(Whether.YES.equals(f.getDisabled()) || fieldDisabled){
+        if(Whether.YES.equals(f.getDisabled()) || formDisabled){
             fieldConfig.put("disabled",true);
         }
         if(StringUtils.isNotBlank(field.getValidations())){

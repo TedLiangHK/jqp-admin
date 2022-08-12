@@ -14,26 +14,26 @@ AMIS_JSON={
             "autoFillHeight": true,
             "affixHeader":true,
             "filter": {
-                "title": ["${pageName}",
-                    "<button type='button' onclick='window.location.reload()' style='margin-left:10px;;float:right;position:relative;top:-7px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>"
+                "title": ["<span style='line-height:30px;'>${pageName}</span>",
+                    "<button type='button' onclick='window.location.reload()' style='margin-left:10px;;float:right;position:relative;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>"
                     ,{
                         "type":"button",
                         "label":"导出Excel",
                         "actionType": "url",
                         "url":"/admin/page/crudExport/${pageCode}${downloadParam}",
-                        "className":"m-l float-right relative -top-2"
+                        "className":"m-l float-right relative "
                     },{
                         "type":"button",
                         "label":"重置",
                         "actionType":"reset",
-                        "className":"m-l float-right relative -top-2"
+                        "className":"m-l float-right relative "
                     },
                     {
                         "type":"button",
                         "label":"查询",
                         "primary":true,
                         "actionType":"submit",
-                        "className":"m-l float-right relative -top-2"
+                        "className":"m-l float-right relative "
                     }
                 ],
                 "submitText": "",
