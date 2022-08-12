@@ -45,23 +45,28 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         if(!tableInfo.isSuccess()){
             throw new RuntimeException("找不到表:"+tableName);
         }
+        Map<String, Field> fieldMap = ReflectUtil.getFieldMap(obj.getClass());
+        if(fieldMap.containsKey("enterpriseId") && ReflectUtil.getFieldValue(obj,"enterpriseId") == null){
+            //有企业id
+            ReflectUtil.setFieldValue(obj,fieldMap.get("enterpriseId"), SessionContext.getSession().getEnterpriseId());
+        }
+        if(fieldMap.containsKey("createUserId") && ReflectUtil.getFieldValue(obj,"createUserId") == null){
+            //有创建人id
+            ReflectUtil.setFieldValue(obj,fieldMap.get("createUserId"), SessionContext.getSession().getUserId());
+        }
+        if(fieldMap.containsKey("updateAt") && ReflectUtil.getFieldValue(obj,"updateAt") == null){
+            ReflectUtil.setFieldValue(obj,fieldMap.get("updateAt"), new Date());
+        }
+        if(fieldMap.containsKey("createAt") && ReflectUtil.getFieldValue(obj,"createAt") == null){
+            ReflectUtil.setFieldValue(obj,fieldMap.get("createAt"), new Date());
+        }
         TableInfo table = tableInfo.getData();
         List<ColumnInfo> columnInfos = table.getColumnInfos();
         List<String> columns = columnInfos.stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
         List<String> args = columnInfos.stream().map(columnInfo -> "?").collect(Collectors.toList());
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
-        Map<String, Field> fieldMap = ReflectUtil.getFieldMap(obj.getClass());
         List<Object> values = new ArrayList<>();
-        if(fieldMap.containsKey("enterpriseId") && ReflectUtil.getFieldValue(obj,"enterpriseId") == null){
-            //有企业id
-            ReflectUtil.setFieldValue(obj,fieldMap.get("enterpriseId"), SessionContext.getSession().getEnterpriseId());
-        }
-        if(fieldMap.containsKey("updatedAt") && ReflectUtil.getFieldValue(obj,"updatedAt") == null){
-            ReflectUtil.setFieldValue(obj,fieldMap.get("updatedAt"), new Date());
-        }
-        if(fieldMap.containsKey("createAt") && ReflectUtil.getFieldValue(obj,"createAt") == null){
-            ReflectUtil.setFieldValue(obj,fieldMap.get("createAt"), new Date());
-        }
+
         for(String column:columns){
             Object value = null;
             String fieldName = StringUtil.toFieldColumn(column);
@@ -89,6 +94,11 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         TableInfo table = tableInfo.getData();
         List<ColumnInfo> columnInfos = table.getColumnInfos();
+        if(obj.get("enterpriseId") == null){
+            obj.put("enterpriseId",SessionContext.getSession().getEnterpriseId());
+        }
+        obj.computeIfAbsent("updatedAt", k -> new Date());
+        obj.computeIfAbsent("createdAt", k -> new Date());
         // List<String> columns = columnInfos.stream().map(columnInfo -> columnInfo.getColumnName()).collect(Collectors.toList());
         List<String> columns = columnInfos.stream().filter(
                 columnInfo -> obj.containsKey(StringUtil.toFieldColumn(columnInfo.getColumnName()))
@@ -98,12 +108,6 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         List<String> args = columns.stream().map(columnInfo -> "?").collect(Collectors.toList());
         String sql = StrUtil.format("insert into {} ({}) values ({})",table.getTableName(),StringUtil.concatStr(columns,","),StringUtil.concatStr(args,","));
         List<Object> values = new ArrayList<>();
-        if(obj.get("enterpriseId") == null){
-            obj.put("enterpriseId",SessionContext.getSession().getEnterpriseId());
-        }
-
-        obj.computeIfAbsent("updatedAt", k -> new Date());
-        obj.computeIfAbsent("createdAt", k -> new Date());
         for(String column:columns){
             Object value = null;
             String fieldName = StringUtil.toFieldColumn(column);

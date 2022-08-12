@@ -195,7 +195,7 @@ public class FormServiceImpl implements FormService {
                 tab.put("body",tabContent);
 
                 tabs.add(tab);
-                targets.add(ref.getRefPageCode()+"Table?"+ref.getRefField()+"=${id}");
+                targets.add(ref.getRefPageCode()+"Table?"+ref.getRefField());
             });
 
 //            form.put("tabs",tabs);
@@ -221,7 +221,7 @@ public class FormServiceImpl implements FormService {
             form.put("body",formBodys);
 
             saveBtn.put("reload", StringUtil.concatStr(targets,","));
-
+            log.info("reload::::"+StringUtil.concatStr(targets,","));
         }
 
         if(formDisabled){
