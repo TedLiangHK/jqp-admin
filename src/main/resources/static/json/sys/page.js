@@ -388,6 +388,12 @@ AMIS_JSON={
                                 "label": "日期表达式"
                             },
                             {
+                                "type":"input-text",
+                                "name": "labelRemark",
+                                "placeholder":"标签提示",
+                                "label": "标签提示",
+                            },
+                            {
                                 "type":"textarea",
                                 "name": "optionSql",
                                 "label": "选项sql"

@@ -44,6 +44,13 @@ public class InputDefaultRender implements InputRender{
             config.put("md",field.getWidth());
             config.put("lg",field.getWidth());
         }
+        if(StringUtils.isNotBlank(field.getLabelRemark())){
+            Map<String,Object> labelRemark = new HashMap<>();
+            labelRemark.put("type","remark");
+            labelRemark.put("title","提示");
+            labelRemark.put("content",StrUtil.format("<pre>{}</pre>",field.getLabelRemark()));
+            config.put("labelRemark",labelRemark);
+        }
 
         boolean isMulti = Whether.YES.equals(field.getMulti());
 //        if(StrUtil.isNotBlank(field.getValue())){

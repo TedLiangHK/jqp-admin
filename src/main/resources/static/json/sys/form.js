@@ -260,6 +260,12 @@ AMIS_JSON={
                                 "label": "默认值",
                             },
                             {
+                                "type":"input-text",
+                                "name": "labelRemark",
+                                "placeholder":"标签提示",
+                                "label": "标签提示",
+                            },
+                            {
                                 "type":"select",
                                 "name": "checkRepeatType",
                                 "label": "校验重复类型",
@@ -286,6 +292,11 @@ AMIS_JSON={
                                 "placeholder":"表单项校验,参考amis官方文档",
                                 "size":"lg",
                                 "label": "表单项校验"
+                            },
+                            {
+                                "type":"textarea",
+                                "name": "optionSql",
+                                "label": "选项sql"
                             }
                         ]
                     }

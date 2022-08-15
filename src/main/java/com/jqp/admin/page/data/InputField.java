@@ -37,4 +37,7 @@ public class InputField extends BaseData {
     private String componentType;
     //是否多选
     private String multi;
+
+    //标签提示
+    private String labelRemark;
 }
