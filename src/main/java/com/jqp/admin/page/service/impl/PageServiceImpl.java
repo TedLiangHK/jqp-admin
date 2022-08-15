@@ -115,7 +115,10 @@ public class PageServiceImpl  implements PageService {
             sql.append(page.getOrderBy());
         }
 
-
+        if(Whether.NO.equals(page.getOpenPage())){
+            pageParam.put("page",1);
+            pageParam.put("perPage",Integer.MAX_VALUE);
+        }
         Result<PageData<Map<String, Object>>> result = jdbcService.query(pageParam, sql.toString(), values.toArray());
 
         Map<String,PageResultField> dateFields = new HashMap<>();
@@ -387,6 +390,9 @@ public class PageServiceImpl  implements PageService {
                 columnData.put("width",optionWidth);
                 crudData.getColumns().add(columnData);
             }
+        }
+        if(Whether.NO.equals(page.getOpenPage())){
+            crudData.setCount(null);
         }
         return Result.success(crudData);
     }

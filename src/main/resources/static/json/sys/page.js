@@ -47,6 +47,16 @@ AMIS_JSON={
                         ]
                     },
                     {
+                        "type": "select",
+                        "name": "openPage",
+                        "placeholder":"默认开启分页",
+                        "label": "是否开启分页",
+                        "options":[
+                            {"label":"YES","value":"YES"},
+                            {"label":"NO","value":"NO"}
+                        ]
+                    },
+                    {
                         "type": "editor",
                         "name": "querySql",
                         "label": "查询sql",

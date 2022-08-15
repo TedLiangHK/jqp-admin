@@ -128,7 +128,7 @@ public class PageConfigServiceImpl implements PageConfigService {
         }
         params.put("perPage",perPage);
         params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
-
+        params.put("openPage",!Whether.NO.equals(page.getOpenPage()));
         String ui = TemplateUtil.getUi("crud.json.vm", params);
         JSONObject json = JSONUtil.parseObj(ui);
         return json;

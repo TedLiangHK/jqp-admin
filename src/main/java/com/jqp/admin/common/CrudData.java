@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class CrudData<T> {
-    private int count;
+    private Integer count;
     private List<T> rows = new ArrayList<>();
     private List<ColumnData> columns = new ArrayList<>();
 }

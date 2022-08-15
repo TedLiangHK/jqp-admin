@@ -403,6 +403,7 @@ public class PageController {
             params.put("target",StringUtil.concatStr(targets,","));
             params.put("tabs",JSONUtil.toJsonPrettyStr(tabs));
         }
+        params.put("openPage",!Whether.NO.equals(page.getOpenPage()));
         js = TemplateUtil.getValue(js,params);
         return js;
     }

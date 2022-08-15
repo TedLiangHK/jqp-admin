@@ -41,4 +41,7 @@ public class Page extends BaseData {
 
     //前置接口
     private String beforeApi;
+
+    //是否开启分页,默认为YES
+    private String openPage;
 }

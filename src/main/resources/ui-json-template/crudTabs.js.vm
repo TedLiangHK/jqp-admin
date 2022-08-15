@@ -13,6 +13,15 @@ AMIS_JSON={
             "syncLocation": false,
             "autoFillHeight": true,
             "affixHeader":true,
+            #if($openPage)
+                "footerToolbar": [
+                    "statistics",
+                    "switch-per-page",
+                    "pagination"
+                ],
+                "perPage":${perPage},
+                "perPageAvailable":${perPageAvailable},
+            #end
             "filter": {
                 "title": ["<span style='line-height:30px;'>${pageName}</span>",
                     "<button type='button' onclick='window.location.reload()' style='margin-left:10px;;float:right;position:relative;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>"

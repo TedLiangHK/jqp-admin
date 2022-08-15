@@ -38,12 +38,14 @@
 
     "headerToolbar": ${topButtons},
     "bulkActions": ${bulkButtons},
-    "footerToolbar": [
-        "statistics",
-        "switch-per-page",
-        "pagination"
-    ],
-  "affixHeader":true,
+#if($openPage)
+  "footerToolbar": [
+    "statistics",
+    "switch-per-page",
+    "pagination"
+  ],
   "perPage":${perPage},
-  "perPageAvailable":${perPageAvailable}
+  "perPageAvailable":${perPageAvailable},
+#end
+  "affixHeader":true
 }

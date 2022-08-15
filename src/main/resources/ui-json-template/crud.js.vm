@@ -40,14 +40,16 @@ AMIS_JSON={
         "filterTogglable": true,
         "headerToolbar": ${topButtons},
         "bulkActions": ${bulkButtons},
+#if($openPage)
         "footerToolbar": [
             "statistics",
             "switch-per-page",
             "pagination"
         ],
-        "autoFillHeight": true,
-        "affixHeader":true,
         "perPage":${perPage},
-        "perPageAvailable":${perPageAvailable}
+        "perPageAvailable":${perPageAvailable},
+#end
+        "autoFillHeight": true,
+        "affixHeader":true
     }
 }
