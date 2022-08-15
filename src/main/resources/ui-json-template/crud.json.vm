@@ -2,6 +2,7 @@
     "type": "crud",
     "name": "${pageCode}Table",
     "api": "post:/admin/page/crudQuery/${pageCode}",
+    "title": "${pageName}",
     "syncLocation": false,
     "filter": {
       "title": ["<span style='line-height:30px;'>${pageName}</span>",

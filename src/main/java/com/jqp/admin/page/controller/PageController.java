@@ -372,6 +372,7 @@ public class PageController {
                     Page tabPage = pageService.get(pageRef.getRefPageCode());
                     title = tabPage.getName();
                     tabBody = pageConfigService.getCurdJson(pageRef.getRefPageCode());
+                    tabBody.remove("title");
                     targets.add(StrUtil.format("{}Table?{}",tabPage.getCode(),pageRef.getRefField()));
                 }else if(RefType.Form.equals(refType)){
                     Form form = formService.get(pageRef.getRefPageCode());
