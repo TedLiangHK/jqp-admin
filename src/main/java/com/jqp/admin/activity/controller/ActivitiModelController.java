@@ -19,6 +19,7 @@ import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
+import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.DicService;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.rbac.data.User;
@@ -78,7 +79,7 @@ public class ActivitiModelController {
     private ApiService apiService;
 
     @Resource
-    private DicService dicService;
+    private DicCacheService dicCacheService;
 
     @Resource
     private FormService formService;
@@ -538,9 +539,9 @@ public class ActivitiModelController {
         record.setTaskId(task.getId());
         record.setProcessDefinitionId(processInstance.getProcessDefinitionId());
         record.setNextStatus(node.getDocumentation());
-        record.setNextStatusName(dicService.getLabel(statusDic,node.getDocumentation()));
+        record.setNextStatusName(dicCacheService.getLabel(statusDic,node.getDocumentation()));
         record.setPrevStatus(task.getDescription());
-        record.setPrevStatusName(dicService.getLabel(statusDic,task.getDescription()));
+        record.setPrevStatusName(dicCacheService.getLabel(statusDic,task.getDescription()));
         record.setTaskName(task.getName());
         record.setProcessKey(processInstance.getProcessDefinitionKey());
         record.setResultName(node.getName());

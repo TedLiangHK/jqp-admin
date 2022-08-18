@@ -1,0 +1,9 @@
+package com.jqp.admin.page.service;
+
+import java.util.List;
+import java.util.Map;
+
+public interface DicCacheService {
+    List<Map<String,Object>> options(String dicCode);
+    String getLabel(String code,String value);
+}

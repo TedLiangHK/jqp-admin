@@ -2,6 +2,7 @@ package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.data.ColumnMeta;
@@ -11,6 +12,7 @@ import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.PageType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
+import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageService;
@@ -349,9 +351,8 @@ public class PageServiceImpl  implements PageService {
             if(DataType.DIC.equals(resultField.getType())){
                 columnData.put("type","mapping");
                 Map<String,Object> map = new HashMap<>();
-                List<Map<String, Object>> options = jdbcService.find("select label,value from dic_item where parent_id in(" +
-                        "select id from dic where dic_code = ? " +
-                        ") order by value asc ", resultField.getFormat());
+                DicCacheService dicCacheService = SpringUtil.getBean(DicCacheService.class);
+                List<Map<String, Object>> options = dicCacheService.options(resultField.getFormat());
                 options.forEach(o->{
                     map.put((String)o.get("value"),o.get("label"));
                 });

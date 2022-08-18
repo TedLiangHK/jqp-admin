@@ -2,6 +2,7 @@ package com.jqp.admin.page.inputRender;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.page.data.InputField;
+import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.DicService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,8 +14,8 @@ public class InputRatingRender  extends InputDefaultRender{
     @Override
     protected void extra(Map<String, Object> config, InputField field) {
         if(StringUtils.isNotBlank(field.getFormat())){
-            DicService dicService = SpringUtil.getBean(DicService.class);
-            List<Map<String, Object>> options = dicService.options(field.getFormat());
+            DicCacheService dicCacheService = SpringUtil.getBean(DicCacheService.class);
+            List<Map<String, Object>> options = dicCacheService.options(field.getFormat());
 
             config.put("count",options.size());
 

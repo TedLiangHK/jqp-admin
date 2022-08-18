@@ -7,6 +7,7 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.InputField;
+import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.DicService;
 import com.jqp.admin.page.service.PageConfigService;
 import com.jqp.admin.util.StringUtil;
@@ -79,8 +80,8 @@ public class InputDefaultRender implements InputRender{
             }
         }else if(DataType.DIC.equals(field.getType())){
             config.put("type","select");
-            DicService dicService = SpringUtil.getBean(DicService.class);
-            List<Map<String, Object>> options = dicService.options(field.getFormat());
+            DicCacheService dicCacheService = SpringUtil.getBean(DicCacheService.class);
+            List<Map<String, Object>> options = dicCacheService.options(field.getFormat());
             if(options.size()>10){
                 config.put("searchable",true);
             }

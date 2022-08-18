@@ -19,4 +19,6 @@ public class DataListener extends BaseData {
     private String afterApi;
     //序号
     private Integer seq;
+    //javaBean
+    private String javaBean;
 }

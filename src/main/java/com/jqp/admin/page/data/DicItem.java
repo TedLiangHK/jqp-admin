@@ -1,0 +1,20 @@
+package com.jqp.admin.page.data;
+
+import com.jqp.admin.common.BaseData;
+import lombok.Data;
+
+/***
+ * @date 2022-07-11 15:52:11
+ * @remark 字典明细
+ */
+@Data
+public class DicItem extends BaseData {
+    //字典id
+    private Long parentId;
+    //字典标签
+    private String label;
+    //字典值
+    private String value;
+    //排序
+    private Integer seq;
+}

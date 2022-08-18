@@ -114,7 +114,7 @@ public class SessionContext {
     public UserSession newSession(HttpServletRequest request, User user,Long enterpriseId){
         UserSession userSession = new UserSession();
         userSession.setUserId(user.getId());
-        String token = TokenUtil.getToken(user.getSalt(),user.getMobile()+SPLIT+enterpriseId, user.getPassword(), SessionTimeOut * 1000);
+        String token = TokenUtil.getToken(user.getSalt(),user.getMobile()+SPLIT+enterpriseId, user.getPassword(), SessionTimeOut * 10   * 1000);
         userSession.setToken(token);
         String userType = user.getUserType();
         if(!UserType.Admin.equals(user.getUserType())){
