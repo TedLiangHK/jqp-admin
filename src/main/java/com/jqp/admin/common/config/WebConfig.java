@@ -28,7 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "/admin/user/login/*",
                 "/admin/user/logout",
                 "/amis/**",
-                "/amis-editor/**"
+                "/amis-editor/**",
+                "/admin/article/**"
                 );
     }
 
