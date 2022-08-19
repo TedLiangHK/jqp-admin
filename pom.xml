@@ -8,10 +8,10 @@
         <version>2.6.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.jqp.admin</groupId>
-    <artifactId>jqp-admin</artifactId>
+    <groupId>com.jqp.admin-rest</groupId>
+    <artifactId>jqp-admin-rest</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>jqp-admin</name>
+    <name>jqp-admin-rest</name>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>1.8</java.version>
@@ -138,6 +138,17 @@
             <artifactId>itext</artifactId>
             <version>${itext.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.11.3</version>
+        </dependency>
+        <!--htmlunit-->
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+        </dependency>
+
 
     </dependencies>
 
