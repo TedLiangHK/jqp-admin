@@ -92,7 +92,7 @@ public class DicCacheServiceImpl implements DataListenerTask, DicCacheService {
 
     @Override
     public String getLabel(String code, String value) {
-        if(StringUtils.isBlank(value) || StringUtils.isNotBlank(code)){
+        if(StringUtils.isBlank(value) || StringUtils.isBlank(code)){
             return null;
         }
         List<Map<String, Object>> options = options(code);
