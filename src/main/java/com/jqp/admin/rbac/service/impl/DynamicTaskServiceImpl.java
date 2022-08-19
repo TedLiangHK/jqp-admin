@@ -10,7 +10,9 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.rbac.constants.TimerTaskRecordStatus;
 import com.jqp.admin.rbac.data.DynamicTask;
 import com.jqp.admin.rbac.service.ApiService;
+import com.jqp.admin.rbac.service.DynamicTaskApi;
 import com.jqp.admin.rbac.service.DynamicTaskService;
+import com.jqp.admin.util.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -63,7 +65,7 @@ public class DynamicTaskServiceImpl implements DynamicTaskService {
     }
 
     @Override
-    public Long save(String name,Long refId, Date planTime, Map<String, Object> params, String api) {
+    public Long save(String name,Long refId, Date planTime, Map<String, Object> params, String api,String javaService) {
         DynamicTask task = new DynamicTask();
         task.setRefId(refId);
         task.setPlanTime(planTime);
@@ -71,6 +73,13 @@ public class DynamicTaskServiceImpl implements DynamicTaskService {
         task.setName(name);
         task.setCreateTime(new Date());
         task.setTimerTaskStatus(null);
+        task.setJavaService(javaService);
+        if(StringUtils.isBlank(api) && StringUtils.isBlank(javaService)){
+           throw new RuntimeException("magicApi接口和java接口必须有一个");
+        }
+        if(StringUtils.isNotBlank(api) && StringUtils.isNotBlank(javaService)){
+            throw new RuntimeException("magicApi接口和java接口只能有一个");
+        }
         if(params != null){
             task.setParams(JSONUtil.toJsonPrettyStr(params));
         }
@@ -106,9 +115,17 @@ public class DynamicTaskServiceImpl implements DynamicTaskService {
                 context.putAll(jsonObject);
             }
             jdbcService.transactionOption(()->{
-                Result<String> call = apiService.call(task.getApi(), context);
-                if(!call.isSuccess()){
-                    throw new RuntimeException(call.getMsg());
+                if(StringUtils.isNotBlank(task.getApi())){
+                    Result<String> call = apiService.call(task.getApi(), context);
+                    if(!call.isSuccess()){
+                        throw new RuntimeException(call.getMsg());
+                    }
+                }else{
+                    DynamicTaskApi api = SpringContextUtil.getBean(task.getJavaService());
+                    String msg = api.execute(task);
+                    if(msg != null){
+                        throw new RuntimeException(msg);
+                    }
                 }
             });
             task.setTimerTaskStatus(TimerTaskRecordStatus.Success);
@@ -137,6 +154,7 @@ public class DynamicTaskServiceImpl implements DynamicTaskService {
             task.setTimerTaskStatus(TimerTaskRecordStatus.Fail);
             task.setMsg("手动停止任务");
             taskIds.remove(task.getId());
+            jdbcService.saveOrUpdate(task);
         }
     }
 }

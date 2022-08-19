@@ -25,6 +25,7 @@ public interface JdbcService extends JdbcDao{
     void delete(String sql,Object ... args);
 
     void transactionOption(TransactionOption transactionOption);
+    void forceSaveOrUpdate(BaseData obj);
     boolean isRepeat(String sql,Map<String,Object> params);
     Set<Long> findChildIds(String parentSql,String childSql);
     Set<Long> findChildIds(Collection<Long> parentIds, String childSql);

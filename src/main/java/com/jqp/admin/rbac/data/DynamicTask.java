@@ -31,4 +31,6 @@ public class DynamicTask extends BaseData {
     private String api;
     //创建时间
     private Date createTime;
+    //java接口
+    private String javaService;
 }

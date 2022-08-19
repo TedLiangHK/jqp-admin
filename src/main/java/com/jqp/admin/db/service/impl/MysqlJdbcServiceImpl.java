@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -276,7 +277,11 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
     public void transactionOption(TransactionOption transactionOption) {
         transactionOption.call();
     }
-
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void forceSaveOrUpdate(BaseData obj) {
+        this.saveOrUpdate(obj);
+    }
     @Override
     public boolean isRepeat(String sql, Map<String, Object> params) {
         Object id = params.get("id");

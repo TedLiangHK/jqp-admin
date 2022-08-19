@@ -9,6 +9,6 @@ import java.util.Map;
 public interface DynamicTaskService {
     void start();
     void stop();
-    Long save(String name,Long refId, Date planTime, Map<String,Object> params,String api);
+    Long save(String name,Long refId, Date planTime, Map<String,Object> params,String api,String javaService);
     void stop(Long taskId);
 }

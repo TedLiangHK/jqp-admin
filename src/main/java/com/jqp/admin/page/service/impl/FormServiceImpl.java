@@ -250,7 +250,10 @@ public class FormServiceImpl implements FormService {
         }else{
             fieldConfig.put("columnClassName","mb-3");
         }
-        if(f.getFieldWidth() != null && !Whether.YES.equals(field.getHidden())){
+        if(f.getFieldWidth() != null
+                && field.getWidth() == null
+                && !"input-table".equals(field.getComponentType())
+                && !Whether.YES.equals(field.getHidden())){
             fieldConfig.put("xs",f.getFieldWidth());
             fieldConfig.put("sm",f.getFieldWidth());
             fieldConfig.put("md",f.getFieldWidth());
@@ -267,10 +270,24 @@ public class FormServiceImpl implements FormService {
 
     @Override
     public Map<String, Object> getPageJson(String code, BaseButton button) {
-
-        String[] arr = StringUtil.splitStr(code,",");
-        String pageCode = arr[0];
-        String refField = arr[1];
+        //支持两种格式  页面编码,关联id
+        //页面编码?字段名=字段名&字段名=字段名
+        String pageCode = null;
+        Map<String,Object> data = new HashMap<>();
+        if(code.contains(",")){
+            String[] arr = StringUtil.splitStr(code,",");
+            pageCode = arr[0];
+            String refField = arr[1];
+            data.put("id","");
+            data.put(refField,"${id}");
+        }else{
+            pageCode = code.substring(0,code.indexOf("?"));
+            String[] arr = code.substring(code.indexOf("?") + 1).split("&");
+            for(String s:arr){
+                String[] split = s.split("=");
+                data.put(split[0],split[1]);
+            }
+        }
 
         Map<String,Object> dialog = new HashMap<>();
         dialog.put("title",button.getLabel());
@@ -278,10 +295,6 @@ public class FormServiceImpl implements FormService {
         List<Map<String,Object>> dialogButtons = new ArrayList<>();
 
         dialog.put("actions",dialogButtons);
-
-        Map<String,Object> data = new HashMap<>();
-        data.put("id","");
-        data.put(refField,"${id}");
         Map<String, Object> curdJson = pageConfigService.getCurdJson(pageCode);
         curdJson.put("data",data);
         dialog.put("body",curdJson);

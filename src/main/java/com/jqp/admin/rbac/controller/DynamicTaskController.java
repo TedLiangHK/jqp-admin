@@ -19,7 +19,8 @@ public class DynamicTaskController {
     public Result<Long> test(){
         Map<String,Object> params = new HashMap<>();
         params.put("name","测试动态定时任务");
-        Long taskId = dynamicTaskService.save("测试动态定时任务", 1L, new Date(System.currentTimeMillis() + 60 * 1000), params, "/timerTask/testTimerTask");
+        Long taskId = dynamicTaskService.save("测试动态定时任务", 1L, new Date(System.currentTimeMillis() + 60 * 1000), params, "/timerTask/testTimerTask",null);
         return Result.success(taskId);
     }
 }
+
