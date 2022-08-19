@@ -23,6 +23,8 @@
         <aliyun-oss.version>3.12.0</aliyun-oss.version>
         <activiti.version>5.22.0</activiti.version>
         <minio.version>3.0.10</minio.version>
+        <core-renderer.version>R8</core-renderer.version>
+        <itext.version>2.0.8</itext.version>
     </properties>
     <dependencies>
         <dependency>
@@ -123,6 +125,18 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/core-renderer -->
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>core-renderer</artifactId>
+            <version>${core-renderer.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.lowagie/itext -->
+        <dependency>
+            <groupId>com.lowagie</groupId>
+            <artifactId>itext</artifactId>
+            <version>${itext.version}</version>
         </dependency>
 
     </dependencies>
