@@ -84,6 +84,7 @@ public class UserController {
         data.put("name", StrUtil.format("{}({})",user.getName(),enterprise.getName()));
         data.put("avatar",user.getAvatar());
         data.put("menus",session.getCurrentUserMenu());
+        data.put("menusMobile",session.getCurrentUserMenuMobile());
 
         return Result.success(data);
     }

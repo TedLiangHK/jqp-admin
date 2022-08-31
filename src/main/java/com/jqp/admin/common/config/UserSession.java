@@ -1,10 +1,10 @@
 package com.jqp.admin.common.config;
 
-import com.jqp.admin.common.CrudData;
-import com.jqp.admin.common.Result;
 import lombok.Data;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author hyz
@@ -20,6 +20,9 @@ public class UserSession implements java.io.Serializable{
     private Long deptId;
     private Set<String> buttonCodes;
     private Set<String> urls;
+    // pc后台
     List<Map<String, Object>> currentUserMenu;
+    //移动端
+    List<Map<String, Object>> currentUserMenuMobile;
 
 }

@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
+import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -481,9 +482,17 @@ public class PageServiceImpl  implements PageService {
 
     @Override
     public Result<CrudData<Map<String, Object>>> queryAll(String pageCode) {
+        return this.queryAll(pageCode,null);
+    }
+
+    @Override
+    public Result<CrudData<Map<String, Object>>> queryAll(String pageCode, Map<String, Object> params) {
         PageParam pageParam = new PageParam();
         pageParam.put("page",1);
         pageParam.put("perPage",Integer.MAX_VALUE);
+        if(params != null){
+            pageParam.putAll(params);
+        }
         return this.query(pageCode,pageParam);
     }
 }

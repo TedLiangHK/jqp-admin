@@ -128,8 +128,14 @@ public class SessionContext {
         userSession.setEnterpriseId(enterpriseId);
         request.getSession().setAttribute(Constants.USER_SESSION,userSession);
 
-        Result<CrudData<Map<String, Object>>> currentUserMenu = pageService.queryAll("currentUserMenu");
+        Map<String,Object> params = new HashMap<>();
+        params.put("menuType","1");//后台菜单
+        Result<CrudData<Map<String, Object>>> currentUserMenu = pageService.queryAll("currentUserMenu",params);
         userSession.setCurrentUserMenu(currentUserMenu.getData().getRows());
+
+        params.put("menuType","3");//移动端菜单
+        Result<CrudData<Map<String, Object>>> currentUserMenuMobile = pageService.queryAll("currentUserMenu",params);
+        userSession.setCurrentUserMenuMobile(currentUserMenuMobile.getData().getRows());
 
         if(!UserType.Admin.equals(userType)){
             Result<CrudData<Map<String, Object>>> currentUserButton = pageService.queryAll("currentUserButton");
