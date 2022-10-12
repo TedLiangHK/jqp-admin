@@ -7,11 +7,11 @@ import java.util.HashMap;
  */
 public class PageParam extends HashMap<String,Object> {
     public Integer getPage() {
-        return  (Integer) super.get("page");
+        return Integer.parseInt(this.getStr("page"));
     }
 
     public int getPerPage() {
-        return (Integer) super.get("perPage");
+        return Integer.parseInt(this.getStr("perPage"));
     }
 
     public String getStr(String key){
