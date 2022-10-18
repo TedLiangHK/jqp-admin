@@ -1,4 +1,6 @@
 
+##所有代码全部开源
+
 ###在线演示
 https://www.jqp-admin.com
 账号 admin
@@ -17,3 +19,12 @@ https://jqp-admin.com/jqp-doc.zip
 
 ###数据库以及markdown文档地址
 https://gitee.com/hyz79/jqp-doc
+
+###前后端不分离版本
+https://gitee.com/hyz79/jqp-admin
+
+###前后端分离版本-前端
+https://gitee.com/hyz79/jqp-admin-page
+
+###前后端分离版本-后端
+https://gitee.com/hyz79/jqp-admin-rest
