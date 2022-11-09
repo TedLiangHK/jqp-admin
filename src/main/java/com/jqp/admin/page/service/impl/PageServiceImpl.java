@@ -80,7 +80,7 @@ public class PageServiceImpl  implements PageService {
         List<String> resultNames = page.getResultFields().stream().map(f -> f.getField()).collect(Collectors.toList());
         for(PageQueryField field:queryFields){
             String fieldName = field.getField();
-            if(!resultNames.contains(fieldName)){
+            if(!resultNames.contains(fieldName) && !resultNames.contains(fieldName.replace("_from","").replace("_to",""))){
                 //log.warn("{},{}查询,字段{}不在结果字段里面,无法作为查询条件,请检查配置",page.getName(),page.getCode(),fieldName);
                 continue;
             }

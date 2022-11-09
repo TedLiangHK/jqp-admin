@@ -73,7 +73,13 @@ public class Opt {
             if(isLike(opt)){
                 realValue = StrUtil.format("%{}%",realValue);
             }
-            sql.append(StrUtil.format(" and {} {} ? ",field,sqlOpt));
+            String nfield = field;
+            if(opt.startsWith("large") && field.endsWith("_from")){
+                nfield = field.replace("_from","");
+            }else if(opt.startsWith("less") && field.endsWith("_to")){
+                nfield = field.replace("_to","");
+            }
+            sql.append(StrUtil.format(" and {} {} ? ",nfield,sqlOpt));
             values.add(realValue);
         }else{
             List<Object> realValues = DataType.getValues(type, value, format);

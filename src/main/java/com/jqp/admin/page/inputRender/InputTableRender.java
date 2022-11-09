@@ -27,16 +27,20 @@ public class InputTableRender extends InputDefaultRender{
         String refField = arr[1];
 
         config.put("type","input-table");
-        config.put("addable",true);
-        config.put("removable",true);
+        FormField srcFormField = (FormField) field;
+        if(!Whether.YES.equals(srcFormField.getDisabled())){
+            config.put("addable",true);
+            config.put("removable",true);
+            config.put("draggable",true);
+        }
         config.put("needConfirm",false);
-        config.put("draggable",true);
         config.put("headerToolbar",new String[]{"filter-toggler"});
 
         List<Map<String,Object>> columns = new ArrayList<>();
         FormService formService = SpringContextUtil.getBean(FormService.class);
         Form form = formService.get(formCode);
         List<FormField> formFields = form.getFormFields();
+
         for(FormField formField:formFields){
             //序号字段也隐藏
             if(Whether.YES.equals(formField.getHidden()) || "seq".equals(formField.getField())){
@@ -44,6 +48,9 @@ public class InputTableRender extends InputDefaultRender{
             }
             Map<String, Object> fieldConfig = formService.buildFormField(form, formField);
             columns.add(fieldConfig);
+            if(Whether.YES.equals(srcFormField.getDisabled())){
+                fieldConfig.put("disabled",true);
+            }
         }
         config.put("columns",columns);
     }
