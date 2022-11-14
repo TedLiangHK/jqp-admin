@@ -33,4 +33,10 @@ public interface FormDao {
             @CacheEvict(value = "form",key = "#form.getCode()")
     })
     void del(Form form);
+
+    @Caching(evict = {
+            @CacheEvict(value = "form", key = "#form.getId()"),
+            @CacheEvict(value = "form",key = "#form.getCode()")
+    })
+    void delCache(Form form);
 }

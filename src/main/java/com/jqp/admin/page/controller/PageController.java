@@ -82,6 +82,7 @@ public class PageController {
             return Result.success();
         }
         Page copy = pageService.get(id);
+        pageService.delCache(copy);
         copy.setId(null);
         copy.setCode(copy.getCode()+"_copy");
         return Result.success(copy);

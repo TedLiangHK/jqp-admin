@@ -22,4 +22,5 @@ public interface FormService {
     Map<String,Object> buildFormField(Form form, FormField formField);
 
     <T extends BaseData> T getObj(T t,String formCode);
+    void delCache(Form form);
 }

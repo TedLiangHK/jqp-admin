@@ -495,4 +495,9 @@ public class PageServiceImpl  implements PageService {
         }
         return this.query(pageCode,pageParam);
     }
+
+    @Override
+    public void delCache(Page page) {
+        pageDao.delCache(page);
+    }
 }

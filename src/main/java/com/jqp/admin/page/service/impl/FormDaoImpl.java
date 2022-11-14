@@ -103,4 +103,9 @@ public class FormDaoImpl implements FormDao {
         //删除表单时， 未删除页面上关联此表单的按钮
         jdbcService.delete(form.getId(), "form");
     }
+
+    @Override
+    public void delCache(Form form) {
+
+    }
 }

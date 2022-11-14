@@ -97,6 +97,7 @@ public class FormController {
             return Result.success();
         }
         Form copy = formService.get(id);
+        formService.delCache(copy);
         copy.setId(null);
         copy.setCode(copy.getCode()+"_copy");
         return Result.success(copy);

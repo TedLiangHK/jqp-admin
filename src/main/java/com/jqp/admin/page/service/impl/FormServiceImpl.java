@@ -370,4 +370,9 @@ public class FormServiceImpl implements FormService {
             form.getFormFields().add(field);
         }
     }
+
+    @Override
+    public void delCache(Form form) {
+        formDao.delCache(form);
+    }
 }
