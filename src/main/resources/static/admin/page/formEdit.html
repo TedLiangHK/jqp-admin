@@ -78,11 +78,11 @@
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
 					</template>
 				</el-table-column>
-				<el-table-column fixed  label="字段" width="180" >
+				<el-table-column fixed  label="字段" width="300" >
 					<template  #default="scope">
 						<div class='el_input'>
-							<div class="el-input__wrapper">
-								<input class="el-input__inner" v-model.lazy="scope.row.field" />
+							<div class="el-input__wrapper" style="width:100%;">
+								<input class="el-input__inner" style="width:100%;" v-model.lazy="scope.row.field" />
 							</div>
 						</div>
 					</template>
@@ -317,10 +317,17 @@
 						</el-select>
 					</template>
 				</el-table-column>
-				<el-table-column label="操作配置" width="300" >
+				<el-table-column label="操作配置" width="400" >
 					<template  #default="scope">
 						<div class='el-textarea'>
-							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.optionValue" style="height:80px;"></textarea>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.optionValue" placeholder="表单:配置表单编号
+iframe:配置url地址,可携带参数url?id=${id}&pageCode=${code}
+弹出页面:配置页面编码,关联字段或者页面编号?关联字段1=${值字段1}&关联字段2=${值字段2}
+请求:get:/xxx?id=${id}&name=${xxx}
+post:/xxx(会携带)requestBody参数
+打开新窗口:配置url地址
+批量操作可以携带url?ids=${ids}参数
+" style="height:80px;"></textarea>
 						</div>
 					</template>
 				</el-table-column>
@@ -433,7 +440,6 @@
           };
         },
 		mounted(){
-        	console.info(this.$refs.form);
         	let me = this;
 			let id = $.getUrlParam("id");
 			let type = $.getUrlParam("type");
@@ -463,6 +469,10 @@
 		methods:{
 			onSubmit(){
 				let me = this;
+				if(this.form.formFields.length == 0){
+					ElementPlus.ElMessage("请配置表单字段");
+					return;
+				}
 				this.$refs.form.validate((valid,fields)=>{
 					if(valid){
 						$.ajax({
