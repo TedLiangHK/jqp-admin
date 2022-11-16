@@ -501,6 +501,8 @@ iframe:配置url地址携带参数?key=${value}"  v-model.lazy="scope.row.refPag
 
     </div>
     <script>
+		let tableHeight = $(window).height() -90;
+		$("el-table").attr("height",tableHeight);
 		// 获取页面 url 参数
 		$.getUrlParam = function (name) {
 			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");

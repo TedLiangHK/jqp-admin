@@ -417,6 +417,8 @@ post:/xxx(会携带)requestBody参数
 
     </div>
     <script>
+		let tableHeight = $(window).height() -90;
+		$("el-table").attr("height",tableHeight);
 		// 获取页面 url 参数
 		$.getUrlParam = function (name) {
 			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
