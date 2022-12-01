@@ -15,9 +15,6 @@ https://jqp-admin.com
 ## pdf文档地址 
 https://jqp-admin.com/doc.pdf
 
-## 数据库以及markdown文档下载
-https://jqp-admin.com/jqp-doc.zip
-
 ## 数据库以及markdown文档地址
 https://gitee.com/hyz79/jqp-doc
 
