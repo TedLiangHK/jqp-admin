@@ -69,7 +69,7 @@
 			<el-button type="primary" @click="onAddResultField">添加</el-button>
 			-->
 			<el-button type="primary" @click="onReload">加载字段</el-button>
-			<el-table :data="page.resultFields" :default-sort="{ prop: 'seq', order: 'ascending' }" border height="500" >
+			<el-table :data="page.resultFields"  border height="500" >
 				<el-table-column fixed prop='seq' sortable   label="序号" width="200" >
 					<template  #default="scope">
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
@@ -148,7 +148,7 @@
 		</el-tab-pane>
 		<el-tab-pane label="查询条件" name="queryFields"  >
 			  <el-button type="primary" @click="onAddQueryField">添加</el-button>
-			  <el-table :data="page.queryFields" :default-sort="{ prop: 'seq', order: 'ascending' }" border height="500" >
+			  <el-table :data="page.queryFields"  border height="500" >
 				  <el-table-column fixed prop='seq' sortable   label="序号" width="200" >
 					  <template  #default="scope">
 						  <el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
@@ -349,7 +349,7 @@
 		</el-tab-pane>
 		<el-tab-pane label="页面按钮" name="pageButton">
 			<el-button type="primary" @click="onAddButton">添加</el-button>
-			<el-table :data="page.pageButtons" :default-sort="{ prop: 'seq', order: 'ascending' }" border  style="width: 100%" height="500">
+			<el-table :data="page.pageButtons"  border  style="width: 100%" height="500">
 				<el-table-column fixed prop='seq' sortable   label="序号" width="200" >
 					<template  #default="scope">
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
@@ -448,7 +448,7 @@ post:/xxx(会携带)requestBody参数
 		</el-tab-pane>
 		<el-tab-pane label="页面关联" name="pageRef">
 			<el-button type="primary" @click="onAddRef">添加</el-button>
-			<el-table :data="page.pageRefs" :default-sort="{ prop: 'seq', order: 'ascending' }" border  style="width: 100%" height="500">
+			<el-table :data="page.pageRefs"  border  style="width: 100%" height="500">
 				<el-table-column fixed prop='seq' sortable   label="序号" width="200" >
 					<template  #default="scope">
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />

@@ -8,10 +8,12 @@ import com.jqp.admin.page.data.FormRef;
 import com.jqp.admin.page.service.FormDao;
 import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageDao;
+import com.jqp.admin.util.SeqComparator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,7 +31,9 @@ public class FormDaoImpl implements FormDao {
     @Transactional
     public void save(Form form) {
         jdbcService.saveOrUpdate(form);
-
+        Collections.sort(form.getFormButtons(), SeqComparator.instance);
+        Collections.sort(form.getFormFields(), SeqComparator.instance);
+        Collections.sort(form.getFormRefs(), SeqComparator.instance);
 
         jdbcService.delete("delete from form_field where form_id = ? ", form.getId());
         int seq = 0;

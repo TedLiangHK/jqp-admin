@@ -3,10 +3,12 @@ package com.jqp.admin.page.service.impl;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.PageDao;
+import com.jqp.admin.util.SeqComparator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 @Service("pageDao")
@@ -67,6 +69,11 @@ public class PageDaoImpl implements PageDao {
         jdbcService.saveOrUpdate(page);
         jdbcService.delete("delete from page_result_field where page_id = ? ", page.getId());
         int seq = 0;
+
+        Collections.sort(page.getPageButtons(), SeqComparator.instance);
+        Collections.sort(page.getResultFields(), SeqComparator.instance);
+        Collections.sort(page.getPageRefs(), SeqComparator.instance);
+        Collections.sort(page.getQueryFields(), SeqComparator.instance);
         for (PageResultField field : page.getResultFields()) {
             field.setId(null);
             field.setPageId(page.getId());

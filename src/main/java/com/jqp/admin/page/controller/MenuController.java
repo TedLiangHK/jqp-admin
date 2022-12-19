@@ -15,7 +15,9 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.data.MenuUrl;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.UrlUtil;
+import com.jqp.admin.util.Util;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -259,6 +261,42 @@ public class MenuController {
             }
         }else if(ActionType.Ajax.equals(btn.getOptionType())){
             add(btn.getCode(),parentName+"-"+btn.getLabel(),btn.getOptionValue(),menuUrls);
+        }
+    }
+
+
+    @GetMapping("/generateCode")
+    public Result generateCode(){
+        List<SysMenu> sysMenus = jdbcService.find(SysMenu.class);
+        sysMenus = Util.buildTree(sysMenus);
+        List<BaseData> updates = new ArrayList<>();
+        generateCode("",sysMenus,updates);
+        jdbcService.bathSaveOrUpdate(updates);
+
+        return Result.success();
+    }
+
+    private void generateCode(String prefix,List<SysMenu> sysMenus,List<BaseData> updates){
+        for(int i=0;i<sysMenus.size();i++){
+            SysMenu sysMenu = sysMenus.get(i);
+            int seq = i+1;
+            sysMenu.setSeq(seq*10);
+            String oldCode = sysMenu.getMenuCode();
+            sysMenu.setMenuCode(prefix+StringUtil.getAddCode(seq+"","0",2));
+            updates.add(sysMenu);
+            if(Whether.YES.equals(sysMenu.getWhetherButton())){
+                List<PageButton> pageButtons = jdbcService.find(PageButton.class, "code", oldCode);
+                for(PageButton pageButton:pageButtons){
+                    pageButton.setCode(sysMenu.getMenuCode());
+                    updates.add(pageButton);
+                }
+                List<FormButton> formButtons = jdbcService.find(FormButton.class, "code", oldCode);
+                for(FormButton formButton:formButtons){
+                    formButton.setCode(sysMenu.getMenuCode());
+                    updates.add(formButton);
+                }
+            }
+            generateCode(sysMenu.getMenuCode(),sysMenu.getChildren(),updates);
         }
     }
 }

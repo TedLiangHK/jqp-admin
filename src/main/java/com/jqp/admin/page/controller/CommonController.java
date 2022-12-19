@@ -12,10 +12,12 @@ import com.jqp.admin.page.constants.ComponentType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
+import com.jqp.admin.page.service.FormEvent;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.CollectionUtil;
+import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -194,6 +196,13 @@ public class CommonController {
         if(!call.isSuccess()){
             return call;
         }
+        if(StringUtils.isNotBlank(form.getFormEvent())){
+            FormEvent formEvent = SpringContextUtil.getBean(form.getFormEvent());
+            Result result = formEvent.beforeSave(obj, tableName, form);
+            if(result!= null && !result.isSuccess()){
+                return result;
+            }
+        }
 
         final Map<String,Object> dbObj = obj;
         try{
@@ -219,6 +228,13 @@ public class CommonController {
                 Result<String> r = apiService.call(form.getAfterApi(), context);
                 if(!r.isSuccess()){
                     throw new RuntimeException(r.getMsg());
+                }
+                if(StringUtils.isNotBlank(form.getFormEvent())){
+                    FormEvent formEvent = SpringContextUtil.getBean(form.getFormEvent());
+                    Result result = formEvent.afterSave(dbObj, tableName, form);
+                    if(result!= null && !result.isSuccess()){
+                        throw new RuntimeException(result.getMsg());
+                    }
                 }
             });
         }catch (Exception e){
@@ -563,6 +579,10 @@ public class CommonController {
                     data.putAll(obj);
                 }
             }
+        }
+        if(StringUtils.isNotBlank(form.getFormEvent())){
+            FormEvent formEvent = SpringContextUtil.getBean(form.getFormEvent());
+            formEvent.init(data,form);
         }
         return Result.success(data);
     }

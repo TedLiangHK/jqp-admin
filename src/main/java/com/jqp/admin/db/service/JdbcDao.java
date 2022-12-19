@@ -18,6 +18,7 @@ public interface JdbcDao {
     Result<PageData<Map<String,Object>>> query(PageParam pageParam, String sql,Object... values);
     <T> List<T> find(String sql,Class<T> clz,Object ...args);
     List<Map<String,Object>> find(String sql, Object ...args);
+    <T> List<T> find(Class<T> clz);
     Map<String,Object> findOne(String sql, Object ...args);
     <T> List<T> find(Class<T> clz,String[] fields,Object[] args);
     <T> T findOne(Class<T> clz,String[] fields,Object[] args);

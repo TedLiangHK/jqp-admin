@@ -46,6 +46,9 @@ public class Form extends BaseData {
     //后置接口
     private String afterApi = "";
 
+    //表单事件
+    private String formEvent = "";
+
     public String getInitSql() {
         return initSql == null ? "" : initSql;
     }
