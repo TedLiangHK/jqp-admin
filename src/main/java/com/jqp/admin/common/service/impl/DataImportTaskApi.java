@@ -111,7 +111,7 @@ public class DataImportTaskApi implements DynamicTaskApi {
                     String[] splitStr = StringUtil.splitStr(field.getColumnFormat(), ",");
                     //表
                     String table = StringUtil.toSqlColumn(splitStr[0]);
-                    TableInfo tableInfo = tableService.tableInfo(table).getData();
+                    TableInfo tableInfo = tableService.get(table).getData();
                     if(tableInfo == null){
                         throw new RuntimeException("关联表不存在["+table+"]");
                     }
@@ -120,7 +120,7 @@ public class DataImportTaskApi implements DynamicTaskApi {
                 }
             }
 
-            List<String> cols = tableService.tableInfo(template.getTableName()).getData().getColumnInfos().stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
+            List<String> cols = tableService.get(template.getTableName()).getData().getColumnInfos().stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
             tableCache.put(template.getTableName(),cols);
 
             MultiValueMap<String,Integer> keyRowsMap = new LinkedMultiValueMap<>();

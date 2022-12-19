@@ -52,12 +52,12 @@ public class TableInfoController {
 
     @RequestMapping("/tableInfo")
     public Result<TableInfo> tableInfo(String tableName){
-        return tableService.tableInfo(tableName);
+        return tableService.get(tableName);
     }
 
     @RequestMapping("/getJson")
     public Result getJson(String tableName){
-        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> tableInfo = tableService.get(tableName);
         String json = JSONUtil.toJsonPrettyStr(tableInfo.getData());
         return Result.success(MapUtil.builder().put("json",json).build());
     }
@@ -65,7 +65,7 @@ public class TableInfoController {
     public Result saveJson(@RequestBody   Map map){
         String json = (String) map.get("json");
         TableInfo tableInfo = JSONUtil.toBean(json, TableInfo.class);
-        Result<TableInfo> oldTableInfo = tableService.tableInfo(tableInfo.getTableName());
+        Result<TableInfo> oldTableInfo = tableService.get(tableInfo.getTableName());
         if(oldTableInfo.getData() == null){
             tableInfo.setOldTableName(null);
         }
@@ -74,7 +74,7 @@ public class TableInfoController {
 
     @RequestMapping("/copyTableInfo")
     public Result<TableInfo> copyTableInfo(String tableName){
-        Result<TableInfo> copyTableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> copyTableInfo = tableService.get(tableName);
         if(copyTableInfo.isSuccess()){
             TableInfo data = copyTableInfo.getData();
             data.setOldTableName(null);
@@ -113,7 +113,7 @@ public class TableInfoController {
     }
     @RequestMapping("/oneTouch")
     public Result oneTouch(String tableName){
-        TableInfo tableInfo = tableService.tableInfo(tableName).getData();
+        TableInfo tableInfo = tableService.get(tableName).getData();
         String pageCode = StringUtil.toFieldColumn(tableName);
         Page page = pageService.get(pageCode);
         if(page == null){

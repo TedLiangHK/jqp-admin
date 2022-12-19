@@ -86,7 +86,7 @@ public class LogServiceImpl implements LogService {
             operation = "修改";
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(beforeObj.get("id").toString()));
-            Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+            Result<TableInfo> tableInfo = tableService.get(tableName);
             List<ColumnInfo> columnInfos = tableInfo.getData().getColumnInfos();
             boolean isUpdate = false;
             for(ColumnInfo columnInfo:columnInfos){

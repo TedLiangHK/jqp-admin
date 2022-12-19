@@ -42,7 +42,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         String clzName = obj.getClass().getSimpleName();
         String tableName = StringUtil.toSqlColumn(clzName);
-        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> tableInfo = tableService.get(tableName);
         if(!tableInfo.isSuccess()){
             throw new RuntimeException("找不到表:"+tableName);
         }
@@ -89,7 +89,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         if(obj == null){
             return;
         }
-        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> tableInfo = tableService.get(tableName);
         if(!tableInfo.isSuccess()){
             throw new RuntimeException("找不到表:"+tableName);
         }
@@ -133,7 +133,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         }
         String clzName = obj.getClass().getSimpleName();
         String tableName = StringUtil.toSqlColumn(clzName);
-        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> tableInfo = tableService.get(tableName);
         if(!tableInfo.isSuccess()){
             throw new RuntimeException("找不到表:"+tableName);
         }
@@ -170,7 +170,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
         if(id == null){
             throw new RuntimeException("更新失败,id不能为空");
         }
-        Result<TableInfo> tableInfo = tableService.tableInfo(tableName);
+        Result<TableInfo> tableInfo = tableService.get(tableName);
         if(!tableInfo.isSuccess()){
             throw new RuntimeException("找不到表:"+tableName);
         }

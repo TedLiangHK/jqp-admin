@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.config.DbConfig;
 import com.jqp.admin.db.data.*;
 import com.jqp.admin.db.service.JdbcDao;
@@ -12,6 +13,7 @@ import com.jqp.admin.db.service.TableService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 @Service("tableService")
 @ConditionalOnProperty(value="db.type",havingValue = "mysql")
 @Slf4j
-public class MysqlTableServiceImpl implements TableService {
+public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo>> implements TableService {
     @Resource
     private DbConfig dbConfig;
 
@@ -58,6 +60,11 @@ public class MysqlTableServiceImpl implements TableService {
     private String getTableSql(){
         //排除工作流表
         return "select t.TABLE_NAME,t.TABLE_COMMENT,t.TABLE_ROWS from "+dbConfig.getManageSchema()+".`TABLES` t where t.TABLE_SCHEMA = '"+dbConfig.getSchema()+"' and t.table_name not like 'act_%'";
+    }
+
+    @Override
+    protected Result<TableInfo> load(String key) {
+        return tableInfo(key);
     }
 
     @Override
@@ -180,7 +187,7 @@ public class MysqlTableServiceImpl implements TableService {
         }
 
         //更新表
-        Result<TableInfo> oldTable = this.tableInfo(tableInfo.getOldTableName());
+        Result<TableInfo> oldTable = this.get(tableInfo.getOldTableName());
         if(!oldTable.isSuccess()){
             return Result.error("表不存在");
         }
@@ -279,6 +286,10 @@ public class MysqlTableServiceImpl implements TableService {
                 jdbcDao.update("删除索引",sql);
             }
         }
+        if(StringUtils.isNotBlank(tableInfo.getOldTableName())){
+            super.invalid(tableInfo.getOldTableName());
+        }
+        super.invalid(tableInfo.getTableName());
         return Result.success();
     }
 
@@ -286,6 +297,7 @@ public class MysqlTableServiceImpl implements TableService {
     public Result dropTable(String tableName) {
         String sql = StrUtil.format(" drop table {}", tableName);
         jdbcDao.update("删除表",sql);
+        super.invalid(tableName);
         return Result.success();
     }
 
@@ -314,8 +326,13 @@ public class MysqlTableServiceImpl implements TableService {
     }
 
     @Override
+    protected String getFullKey(String key) {
+        return StrUtil.format("tableInfo:{}",key.toUpperCase());
+    }
+
+    @Override
     public Map<String, String> generateCode(String tableName) {
-        Result<TableInfo> result = this.tableInfo(tableName);
+        Result<TableInfo> result = this.get(tableName);
         TableInfo tableInfo = result.getData();
         List<ColumnInfo> columnInfos = tableInfo.getColumnInfos();
         Map<String,String> java = new HashMap<>();
