@@ -7,10 +7,12 @@ import lombok.Data;
  */
 @Data
 public class ForeignKey {
+    //原外键名称
+    private String oldConstraintName;
     //外键名称
     private String constraintName;
-    //主表
-    private String tableName;
+//    //主表
+//    private String tableName;
     //字段名
     private String columnName;
     //关联表

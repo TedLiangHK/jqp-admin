@@ -262,7 +262,7 @@
 				  </el-table-column>
 				  <el-table-column label="组件类型" width="180"  >
 					  <template  #default="scope">
-						  <el-select v-model="scope.row.componentType" placeholder="请选择" clearable >
+						  <el-select v-model="scope.row.componentType" filterable  placeholder="请选择" clearable >
 							  <el-option label="文本框" value="input-text" ></el-option>
 							  <el-option label="多行文本" value="textarea" ></el-option>
 							  <el-option label="下拉框" value="select" ></el-option>

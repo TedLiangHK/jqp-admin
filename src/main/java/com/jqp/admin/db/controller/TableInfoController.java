@@ -99,14 +99,6 @@ public class TableInfoController {
     public Result dropTable(String tableName){
         return tableService.dropTable(tableName);
     }
-    @RequestMapping("/saveForeignKey")
-    public Result saveForeignKey(@RequestBody ForeignKey foreignKey){
-        return tableService.saveForeignKey(foreignKey);
-    }
-    @RequestMapping("/dropForeignKey")
-    public Result dropForeignKey(String tableName,String constraintName){
-        return tableService.dropForeignKey(tableName,constraintName);
-    }
     @RequestMapping("/generateJavaCode")
     public Result generateJavaCode(String tableName){
         return Result.success(tableService.generateCode(tableName));

@@ -45,7 +45,7 @@
 				</el-table-column>
 				<el-table-column label="类型" width="300" >
 					<template  #default="scope">
-						<el-select v-model="scope.row.columnType" placeholder="请选择" clearable  >
+						<el-select v-model="scope.row.columnType"  filterable placeholder="请选择" clearable  >
 							<el-option label="整数(11)" value="int(11)"  ></el-option>
 							<el-option label="整数(20)" value="bigint(20)" ></el-option>
 							<el-option label="字符串(20)" value="varchar(20)" ></el-option>
@@ -124,6 +124,53 @@
 				</el-table-column>
 			</el-table>
 		</el-tab-pane>
+		  <el-tab-pane label="外键" name="foreignKeys">
+			  <el-button type="primary" @click="onAddForeignKey">添加</el-button>
+			  <el-table :data="table.foreignKeys"  border  style="width: 100%" height="500">
+				  <el-table-column  label="名称" fixed width="300" >
+					  <template  #default="scope">
+						  <div class='el_input'>
+							  <div class="el-input__wrapper" style="width:100%;" >
+								  <input class="el-input__inner" style="width:100%;" v-model.lazy="scope.row.constraintName" />
+							  </div>
+						  </div>
+					  </template>
+				  </el-table-column>
+				  <el-table-column  label="字段" fixed width="300" >
+					  <template  #default="scope">
+						  <div class='el_input'>
+							  <div class="el-input__wrapper" style="width:100%;" >
+								  <input class="el-input__inner" style="width:100%;" v-model.lazy="scope.row.columnName" />
+							  </div>
+						  </div>
+					  </template>
+				  </el-table-column>
+				  <el-table-column  label="关联表" fixed width="300" >
+					  <template  #default="scope">
+						  <div class='el_input'>
+							  <div class="el-input__wrapper" style="width:100%;" >
+								  <input class="el-input__inner" style="width:100%;" v-model.lazy="scope.row.referencedTableName" />
+							  </div>
+						  </div>
+					  </template>
+				  </el-table-column>
+				  <el-table-column  label="关联字段" fixed width="300" >
+					  <template  #default="scope">
+						  <div class='el_input'>
+							  <div class="el-input__wrapper" style="width:100%;" >
+								  <input class="el-input__inner" style="width:100%;" v-model.lazy="scope.row.referencedColumnName" />
+							  </div>
+						  </div>
+					  </template>
+				  </el-table-column>
+				  <el-table-column fixed="right" label="操作" width="200" >
+					  <template  #default="{row,column,$index}">
+						  <el-button type="primary" @click="onAddForeignKey(row,$index)">添加</el-button>
+						  <el-button type="primary" @click="onDeleteForeignKey(row,$index)">删除</el-button>
+					  </template>
+				  </el-table-column>
+			  </el-table>
+		  </el-tab-pane>
 	  </el-tabs>
 
     </div>
@@ -141,7 +188,8 @@
         data() {
 		  let table = {
 		  	columnInfos:[],
-			indexInfos:[]
+			indexInfos:[],
+			foreignKeys:[],
 		  };
           return {
 			table:table,
@@ -218,6 +266,12 @@
 			},
 			onAddIndex(row,index){
 				this.pushArr(this.table.indexInfos,row,index,'index');
+			},
+			onDeleteForeignKey(row,index){
+				this.deleteItem(this.table.foreignKeys,row,index,'foreignKey');
+			},
+			onAddForeignKey(row,index){
+				this.pushArr(this.table.foreignKeys,row,index,'foreignKey');
 			},
 			deleteItem(arr,row,index,type){
 				arr.splice(index, 1);

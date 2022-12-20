@@ -1,6 +1,7 @@
 package com.jqp.admin.db.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
@@ -92,21 +93,37 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
         String indexSql = "show keys from "+tableName;
         List<Map<String, Object>> indexList = jdbcDao.find(indexSql);
 
-        String foreignKeySql = StrUtil.format("select\n" +
-                "s.CONSTRAINT_NAME\n" +
-                "from {}.KEY_COLUMN_USAGE s\n" +
-                "where s.TABLE_SCHEMA = '{}'\n" +
-                "and s.TABLE_NAME = '{}'\n" +
-                "and s.CONSTRAINT_SCHEMA <> 'PRIMARY'"
-                ,dbConfig.getManageSchema()
-                ,dbConfig.getSchema(),
-                tableName);
-        List<Map<String, Object>> maps = jdbcDao.find(foreignKeySql);
+        String foreignKeySql = "select\n" +
+                "    s.CONSTRAINT_NAME OLD_CONSTRAINT_NAME,\n" +
+                "    s.CONSTRAINT_NAME,\n" +
+                "    s.COLUMN_NAME,\n" +
+                "    s.REFERENCED_TABLE_NAME,\n" +
+                "    s.REFERENCED_COLUMN_NAME,\n" +
+                "    rc.COLUMN_COMMENT REFERENCED_COLUMN_COMMENT\n" +
+                "from INFORMATION_SCHEMA.KEY_COLUMN_USAGE s\n" +
+                "         left join information_schema.`TABLES` t on t.TABLE_NAME = s.TABLE_NAME and t.TABLE_SCHEMA = s.TABLE_SCHEMA\n" +
+                "         left join information_schema.`COLUMNS` tc on tc.TABLE_NAME = s.TABLE_NAME and tc.TABLE_SCHEMA = s.TABLE_SCHEMA and tc.COLUMN_NAME = s.COLUMN_NAME\n" +
+                "         left join information_schema.`TABLES` r on r.TABLE_NAME = s.REFERENCED_TABLE_NAME and r.TABLE_SCHEMA = s.TABLE_SCHEMA\n" +
+                "         left join information_schema.`COLUMNS` rc on rc.TABLE_NAME = s.REFERENCED_TABLE_NAME and rc.TABLE_SCHEMA = s.TABLE_SCHEMA and rc.COLUMN_NAME = s.REFERENCED_COLUMN_NAME\n" +
+                "where s.table_schema ='${schema}'\n" +
+                "  and s.REFERENCED_COLUMN_NAME is not null\n" +
+                "  and upper(t.TABLE_NAME) = upper(?)";
+        foreignKeySql = TemplateUtil.getValue(foreignKeySql, MapUtil.builder("schema", dbConfig.getSchema()).map());
+//        String foreignKeySql = StrUtil.format("select\n" +
+//                "s.CONSTRAINT_NAME\n" +
+//                "from {}.KEY_COLUMN_USAGE s\n" +
+//                "where s.TABLE_SCHEMA = '{}'\n" +
+//                "and s.TABLE_NAME = '{}'\n" +
+//                "and s.CONSTRAINT_SCHEMA <> 'PRIMARY'"
+//                ,dbConfig.getManageSchema()
+//                ,dbConfig.getSchema(),
+//                tableName);
+        List<ForeignKey> foreignKeys_ = jdbcDao.find(foreignKeySql,ForeignKey.class,tableInfo.getTableName());
         Set<String> foreignKeys = new HashSet<>();
-        maps.forEach(item->{
-            foreignKeys.add((String)item.get("constraintName"));
+        foreignKeys_.forEach(item->{
+            foreignKeys.add(item.getConstraintName());
         });
-
+        tableInfo.setForeignKeys(foreignKeys_);
 
         List<IndexInfo> indexInfos = new ArrayList<>();
         Map<String,IndexInfo> indexInfoMap = new HashMap<>();
@@ -183,6 +200,23 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
                 );
                 jdbcDao.update("添加索引",indexSql);
             });
+
+            tableInfo.getForeignKeys().forEach(foreignKey -> {
+                //增加外键
+                String foreignKeySql = StrUtil.format("alter table {} " +
+                                "add constraint {}  " +
+                                "foreign key({}) " +
+                                "REFERENCES {}({}) " +
+                                "ON DELETE CASCADE " +
+                                "ON UPDATE CASCADE",
+                        tableInfo.getTableName(),
+                        foreignKey.getConstraintName(),
+                        foreignKey.getColumnName(),
+                        foreignKey.getReferencedTableName(),
+                        foreignKey.getReferencedColumnName());
+                jdbcDao.update("增加外键",foreignKeySql);
+            });
+
             return Result.success();
         }
 
@@ -200,6 +234,22 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
             String sql = StrUtil.format("alter table {} comment ? ",tableInfo.getTableName());
             jdbcDao.update("修改表注释",sql,tableInfo.getTableComment());
         }
+
+        //更新字段
+        this.updateColumns(tableInfo,oldTableInfo);
+
+        //更新索引
+        this.updateIndex(tableInfo,oldTableInfo);
+
+        //更新外键
+        this.updateForeignKeys(tableInfo,oldTableInfo);
+
+        super.invalid(tableInfo.getTableName());
+        return Result.success();
+    }
+
+    //更新列
+    private void updateColumns(TableInfo tableInfo,TableInfo oldTableInfo){
         Map<String, ColumnInfo> oldColumnMap = oldTableInfo.getColumnInfos().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, c -> c));
         Set<String> names = new HashSet<>();
         //新增/修改字段
@@ -249,6 +299,11 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
                 jdbcDao.update("删除字段",sql);
             }
         }
+
+    }
+
+    //更新外键
+    private void updateIndex(TableInfo tableInfo,TableInfo oldTableInfo){
         Map<String, IndexInfo> oldIndexMap = oldTableInfo.getIndexInfos().stream().collect(Collectors.toMap(IndexInfo::getKeyName, c -> c));
 
         Set<String> indexNames = new HashSet<>();
@@ -286,11 +341,51 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
                 jdbcDao.update("删除索引",sql);
             }
         }
-        if(StringUtils.isNotBlank(tableInfo.getOldTableName())){
-            super.invalid(tableInfo.getOldTableName());
+    }
+    //更新外键
+    private void updateForeignKeys(TableInfo tableInfo,TableInfo oldTableInfo){
+        Map<String, ForeignKey> oldForeignKeyMap = oldTableInfo.getForeignKeys().stream().collect(Collectors.toMap(ForeignKey::getConstraintName, c -> c));
+
+        Set<String> foreignKeyNames = new HashSet<>();
+        //新增/修改索引
+        for(ForeignKey foreignKey:tableInfo.getForeignKeys()){
+
+            boolean newFk = false;
+            if(StrUtil.isBlank(foreignKey.getOldConstraintName())){
+                newFk = true;
+            }else{
+                foreignKeyNames.add(foreignKey.getOldConstraintName());
+                ForeignKey oldForeignKey = oldForeignKeyMap.get(foreignKey.getOldConstraintName());
+                if(!oldForeignKey.equals(foreignKey)){
+                    //修改索引,先删除,后添加
+                    String sql = StrUtil.format("alter table {} drop foreign key {}",tableInfo.getTableName(),oldForeignKey.getOldConstraintName());
+                    jdbcDao.update("删除外键",sql);
+                    newFk = true;
+                }
+            }
+            if(newFk){
+                //增加外键
+                String sql = StrUtil.format("alter table {} " +
+                                "add constraint {}  " +
+                                "foreign key({}) " +
+                                "REFERENCES {}({}) " +
+                                "ON DELETE CASCADE " +
+                                "ON UPDATE CASCADE",
+                        tableInfo.getTableName(),
+                        foreignKey.getConstraintName(),
+                        foreignKey.getColumnName(),
+                        foreignKey.getReferencedTableName(),
+                        foreignKey.getReferencedColumnName());
+                jdbcDao.update("增加外键",sql);
+            }
         }
-        super.invalid(tableInfo.getTableName());
-        return Result.success();
+        //删除外键
+        for(ForeignKey oldForeignKey:oldTableInfo.getForeignKeys()){
+            if(!foreignKeyNames.contains(oldForeignKey.getOldConstraintName())){
+                String sql = StrUtil.format("alter table {} drop foreign key {}",tableInfo.getTableName(),oldForeignKey.getOldConstraintName());
+                jdbcDao.update("删除外键",sql);
+            }
+        }
     }
 
     @Override
@@ -298,30 +393,6 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
         String sql = StrUtil.format(" drop table {}", tableName);
         jdbcDao.update("删除表",sql);
         super.invalid(tableName);
-        return Result.success();
-    }
-
-    @Override
-    public Result<Void> saveForeignKey(ForeignKey foreignKey) {
-        String sql = StrUtil.format("alter table {} " +
-                "add constraint {}  " +
-                "foreign key({}) " +
-                "REFERENCES {}({}) " +
-                "ON DELETE CASCADE " +
-                "ON UPDATE CASCADE",
-                foreignKey.getTableName(),
-                foreignKey.getConstraintName(),
-                foreignKey.getColumnName(),
-                foreignKey.getReferencedTableName(),
-                foreignKey.getReferencedColumnName());
-        jdbcDao.update("增加外键",sql);
-        return Result.success();
-    }
-
-    @Override
-    public Result<Void> dropForeignKey(String tableName,String constraintName) {
-        String sql = StrUtil.format("alter table {} drop foreign key {}",tableName,constraintName);
-        jdbcDao.update("删除外键",sql);
         return Result.success();
     }
 

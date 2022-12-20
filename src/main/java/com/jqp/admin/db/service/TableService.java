@@ -16,8 +16,5 @@ public interface TableService extends CacheService<Result<TableInfo>> {
 
     Result dropTable(String tableName);
 
-    Result<Void> saveForeignKey(ForeignKey foreignKey);
-    Result<Void> dropForeignKey(String tableName,String constraintName);
-
     Map<String,String> generateCode(String tableName);
 }
