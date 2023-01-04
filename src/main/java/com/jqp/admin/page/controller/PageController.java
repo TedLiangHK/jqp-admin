@@ -7,6 +7,8 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
@@ -27,6 +29,9 @@ import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -196,17 +201,24 @@ public class PageController {
 
         try{
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            String fn = page.getName() + sdf.format(new Date()) + ".csv";
+            String fn = page.getName() + sdf.format(new Date()) + ".xlsx";
             // 读取字符编码
             String utf = "UTF-8";
             // 设置响应
-            response.setContentType("application/ms-txt.numberformat:@");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setCharacterEncoding(utf);
             response.setHeader("Pragma", "public");
             response.setHeader("Cache-Control", "max-age=30");
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fn, utf));
-            response.setCharacterEncoding("GBK");
-            PrintWriter writer = response.getWriter();
+
+            ExcelWriter writer = ExcelUtil.getWriter(true);
+            DataFormat dataFormat = writer.getWorkbook().createDataFormat();
+
+            CellStyle cellStyle = writer.getCellStyle();
+            cellStyle.setDataFormat(dataFormat.getFormat("@"));
+            writer.getCellStyle().setAlignment(HorizontalAlignment.LEFT);
+
+//            PrintWriter writer = response.getWriter();
             List<String> fields = new ArrayList<>();
             List<String> titles = new ArrayList<>();
             List<ColumnData> columns = result.getData().getColumns();
@@ -214,24 +226,30 @@ public class PageController {
             columns.forEach(c->{
                 columnsMap.put(c.getName(),c);
             });
+            List<Integer> maxSize = new ArrayList<>();
             for(PageResultField resultField:page.getResultFields()){
                 if(!Whether.YES.equals(resultField.getHidden())){
                     fields.add(StringUtil.toFieldColumn(resultField.getField()));
                     titles.add(resultField.getLabel());
+                    maxSize.add(resultField.getLabel().length()*2+5);
                 }
             }
-            writer.println("\t"+StringUtil.concatStr(titles,",\t"));
+            writer.writeRow(titles);
             List<Map<String, Object>> rows = result.getData().getRows();
             for(Map<String,Object> row:rows){
-                writeTree(row,writer,fields,0,columnsMap);
+                writeTree(row,writer,fields,0,columnsMap,maxSize);
             }
-            writer.flush();
+            for(int i=0;i<maxSize.size();i++){
+                writer.setColumnWidth(i,maxSize.get(i));
+            }
+
+            writer.flush(response.getOutputStream(),false);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    private void writeTree(Map<String,Object> data,PrintWriter writer,List<String> fields,int len,Map<String,ColumnData> columnsMap){
+    private void writeTree(Map<String,Object> data, ExcelWriter writer, List<String> fields, int len, Map<String,ColumnData> columnsMap, List<Integer> maxSize){
         List<Object> rowDatas = new ArrayList<>();
         fields.forEach(field->{
             ColumnData columnData = columnsMap.get(field);
@@ -249,22 +267,39 @@ public class PageController {
         String pre = "";
         for(int i=0;i<len;i++){
             if(i==len-1){
-                pre += "  ";
+                pre += "--";
             }else{
-                pre += "    ";
+                pre += "----";
             }
         }
         if(len>0){
-            pre += "└";
+            pre += "--";
         }
+//        rowDatas.set(0,pre+rowDatas.get(0));
         List<Map<String,Object>> children = (List<Map<String, Object>>) data.get("children");
-        writer.println("\t"+pre+StringUtil.concatStr(rowDatas,",\t"));
+        for(int i=0;i<rowDatas.size();i++){
+            Integer curSize = maxSize.get(i);
+            Object o = rowDatas.get(i);
+            if(o!=null){
+                int size = o.toString().length()*2+5;
+                if(size>curSize){
+                    curSize = size;
+                    if(curSize>100){
+                        curSize = 100;
+                    }
+                    maxSize.set(i,curSize);
+                }
+            }
+        }
+        writer.writeRow(rowDatas);
+        //writer.println("\t"+pre+StringUtil.concatStr(rowDatas,",\t"));
         if(children != null){
             children.forEach(child->{
-                writeTree(child,writer,fields,len+1,columnsMap);
+                writeTree(child,writer,fields,len+1,columnsMap,maxSize);
             });
         }
     }
+
 
     private String checkPage(Page page){
         Map<String,Object> context = new HashMap<>();
