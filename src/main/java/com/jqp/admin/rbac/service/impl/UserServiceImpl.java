@@ -4,7 +4,6 @@ import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.rbac.constants.UserType;
 import com.jqp.admin.rbac.data.Enterprise;
 import com.jqp.admin.rbac.data.User;
-import com.jqp.admin.rbac.service.UserDao;
 import com.jqp.admin.rbac.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +14,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Resource
     private JdbcService jdbcService;
-
-    @Resource
-    private UserDao userDao;
 
     @Override
     public List<Enterprise> getUserEnterpriseList(User user) {
@@ -37,6 +33,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User get(Long id) {
-        return userDao.get(id);
+        return jdbcService.getById(User.class, id);
     }
 }

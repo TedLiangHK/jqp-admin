@@ -74,7 +74,7 @@ public class TableInfoController {
 
     @RequestMapping("/copyTableInfo")
     public Result<TableInfo> copyTableInfo(String tableName){
-        Result<TableInfo> copyTableInfo = tableService.get(tableName);
+        Result<TableInfo> copyTableInfo = tableService.tableInfo(tableName);
         if(copyTableInfo.isSuccess()){
             TableInfo data = copyTableInfo.getData();
             data.setOldTableName(null);

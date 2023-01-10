@@ -1,22 +1,16 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.jqp.admin.common.*;
-import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.data.Obj;
-import com.jqp.admin.db.data.ColumnMeta;
-import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.RefType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
@@ -38,13 +32,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/page")
@@ -87,7 +77,6 @@ public class PageController {
             return Result.success();
         }
         Page copy = pageService.get(id);
-        pageService.delCache(copy);
         copy.setId(null);
         copy.setCode(copy.getCode()+"_copy");
         return Result.success(copy);

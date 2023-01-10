@@ -2,6 +2,8 @@ package com.jqp.admin.page.inputRender;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -104,6 +106,14 @@ public class InputDefaultRender implements InputRender{
             List<Map<String, Object>> options = jdbcService.find(field.getOptionSql());
             config.put("options",options);
             config.remove("source");
+        }
+        if(StringUtils.isNotBlank(field.getExtraJson())){
+            try{
+                JSONObject json = JSONUtil.parseObj(field.getExtraJson());
+                config.putAll(json);
+            }catch (Exception e){
+                throw new RuntimeException(StrUtil.format("字段["+field.getLabel()+"]扩展json配置错误"));
+            }
         }
         this.extra(config,field);
         return config;

@@ -7,7 +7,8 @@ import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageDao;
+import com.jqp.admin.page.service.PageService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,10 +21,12 @@ import java.util.Map;
 public class PageButtonServiceImpl implements PageButtonService {
 
     @Resource
+    @Lazy
     private FormService formService;
 
     @Resource
-    private PageDao pageDao;
+    @Lazy
+    private PageService pageService;
 
     @Resource
     PageButtonDao pageButtonDao;
@@ -81,7 +84,7 @@ public class PageButtonServiceImpl implements PageButtonService {
 
     @Override
     public List<PageButton> byPageCode(String pageCode) {
-        Page page = pageDao.get(pageCode);
+        Page page = pageService.get(pageCode);
         if (page == null) {
             return new ArrayList<>();
         }
@@ -110,7 +113,7 @@ public class PageButtonServiceImpl implements PageButtonService {
 
     @Override
     public Page getPage(PageButton pageButton){
-        return pageDao.get(pageButton.getPageId());
+        return pageService.get(pageButton.getPageId());
     }
 
     @Override

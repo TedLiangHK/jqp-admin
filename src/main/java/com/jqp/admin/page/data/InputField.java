@@ -40,4 +40,9 @@ public class InputField extends BaseData {
 
     //标签提示
     private String labelRemark;
+
+    //扩展json配置
+    private String extraJson;
+
+
 }

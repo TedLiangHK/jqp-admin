@@ -5,29 +5,29 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.config.SessionContext;
+import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
-import com.jqp.admin.page.service.*;
+import com.jqp.admin.page.service.FormService;
+import com.jqp.admin.page.service.InputFieldService;
+import com.jqp.admin.page.service.PageButtonService;
+import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("formService")
 @Slf4j
-public class FormServiceImpl implements FormService {
-    @Resource
-    FormDao formDao;
+public class FormServiceImpl extends AbstractCacheService<Form> implements FormService {
     @Resource
     JdbcService jdbcService;
     @Resource
@@ -35,44 +35,80 @@ public class FormServiceImpl implements FormService {
     @Resource
     InputFieldService inputFieldService;
 
-    @Resource
-    PageButtonDao pageButtonDao;
-
-    @Resource
-    PageDao pageDao;
-
     @Override
     public void save(Form form){
        Form oForm = jdbcService.getById(Form.class, form.getId());
         if(oForm!=null && !form.getCode().equals(oForm.getCode())){
-            //修改表单code之后， 修改按钮关联表单的code
-            pageButtonDao.getByForm(oForm).forEach(pageButton -> {
-                pageButton.setOptionValue(form.getCode());
-                pageButtonDao.save(pageButton);
-                Page page = pageDao.get(pageButton.getPageId());
-                if(page != null){
-                    pageDao.delCache(page); //删除页面缓存
-                }
-            });
-
+            super.invalid(oForm.getCode());
         }
 
-        formDao.save(form);
+        jdbcService.saveOrUpdate(form);
+        Collections.sort(form.getFormButtons(), SeqComparator.instance);
+        Collections.sort(form.getFormFields(), SeqComparator.instance);
+        Collections.sort(form.getFormRefs(), SeqComparator.instance);
+
+        jdbcService.delete("delete from form_field where form_id = ? ", form.getId());
+        int seq = 0;
+        for (FormField item : form.getFormFields()) {
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(++seq);
+            jdbcService.saveOrUpdate(item);
+        }
+
+        jdbcService.delete("delete from form_ref where form_id = ? ", form.getId());
+        seq = 0;
+        for (FormRef item : form.getFormRefs()) {
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(++seq);
+            jdbcService.saveOrUpdate(item);
+        }
+
+        jdbcService.delete("delete from form_button where form_id = ? ", form.getId());
+        seq = 0;
+        for (FormButton item : form.getFormButtons()) {
+            item.setId(null);
+            item.setFormId(form.getId());
+            item.setSeq(++seq);
+            jdbcService.saveOrUpdate(item);
+        }
+        super.invalid(form.getCode());
     }
     @Override
     public Form get(Long id){
-        return formDao.get(id);
+        Form form = jdbcService.getById(Form.class, id);
+        return get(form);
     }
+
+    private Form get(Form form){
+        if(form == null || form.getId() == null){
+            return form;
+        }
+        List<FormField> formFields = jdbcService.find(FormField.class, "formId", form.getId());
+        form.setFormFields(formFields);
+
+        List<FormRef> formRefs = jdbcService.find(FormRef.class, "formId", form.getId());
+        form.setFormRefs(formRefs);
+
+        List<FormButton> formButtons = jdbcService.find(FormButton.class, "formId", form.getId());
+        form.setFormButtons(formButtons);
+        return form;
+    }
+
     @Override
-    public Form get(String code){
-        return formDao.get(code);
+    public Form load(String code){
+        Form form = jdbcService.findOne(Form.class, "code", code);
+        return get(form);
     }
 
     @Override
     public void del(Form form) {
-        //删除表单表时未删除， 页面上关联该表单的按钮， 请手工删除
-        // pageButtonDao.getByForm(form).forEach(pageButton -> pageButtonDao.del(pageButton));
-        formDao.del(form);
+        if (form == null || form.getId() == null) {
+            return;
+        }
+        jdbcService.delete(form);
+        super.invalid(form.getCode());
     }
 
     @Override
@@ -369,10 +405,5 @@ public class FormServiceImpl implements FormService {
             }
             form.getFormFields().add(field);
         }
-    }
-
-    @Override
-    public void delCache(Form form) {
-        formDao.delCache(form);
     }
 }

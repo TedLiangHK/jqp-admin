@@ -5,8 +5,6 @@ import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.service.PageButtonDao;
-import com.jqp.admin.page.service.PageDao;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

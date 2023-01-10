@@ -1,24 +1,19 @@
 package com.jqp.admin.page.service.impl;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
-import com.jqp.admin.page.constants.DataType;
-import com.jqp.admin.page.constants.Opt;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButton;
 import com.jqp.admin.page.data.PageButtonData;
 import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.service.InputFieldService;
 import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +29,12 @@ import java.util.Map;
 @Service("pageConfigService")
 public class PageConfigServiceImpl implements PageConfigService {
     @Resource
-    PageDao pageDao;
+    PageService pageService;
     @Resource
     InputFieldService inputFieldService;
     @Override
     public Map<String, Object> getSelectorConfig(String code,String field) {
-        Page page = pageDao.get(code);
+        Page page = pageService.get(code);
 
         InputStream in = PageConfigServiceImpl.class.getClassLoader().getResourceAsStream("ui-json-template/selector.json.vm");
         String template = IoUtil.readUtf8(in);
@@ -83,7 +77,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 
     @Override
     public Map<String, Object> getCurdJson(String code) {
-        Page page = pageDao.get(code);
+        Page page = pageService.get(code);
         Map<String,Object> params = new HashMap<>();
         params.put("pageTitle",page.getName());
         params.put("pageCode",code);

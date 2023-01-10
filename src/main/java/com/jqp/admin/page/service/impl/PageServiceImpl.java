@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
-import com.jqp.admin.common.data.Obj;
+import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
@@ -15,8 +15,8 @@ import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageDao;
 import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service("pageService")
-public class PageServiceImpl  implements PageService {
+public class PageServiceImpl extends AbstractCacheService<Page> implements PageService {
 
     @Resource
     JdbcService jdbcService;
@@ -37,34 +37,93 @@ public class PageServiceImpl  implements PageService {
     @Resource
     PageButtonService pageButtonService;
 
-    @Resource
-    SessionContext sessionContext;
-
-    @Resource
-    PageDao pageDao;
-
     @Override
-    public Page get(String pageCode) {
-        return pageDao.get(pageCode);
+    public Page load(String pageCode) {
+        Page page = jdbcService.findOne(Page.class, "code", pageCode);
+        this.get(page);
+        return page;
     }
 
     @Override
     public void del(Page page) {
-        pageDao.del(page);
+        if(page == null){
+            return;
+        }
+        jdbcService.delete(page);
+        super.invalid(page.getCode());
+    }
+
+    private void get(Page page) {
+        if(page == null){
+            return;
+        }
+        List<PageResultField> pageResultFields = jdbcService.find(PageResultField.class, "pageId", page.getId());
+        page.setResultFields(pageResultFields);
+
+        List<PageQueryField> pageQueryFields = jdbcService.find(PageQueryField.class, "pageId", page.getId());
+        page.setQueryFields(pageQueryFields);
+
+        List<PageButton> pageButtons = jdbcService.find(PageButton.class, "pageId", page.getId());
+        page.setPageButtons(pageButtons);
+
+        List<PageRef> pageRefs = jdbcService.find(PageRef.class, "pageId", page.getId());
+        page.setPageRefs(pageRefs);
     }
 
     @Override
     public void save(Page page) {
         Page oPage = jdbcService.getById(Page.class, page.getId());
         if(oPage!=null && !page.getCode().equals(oPage.getCode())){
-            pageDao.delCache(oPage); //修改页面code之后 ，删除原code页面缓存
+            super.invalid(oPage.getCode());
         }
-        pageDao.save(page);
+        jdbcService.saveOrUpdate(page);
+        jdbcService.delete("delete from page_result_field where page_id = ? ", page.getId());
+        int seq = 0;
+
+        Collections.sort(page.getPageButtons(), SeqComparator.instance);
+        Collections.sort(page.getResultFields(), SeqComparator.instance);
+        Collections.sort(page.getPageRefs(), SeqComparator.instance);
+        Collections.sort(page.getQueryFields(), SeqComparator.instance);
+        for (PageResultField field : page.getResultFields()) {
+            field.setId(null);
+            field.setPageId(page.getId());
+            field.setSeq(++seq);
+            jdbcService.saveOrUpdate(field);
+        }
+        jdbcService.delete("delete from page_query_field where page_id = ? ", page.getId());
+        seq = 0;
+        for (PageQueryField field : page.getQueryFields()) {
+            field.setId(null);
+            field.setPageId(page.getId());
+            field.setSeq(++seq);
+            jdbcService.saveOrUpdate(field);
+        }
+
+        jdbcService.delete("delete from page_button where page_id = ? ", page.getId());
+        seq = 0;
+        for (PageButton button : page.getPageButtons()) {
+            button.setId(null);
+            button.setPageId(page.getId());
+            button.setSeq(++seq);
+            jdbcService.saveOrUpdate(button);
+        }
+
+        jdbcService.delete("delete from page_ref where page_id = ? ", page.getId());
+        seq = 0;
+        for (PageRef ref : page.getPageRefs()) {
+            ref.setId(null);
+            ref.setPageId(page.getId());
+            ref.setSeq(++seq);
+            jdbcService.saveOrUpdate(ref);
+        }
+        super.invalid(page.getCode());
     }
 
     @Override
     public Page get(Long id) {
-        return pageDao.get(id);
+        Page page = jdbcService.getById(Page.class, id);
+        this.get(page);
+        return page;
     }
 
 
@@ -494,10 +553,5 @@ public class PageServiceImpl  implements PageService {
             pageParam.putAll(params);
         }
         return this.query(pageCode,pageParam);
-    }
-
-    @Override
-    public void delCache(Page page) {
-        pageDao.delCache(page);
     }
 }

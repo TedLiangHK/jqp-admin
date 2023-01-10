@@ -2,20 +2,15 @@ package com.jqp.admin.page.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
-import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
-import com.jqp.admin.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +20,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/form")
@@ -97,7 +91,6 @@ public class FormController {
             return Result.success();
         }
         Form copy = formService.get(id);
-        formService.delCache(copy);
         copy.setId(null);
         copy.setCode(copy.getCode()+"_copy");
         return Result.success(copy);
