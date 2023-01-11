@@ -5,4 +5,5 @@ public interface TemplateService {
     String permission(String permissionCode,String field);
     String permissionTree(String permissionCode,String field,String tableName);
     String serial(String code);
+    String treeSql(String template,String tableName,String ids);
 }

@@ -10,6 +10,7 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.constants.UserType;
 import com.jqp.admin.rbac.data.Permission;
 import com.jqp.admin.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service("templateService")
+@Slf4j
 public class TemplateServiceImpl implements TemplateService {
     @Resource
     private JdbcService jdbcService;
@@ -185,5 +187,30 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public String serial(String code) {
         return serialNumberService.nextSerial(code);
+    }
+
+    @Override
+    public String treeSql(String template, String tableName, String ids) {
+        if(StringUtils.isBlank(ids)){
+            return "";
+        }
+        String errSql = StrUtil.format(template,"-1");
+        Set<Long> parentIds = new HashSet<>();
+        String[] idArr = StringUtil.splitStr(ids, ",");
+        for(String id:idArr){
+            try {
+                parentIds.add(Long.parseLong(id));
+            }catch (Exception e){
+                log.error("错误的id值"+id);
+                return errSql;
+            }
+        }
+        String childSql = "select id from "+tableName+" where parent_id in ({}) ";
+        Set<Long> childIds = jdbcService.findChildIds(parentIds, childSql);
+        if(!childIds.isEmpty()){
+            return StrUtil.format(template,StringUtil.concatStr(childIds,","));
+        }else{
+            return errSql;
+        }
     }
 }

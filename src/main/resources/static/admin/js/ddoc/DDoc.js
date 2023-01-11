@@ -157,10 +157,19 @@ DDoc.prototype.addTable=function(arrs,styles){
     var row = arrs.length;
     var col = arrs[0].length;
     var width = parseInt(8296/col);
+    var noBorders = '<w:tblBorders>' +
+        '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto" />' +
+        '</w:tblBorders>' ;
     var table = '<w:tbl>' +
                     '<w:tblPr>' +
                         '<w:tblStyle w:val="a3"/>' +
                         '<w:tblW w:w="0" w:type="auto"/>' +
+                        ((styles != null && styles.border === false) ? noBorders : "")
                     '</w:tblPr>' +
                 '<w:tblGrid>';
     for(var i=0;i<col;i++){
@@ -332,7 +341,7 @@ DDoc.prototype.generate = function (fileName) {
     }
     this.zip.add("word/document.xml", this._generateDocument());
     if(fileName && fileName.trim().length > 0){
-        var link = document.createElement('a');    
+        var link = document.createElement('a');
         link.href = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + this.zip.generate();
         link.download = fileName;
         link.click();
