@@ -33,8 +33,8 @@ public class ResetDb {
     }
 //    @Scheduled(fixedDelay = 3000)
 //    @Scheduled(fixedRate = 3000)
-    @Scheduled(cron = "0 */5 * * * ?")
-//    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
 //    @Async(value = "myAsync")
     void resetDb() throws Exception {
         log.info("开始还原数据库");
