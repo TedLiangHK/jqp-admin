@@ -1,14 +1,15 @@
 package com.jqp.admin.page.data;
 
-import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.TreeData;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 /***
  * @date 2022-02-18 09:28:40
  * @remark 系统菜单
  */
 @Data
+@FieldNameConstants
 public class SysMenu extends TreeData<SysMenu> {
     //菜单编号
     private String menuCode;

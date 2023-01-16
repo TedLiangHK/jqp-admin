@@ -81,4 +81,8 @@ public class SpringContextUtil implements ApplicationContextAware {
     public static HttpSession getSession(){
         return getRequest().getSession();
     }
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
 }

@@ -2,10 +2,11 @@ package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.page.constants.Whether;
+import com.jqp.admin.rbac.service.InputParam;
 import lombok.Data;
 
 @Data
-public class InputField extends BaseData {
+public class InputField extends BaseData implements InputParam {
     //字段
     private String field;
     //标签

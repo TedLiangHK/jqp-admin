@@ -2,6 +2,7 @@ package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.annotations.OrderBy;
+import com.jqp.admin.rbac.service.InputParam;
 import lombok.Data;
 
 /***
@@ -9,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @OrderBy
-public class PageResultField extends BaseData {
+public class PageResultField extends BaseData implements InputParam {
     //关联页面id
     private Long pageId;
     //字段

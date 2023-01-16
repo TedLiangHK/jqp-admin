@@ -105,4 +105,9 @@ public class DicCacheServiceImpl implements DataListenerTask, DicCacheService {
         }
         return null;
     }
+
+    @Override
+    public void clear() {
+        cache.clear();
+    }
 }

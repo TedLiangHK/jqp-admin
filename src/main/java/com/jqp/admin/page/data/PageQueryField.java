@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @OrderBy
-public class PageQueryField extends InputField {
+public class PageQueryField extends InputField  {
     //关联页面id
     private Long pageId;
     //操作类型

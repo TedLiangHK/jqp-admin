@@ -74,4 +74,11 @@ public abstract class AbstractCacheService<T> implements CacheService<T> {
     public void clear() {
         cache.clear();
     }
+
+    public static void clearAll(){
+        for (Map.Entry<String, Cache> en : allCaches.entrySet()) {
+            log.info("清理全部缓存{}",en.getKey());
+            en.getValue().clear();
+        }
+    }
 }

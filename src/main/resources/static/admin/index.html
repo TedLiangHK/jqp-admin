@@ -14,10 +14,10 @@
 <link href="css/style.min.css" rel="stylesheet">
 
 <script>
-    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-        //该页面是在移动端打开的，
-        window.location.href="/admin/mobile.html?t="+new Date().getTime();
-    }
+    // if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+    //     //该页面是在移动端打开的，
+    //     window.location.href="/admin/mobile.html?t="+new Date().getTime();
+    // }
 </script>
 </head>
 
@@ -229,21 +229,6 @@
 <script type="text/javascript" src="js/jquery.min.js"></script>
 
 <script type="text/javascript">
-    // $.ajax({
-    //     method:"post",
-    //     url:"/admin/page/crudQuery/currentUserMenu",
-    //     data:JSON.stringify({
-    //         page:1,
-    //         perPage:99999
-    //     }),
-    //     contentType: "application/json; charset=utf-8",
-    //     dataType:"JSON",
-    //     success:function(resp){
-    //         let menus = resp.data.rows;
-    //         //$("#menus").empty();
-    //         buildMenu($("#menus"),menus);
-    //     }
-    // });
 
     function buildMenu(ul,menus){
         for (let i = 0; i < menus.length; i++) {

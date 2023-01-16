@@ -44,6 +44,18 @@ public class DataType {
     public static final boolean isStr(String type){
         return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE,IMAGE,FILE).contains(type);
     }
+    public static final boolean isDic(String type){
+        return Arrays.asList(DIC).contains(type);
+    }
+    public static final boolean isImg(String type){
+        return Arrays.asList(IMAGE).contains(type);
+    }
+    public static final boolean isFile(String type){
+        return Arrays.asList(FILE).contains(type);
+    }
+    public static final boolean isSelector(String type){
+        return Arrays.asList(Selector).contains(type);
+    }
     public static final boolean isDate(String type){
         return Arrays.asList(DATE).contains(type);
     }

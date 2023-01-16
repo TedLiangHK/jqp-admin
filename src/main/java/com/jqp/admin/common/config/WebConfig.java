@@ -21,6 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "/admin/js/**",
                 "/admin/images/**",
                 "/admin/fonts/**",
+                "/doc/**",
+                "/test/**",
                 "/admin/lyear_pages_login.html",
                 "/admin/choose_enterprise.html",
                 "/captcha.png",

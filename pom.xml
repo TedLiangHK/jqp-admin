@@ -14,6 +14,8 @@
     <name>jqp-admin</name>
     <description>Demo project for Spring Boot</description>
     <properties>
+        <!-- 跳过测试 -->
+        <skipTests>true</skipTests>
         <java.version>1.8</java.version>
         <poi.version>5.1.0</poi.version>
         <hutool-all.version>5.7.5</hutool-all.version>

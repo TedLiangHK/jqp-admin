@@ -16,6 +16,7 @@ public class TestUrl {
         String path = "/test/a/b";
         String pattern = "/test/${id}";
         boolean isMatch=matcher.match(pattern, path);
+        log.info("urlMatch:{}",UrlUtil.match("post:/admin/common/abc/get","post:/admin/common/{code}/get"));
         log.info("isMatch:{}",isMatch);
     }
     @Test
