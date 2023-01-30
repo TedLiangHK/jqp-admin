@@ -1,12 +1,17 @@
 package com.jqp.admin.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+@Slf4j
 public class UrlUtil {
     private static final Pattern pattern = Pattern.compile("(\\$\\{\\w+\\})");
     private static final AntPathMatcher matcher = new AntPathMatcher();
@@ -34,5 +39,17 @@ public class UrlUtil {
             url = url.substring(0,url.indexOf("?"));
         }
         return matcher.match(pattern, url);
+    }
+
+    public static List<String> getPathArgNames(String url){
+        List<String> names = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile("\\{([^\\}]+)\\}");
+        Matcher matcher = pattern.matcher(url);
+        while (matcher.find()){
+            String arg = matcher.group(1);
+            names.add(arg);
+        }
+        return names;
     }
 }

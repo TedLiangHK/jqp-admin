@@ -5,4 +5,6 @@ public interface InputParam {
     String getFormat();
     String getField();
     String getLabel();
+    String getMust();
+    String getComponentType();
 }

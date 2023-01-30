@@ -32,7 +32,13 @@ public class WebConfig implements WebMvcConfigurer {
                 "/amis/**",
                 "/amis-editor/**",
                 "/admin/article/**",
-                "/admin/error"
+                "/admin/error",
+
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/openApi/**"
                 );
     }
 

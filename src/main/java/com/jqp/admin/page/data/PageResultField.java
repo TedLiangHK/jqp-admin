@@ -2,8 +2,11 @@ package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.annotations.OrderBy;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.rbac.service.InputParam;
 import lombok.Data;
+
+import java.beans.Transient;
 
 /***
  * 页面结果字段
@@ -27,4 +30,16 @@ public class PageResultField extends BaseData implements InputParam {
     private String hidden = "NO";
     //序号
     private int seq;
+
+    @Override
+    @Transient
+    public String getMust() {
+        return Whether.NO;
+    }
+
+    @Override
+    @Transient
+    public String getComponentType() {
+        return null;
+    }
 }
