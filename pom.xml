@@ -156,6 +156,10 @@
             <artifactId>knife4j-spring-ui</artifactId>
             <version>3.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
 
 
     </dependencies>

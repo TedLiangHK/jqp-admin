@@ -1,5 +1,7 @@
 package com.jqp.admin.common.config;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
@@ -49,5 +51,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS")
                 .maxAge(3600);
+    }
+
+    /**
+     * 注册Filter
+     */
+    @Bean
+    public FilterRegistrationBean xssSpringFilter(){
+        FilterRegistrationBean bean = new FilterRegistrationBean(new XssSpringFilter());
+        bean.addUrlPatterns("/*");
+        return bean;
     }
 }
