@@ -39,12 +39,19 @@
             width: 100% !important;
             max-height: 100% !important;
         }
+        .cxd-TreeSelectControl{
+            width : 100% !important;
+        }
         .cxd-TreeControl{
             width: 100% !important;
             max-height: 100% !important;
         }
         .auth{
             display:none !important;
+        }
+        .jqp-top-btn{
+            display:inline-block !important;
+            margin-left:10px !important;
         }
     </style>
     <link rel="stylesheet" href="/admin/user/auth.css" />
@@ -53,6 +60,8 @@
 <div id="root" class="app-wrapper"></div>
 <script th:src="${js}"></script>
 <script src="/amis/sdk.js"></script>
+<script src="/amis/rest.js"></script>
+<script src="/amis/tinymce.js"></script>
 <script type="text/javascript">
     (function () {
         let amis = amisRequire('amis/embed');

@@ -6,10 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -42,6 +44,15 @@ public class StaticPageController {
         model.addAttribute("js","/admin/models/auditRecord/js/"+modelName+"/"+id+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
+    @RequestMapping("/form/{pageCode}")
+    public String formPage(Model model,@PathVariable("pageCode") String pageCode,@RequestParam Map<String,Object> data){
+        StringBuilder params = new StringBuilder("");
+        data.entrySet().forEach(entry -> {
+            params.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        });
+        model.addAttribute("js","/admin/form/js/"+pageCode+".js?_rt="+System.currentTimeMillis()+params);
+        return "page";
+    }
 
     @Value("${index-page}")
     private String indexPage;
@@ -54,4 +65,6 @@ public class StaticPageController {
             e.printStackTrace();
         }
     }
+
+
 }

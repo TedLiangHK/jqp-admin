@@ -27,6 +27,12 @@ public interface JdbcDao {
     <T> T getById(Class<T> clz,Long id);
     Map<String,Object> getById(String tableName,Long id);
     List<ColumnMeta> columnMeta(String sql);
+    List<ColumnMeta> namedColumnMeta(String sql);
     <T> List<T> findForObject(String sql,Class<T> clz,Object ...args);
     <T> T findOneForObject(String sql,Class<T> clz,Object ...args);
+
+    <T> List<T> find(String sql,Class<T> clz,Map<String,Object> params);
+    <T> T findOne(String sql,Class<T> clz,Map<String,Object> params);
+    List<Map<String,Object>> find(String sql,Map<String,Object> params);
+    Map<String,Object> findOne(String sql,Map<String,Object> params);
 }

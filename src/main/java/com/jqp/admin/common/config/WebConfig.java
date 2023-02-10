@@ -59,7 +59,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public FilterRegistrationBean xssSpringFilter(){
         FilterRegistrationBean bean = new FilterRegistrationBean(new XssSpringFilter());
-        bean.addUrlPatterns("/*");
+        bean.addUrlPatterns("/api/*");
         return bean;
     }
 }

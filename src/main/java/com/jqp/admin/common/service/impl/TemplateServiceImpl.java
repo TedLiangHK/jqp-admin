@@ -3,6 +3,7 @@ package com.jqp.admin.common.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
+import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.common.service.SerialNumberService;
 import com.jqp.admin.common.service.TemplateService;
 import com.jqp.admin.db.service.JdbcService;
@@ -212,5 +213,23 @@ public class TemplateServiceImpl implements TemplateService {
         }else{
             return errSql;
         }
+    }
+
+    @Override
+    public String addParam(String sql, Object param, List<Object> values) {
+        if(param == null || ((param instanceof String) && (StringUtils.isBlank((String)param) || ((String)param).startsWith("$")))){
+            return "";
+        }
+        values.add(param);
+        return sql;
+    }
+
+    @Override
+    public String addParamLike(String sql, Object param, List<Object> values) {
+        if(param == null || ((param instanceof String) && (StringUtils.isBlank((String)param) || ((String)param).startsWith("$")))){
+            return "";
+        }
+        values.add(StrUtil.format("%{}%",param));
+        return sql;
     }
 }

@@ -2,19 +2,21 @@ package com.jqp.admin.page.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
 import com.jqp.admin.common.Result;
+import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.PageKey;
+import com.jqp.admin.page.data.BaseButton;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
 import com.jqp.admin.page.data.Page;
 import com.jqp.admin.page.service.FormService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -109,5 +111,27 @@ public class FormController {
         form.setFormFields(JSONUtil.toList(fields,FormField.class));
         formService.save(form);
         return Result.success();
+    }
+
+    @RequestMapping("/js/{code}.js")
+    public String js(@PathVariable("code") String code, @RequestParam Map<String,Object> data){
+        Form form = formService.get(code);
+        BaseButton button = new BaseButton();
+        button.setLabel(form.getName());
+        Map<String, Object> formJson = formService.getFormJson(form, button);
+        Map<String,Object> formBody = (Map<String, Object>) formJson.get("body");
+        List<Map<String, Obj>> actions = (List<Map<String, Obj>>) formJson.get("actions");
+        formBody.put("name",form.getCode()+"Form");
+        if(actions != null && !actions.isEmpty()){
+            formBody.put("actions",actions);
+        }
+        if(formBody.containsKey("data")){
+            Map<String,Object> oldData = (Map<String, Object>) formBody.get("data");
+            oldData.putAll(data);
+            formBody.put("data",oldData);
+        }else{
+            formBody.put("data",data);
+        }
+        return StrUtil.format("{}={}", PageKey.AMIS_JSON,JSONUtil.toJsonPrettyStr(formJson));
     }
 }

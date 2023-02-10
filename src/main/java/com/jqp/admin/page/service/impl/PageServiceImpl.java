@@ -174,7 +174,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             List<String> args = new ArrayList<>();
             for (int i = optionValues.length - 1; i >= 0; i--) {
                 args.add("?");
-                values.add(Long.valueOf(optionValues[i]));
+                values.add(optionValues[i]);
             }
             sql.append(StrUtil.format(" and {} in ({}) ",
                     page.getValueField(),
@@ -441,7 +441,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         Boolean selector = (Boolean) pageParam.get("selector");
         if(!Boolean.TRUE.equals(selector)){
             int optionWidth = 0;
-            int fontWidth = 12;
+            int fontWidth = 13;
             int padding = 23;
             PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), true);
             List<Map<String,Object>> rowButtons = pageButtonData.getRowButtons();

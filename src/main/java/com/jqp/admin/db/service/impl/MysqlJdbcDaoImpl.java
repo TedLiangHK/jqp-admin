@@ -1,5 +1,6 @@
 package com.jqp.admin.db.service.impl;
 
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.PageData;
 import com.jqp.admin.common.PageParam;
@@ -12,8 +13,12 @@ import com.jqp.admin.util.RowMapperUtil;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,9 @@ import java.util.stream.Collectors;
 public class MysqlJdbcDaoImpl implements JdbcDao {
     @Resource
     private JdbcTemplate jdbcTemplate;
+
+    @Resource
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Resource
     private DbConfig dbConfig;
@@ -147,15 +155,25 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     private String getTableName(Class clz){
         return StringUtil.toSqlColumn(clz.getSimpleName());
     }
-
     @Override
     public List<ColumnMeta> columnMeta(String sql) {
+        return columnMeta(sql,jdbcTemplate);
+    }
+
+    @Override
+    public List<ColumnMeta> namedColumnMeta(String sql) {
+        return columnMeta(sql,namedParameterJdbcTemplate);
+    }
+
+    private List<ColumnMeta> columnMeta(String sql, Object template) {
 
         List<ColumnMeta> columnMetas = new ArrayList<>();
 
         List<String> tableColumns = new ArrayList<>();
         Map<String,ColumnMeta> metaMap = new HashMap<>();
-        jdbcTemplate.execute(sql + " limit 0 ", (PreparedStatementCallback<Object>) ps -> {
+        sql = sql + " limit 0 ";
+
+        PreparedStatementCallback<Object> psc = (PreparedStatementCallback<Object>) ps -> {
             ParameterMetaData parameterMetaData = ps.getParameterMetaData();
             ResultSetMetaData resultSetMetaData = ps.getMetaData();
 
@@ -192,7 +210,18 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
                 }
             }
             return null;
-        });
+        };
+        if (template instanceof JdbcTemplate){
+            ((JdbcTemplate)template).execute(sql,psc );
+        }else if(template instanceof NamedParameterJdbcTemplate){
+            ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+            List<String> names = ReflectUtil.invoke(parsedSql,"getParameterNames");
+            Map<String,Object> params = new HashMap<>();
+            for(String name:names){
+                params.put(name,"");
+            }
+            ((NamedParameterJdbcTemplate)template).execute(sql,params,psc);
+        }
         if(!tableColumns.isEmpty()){
             StringBuffer commentSql = new StringBuffer(StrUtil.format(
                     "select c.TABLE_NAME,c.COLUMN_NAME,c.COLUMN_COMMENT from {}.`COLUMNS` c where c.TABLE_SCHEMA = '{}' and ({})",
@@ -251,6 +280,28 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     @Override
     public <T> T findOneForObject(String sql, Class<T> clz, Object... args) {
         List<T> list = this.findForObject(sql, clz, args);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public <T> List<T> find(String sql, Class<T> clz, Map<String, Object> params) {
+        return namedParameterJdbcTemplate.query(sql,params,RowMapperUtil.newRowMapper(clz));
+    }
+
+    @Override
+    public <T> T findOne(String sql, Class<T> clz, Map<String, Object> params) {
+        List<T> list = this.find(sql, clz, params);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public List<Map<String, Object>> find(String sql, Map<String, Object> params) {
+        return namedParameterJdbcTemplate.query(sql,params,RowMapperUtil.newMapMapper());
+    }
+
+    @Override
+    public Map<String, Object> findOne(String sql, Map<String, Object> params) {
+        List<Map<String, Object>> list = this.find(sql, params);
         return list.isEmpty() ? null : list.get(0);
     }
 }

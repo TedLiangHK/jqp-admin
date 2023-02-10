@@ -35,7 +35,7 @@ public class AdminInterceptor implements HandlerInterceptor {
 
                 response.getWriter().println(JSONUtil.toJsonStr(new Result(ResultCode.NotLogin,"登录失效",null)));
             }else{
-                response.sendRedirect("/admin/lyear_pages_login.html");
+                response.sendRedirect("/admin/lyear_pages_login.html?t="+System.currentTimeMillis() );
             }
             return false;
         }

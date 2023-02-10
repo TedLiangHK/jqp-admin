@@ -125,6 +125,20 @@ AMIS_JSON={
                             "actions":[]
                         }
                     },{
+                        "label": "预览",
+                        "type": "button",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "title": "预览-${name}",
+                            "size": "full",
+                            "body": {
+                                "type":"iframe",
+                                "src":"/form/${code}",
+                                "height":"98%"
+                            },
+                            "actions":[]
+                        }
+                    },{
                         "type": "button",
                         "level":"danger",
                         "actionType": "ajax",

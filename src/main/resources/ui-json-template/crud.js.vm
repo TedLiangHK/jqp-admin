@@ -7,25 +7,34 @@ AMIS_JSON={
         "syncLocation": false,
         "filter": {
           "title": ["<span style='line-height:30px;'>${pageName}</span>",
-              "<button type='button' onclick='window.location.reload()' style='margin-left:10px;;float:right;position:relative;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>"
               ,{
+                  "type":"button",
+                  "label":"刷新页面",
+                  "actionType": "url",
+                  "url":"",
+                  "blank":false,
+                  "level":"secondary",
+                  "className":"m-l float-right relative jqp-top-btn"
+              },{
                   "type":"button",
                   "label":"导出Excel",
                   "actionType": "url",
+                  "level":"success",
                   "url":"/admin/page/crudExport/${pageCode}${downloadParam}",
-                  "className":"m-l float-right relative"
+                  "className":"m-l float-right relative jqp-top-btn"
               },{
                   "type":"button",
                   "label":"重置",
                   "actionType":"reset",
-                  "className":"m-l float-right relative"
+                  "level":"warning",
+                  "className":"mr-1 float-right relative jqp-top-btn"
               },
               {
                   "type":"button",
                   "label":"查询",
                   "primary":true,
                   "actionType":"submit",
-                  "className":"m-l float-right relative"
+                  "className":"m-l float-right relative jqp-top-btn"
               }
 
           ],
@@ -37,7 +46,7 @@ AMIS_JSON={
           },
           "actions":[]
         },
-        "filterTogglable": true,
+        "filterTogglable": false,
         "headerToolbar": ${topButtons},
         "bulkActions": ${bulkButtons},
 #if($openPage)

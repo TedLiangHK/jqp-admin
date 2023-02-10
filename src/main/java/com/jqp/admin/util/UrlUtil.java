@@ -48,7 +48,9 @@ public class UrlUtil {
         Matcher matcher = pattern.matcher(url);
         while (matcher.find()){
             String arg = matcher.group(1);
-            names.add(arg);
+            if(!names.contains(arg)){
+                names.add(arg);
+            }
         }
         return names;
     }

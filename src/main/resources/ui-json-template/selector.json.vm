@@ -11,18 +11,20 @@
         "mode": "table",
         "name": "${page.code}Selector",
         "filter": {
-          "title": ["${page.name}",
+          "title": ["<span style='line-height:30px;'>${page.name}</span>",
+            {
+              "type":"button",
+              "label":"重置",
+              "actionType":"reset",
+              "level":"warning",
+              "className":"mr-1 float-right relative jqp-top-btn"
+            },
             {
               "type":"button",
               "label":"查询",
               "primary":true,
               "actionType":"submit",
-              "className":"m-l"
-            },{
-              "type":"button",
-              "label":"重置",
-              "actionType":"reset",
-              "className":"m-l"
+              "className":"m-l float-right relative jqp-top-btn"
             }
           ],
             "submitText": "",

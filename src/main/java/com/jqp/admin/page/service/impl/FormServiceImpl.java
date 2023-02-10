@@ -163,31 +163,36 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             if(Whether.YES.equals(b.getClose())){
                 config.put("close",true);
             }
+            config.put("reload","mainTable");
             formButtons.add(config);
         });
 
         if(!f.getFormRefs().isEmpty()){
 
             List<Object> dialogButtons = new ArrayList<>();
-            dialogButtons.add("基本信息");
+            dialogButtons.add("<span style='line-height:30px;'>基本信息</span>");
             Map<String,Object> saveBtn = new HashMap<>();
             if(!formDisabled && formButtons.isEmpty()){
+                Map<String,Object> resetBtn = new HashMap<>();
+
                 saveBtn.put("label","保存");
                 saveBtn.put("type","button");
                 saveBtn.put("actionType","submit");
                 saveBtn.put("primary",true);
                 saveBtn.put("close",false);
-                saveBtn.put("className","m-l");
+                saveBtn.put("className","m-l float-right relative jqp-top-btn");
 
-                Map<String,Object> resetBtn = new HashMap<>();
                 resetBtn.put("label","重置");
                 resetBtn.put("type","button");
                 resetBtn.put("actionType","reset");
                 resetBtn.put("close",true);
-                resetBtn.put("className","m-l");
+                resetBtn.put("level","warning");
+                resetBtn.put("className","m-l float-right relative jqp-top-btn");
 
-                dialogButtons.add(saveBtn);
+
+
                 dialogButtons.add(resetBtn);
+                dialogButtons.add(saveBtn);
             }
 
             if(!formButtons.isEmpty()){
@@ -295,7 +300,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             fieldConfig.put("md",f.getFieldWidth());
             fieldConfig.put("lg",f.getFieldWidth());
         }
-        if(Whether.YES.equals(f.getDisabled()) || formDisabled){
+        if(Whether.YES.equals(field.getDisabled()) || formDisabled){
             fieldConfig.put("disabled",true);
         }
         if(StringUtils.isNotBlank(field.getValidations())){
