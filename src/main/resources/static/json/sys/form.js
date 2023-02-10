@@ -26,7 +26,7 @@ AMIS_JSON={
         "type": "crud",
         "api": "post:/admin/form/query",
         "syncLocation": false,
-        "filterTogglable": true,
+        "filterTogglable": false,
         "headerToolbar": [
             "filter-toggler",{
                 "label": "新增",
@@ -57,7 +57,16 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title": "条件搜索<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
+            "title":["<span style='line-height:30px;'>表单管理</span>",
+                ,{
+                    "type":"button",
+                    "label":"刷新页面",
+                    "actionType": "url",
+                    "url":"",
+                    "blank":false,
+                    "level":"secondary",
+                    "className":"m-l float-right relative jqp-top-btn"
+                }],
             "submitText": "",
             "body": [
                 {

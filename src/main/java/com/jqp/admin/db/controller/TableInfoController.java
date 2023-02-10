@@ -178,7 +178,8 @@ public class TableInfoController {
             menu.put("menuName",tableInfo.getTableComment());
             menu.put("menuType","1");
             menu.put("url",url);
-            menu.put("seq",maxCode);
+            menu.put("seq",maxCode*10);
+            menu.put("whetherButton",Whether.NO);
             jdbcService.saveOrUpdate(menu,"sys_menu");
         }
         return Result.success();

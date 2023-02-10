@@ -43,8 +43,9 @@ public class MenuController {
         String url = menu.getUrl();
         String prefix = "/crud/";
         String oneToMany = "/oneToMany/";
-        if(StringUtils.isBlank(url) || (!url.startsWith(prefix) && !url.startsWith(oneToMany))){
-            return Result.error("只能初始化地址为["+prefix+","+oneToMany+"]开头的菜单");
+        String formPrefix = "/form/";
+        if(StringUtils.isBlank(url) || (!url.startsWith(prefix) && !url.startsWith(oneToMany) && !url.startsWith(formPrefix))){
+            return Result.error("只能初始化地址为["+prefix+","+oneToMany+","+formPrefix+"]开头的菜单");
         }
 
 
@@ -77,6 +78,10 @@ public class MenuController {
                 }
                 this.pageButtons(btnIds,btns,page,btnMenus,menu,objSeq,menu.getMenuCode(),menuUrls);
             }
+        }else if(url.startsWith(formPrefix)){
+            String formCode = url.substring(url.indexOf(formPrefix)+formPrefix.length());
+            Form form = formService.get(formCode);
+            this.formButtons(btnIds,btns,form,btnMenus,menu,objSeq,menu.getMenuCode(),menuUrls);
         }
         jdbcService.transactionOption(() -> {
             jdbcService.bathSaveOrUpdate(btnMenus);

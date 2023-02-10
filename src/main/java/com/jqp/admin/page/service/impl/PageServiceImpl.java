@@ -442,7 +442,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         if(!Boolean.TRUE.equals(selector)){
             int optionWidth = 0;
             int fontWidth = 13;
-            int padding = 23;
+            int padding = 26;
             PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), true);
             List<Map<String,Object>> rowButtons = pageButtonData.getRowButtons();
             for(Map<String,Object> btn:rowButtons){
@@ -460,6 +460,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 columnData.put("label","操作");
                 columnData.put("buttons",rowButtons);
                 columnData.put("width",optionWidth);
+                columnData.put("fixed","right");
                 crudData.getColumns().add(columnData);
             }
         }

@@ -104,7 +104,16 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title": "条件搜索<button type='button' onclick='window.location.reload()' style='float:right;position:relative;top:-8px;' class='cxd-Button cxd-Button--sm cxd-Button--default is-active'>刷新页面</button>",
+            "title":["<span style='line-height:30px;'>数据库表</span>",
+                ,{
+                    "type":"button",
+                    "label":"刷新页面",
+                    "actionType": "url",
+                    "url":"",
+                    "blank":false,
+                    "level":"secondary",
+                    "className":"m-l float-right relative jqp-top-btn"
+                }],
             "submitText": "",
             "body": [
                 {
