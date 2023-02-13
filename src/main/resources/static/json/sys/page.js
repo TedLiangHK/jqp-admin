@@ -41,7 +41,7 @@ AMIS_JSON={
                     "body":{
                         "type":"iframe",
                         "src":"/admin/page/pageEdit.html",
-                        "height":"calc( 100% - 5px )"
+                        "height":"calc( 100% - 10px )"
                     },
                     "actions":[]
                 }
@@ -126,7 +126,7 @@ AMIS_JSON={
                             "body":{
                                 "type":"iframe",
                                 "src":"/admin/page/pageEdit.html?id=${id}",
-                                "height":"calc( 100% - 5px )"
+                                "height":"calc( 100% - 10px )"
                             },
                             "actions":[]
                         }
@@ -140,7 +140,7 @@ AMIS_JSON={
                             "body":{
                                 "type":"iframe",
                                 "src":"/admin/page/pageEdit.html?id=${id}&type=copy",
-                                "height":"calc( 100% - 5px )"
+                                "height":"calc( 100% - 10px )"
                             },
                             "actions":[]
                         }
@@ -154,7 +154,7 @@ AMIS_JSON={
                             "body": {
                                 "type":"iframe",
                                 "src":"/crud/${code}",
-                                "height":"98%"
+                                "height":"calc( 100% - 10px )"
                             },
                             "actions":[]
                         }
