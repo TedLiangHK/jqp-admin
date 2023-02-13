@@ -3,6 +3,7 @@ package com.jqp.admin.rbac.service.impl;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.ssssssss.magicapi.core.model.JsonBean;
@@ -12,6 +13,7 @@ import javax.annotation.Resource;
 import java.util.Map;
 
 @Service("apiService")
+@Slf4j
 public class ApiServiceImpl implements ApiService {
 
     @Resource
@@ -23,11 +25,11 @@ public class ApiServiceImpl implements ApiService {
             String[] apis = StringUtil.splitStr(api, "\n");
             for(String a:apis){
                 if(StringUtils.isNotBlank(a)){
-                    JsonBean<String> result = magicAPIService.call("post", a, context);
-                    if(result.getCode() != 1){
-                        return Result.error(result.getMessage());
+                    Map<String,Object> result = magicAPIService.call("post", a, context);
+                    if((Integer)result.get("code") != 1){
+                        return Result.error((String)result.get("msg"));
                     }
-                    String data = result.getData();
+                    String data = (String)result.get("data");
                     if(StringUtils.isNotBlank(data)){
                         return Result.error(data);
                     }
