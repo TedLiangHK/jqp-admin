@@ -296,6 +296,7 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public List<Map<String, Object>> find(String sql, Map<String, Object> params) {
+        log.info("sql:{},params:{}",sql,params);
         return namedParameterJdbcTemplate.query(sql,params,RowMapperUtil.newMapMapper());
     }
 
@@ -303,5 +304,17 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     public Map<String, Object> findOne(String sql, Map<String, Object> params) {
         List<Map<String, Object>> list = this.find(sql, params);
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public <T> T findOneForObject(String sql, Map<String, Object> params, Class<T> clz) {
+        List<T> list = this.findForObject(sql, params, clz);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public <T> List<T> findForObject(String sql, Map<String, Object> params, Class<T> clz) {
+        log.info("sql:{},params:{}",sql,params);
+        return namedParameterJdbcTemplate.queryForList(sql,params,clz);
     }
 }

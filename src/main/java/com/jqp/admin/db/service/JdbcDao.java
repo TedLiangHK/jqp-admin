@@ -35,4 +35,6 @@ public interface JdbcDao {
     <T> T findOne(String sql,Class<T> clz,Map<String,Object> params);
     List<Map<String,Object>> find(String sql,Map<String,Object> params);
     Map<String,Object> findOne(String sql,Map<String,Object> params);
+    <T> T findOneForObject(String sql,Map<String,Object> params,Class<T> clz);
+    <T> List<T> findForObject(String sql,Map<String,Object> params,Class<T> clz);
 }
