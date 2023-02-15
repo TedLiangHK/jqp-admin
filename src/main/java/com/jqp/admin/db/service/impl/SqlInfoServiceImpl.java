@@ -3,15 +3,19 @@ package com.jqp.admin.db.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jqp.admin.common.Result;
+import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.SqlInfoService;
 import com.jqp.admin.page.constants.ParamType;
 import com.jqp.admin.page.constants.SqlType;
 import com.jqp.admin.page.constants.Whether;
+import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.SqlInfo;
 import com.jqp.admin.page.data.SqlParam;
 import com.jqp.admin.page.data.SqlResult;
+import com.jqp.admin.page.service.FormEvent;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +30,7 @@ import java.util.*;
 
 @Service("sqlInfoService")
 @Slf4j
-public class SqlInfoServiceImpl implements SqlInfoService {
+public class SqlInfoServiceImpl extends AbstractCacheService<SqlInfo> implements SqlInfoService, FormEvent {
     @Resource
     private JdbcService jdbcService;
 
@@ -166,7 +170,12 @@ public class SqlInfoServiceImpl implements SqlInfoService {
 
     @Override
     public SqlInfo getSqlInfo(String code) {
-        SqlInfo sqlInfo = jdbcService.findOne(SqlInfo.class, SqlInfo.Fields.code, code);
+        return get(code);
+    }
+
+    @Override
+    protected SqlInfo load(String key) {
+        SqlInfo sqlInfo = jdbcService.findOne(SqlInfo.class, SqlInfo.Fields.code, key);
         if(sqlInfo == null){
             return null;
         }
@@ -175,5 +184,18 @@ public class SqlInfoServiceImpl implements SqlInfoService {
         List<SqlResult> sqlResults = jdbcService.find(SqlResult.class, SqlResult.Fields.sqlInfoId, sqlInfo.getId());
         sqlInfo.setSqlResults(sqlResults);
         return sqlInfo;
+    }
+
+    @Override
+    public Result beforeSave(Map<String, Object> obj, String tableName, Form form) {
+        Long id = (Long) obj.get("id");
+        String code = (String) obj.get("code");
+        if(id != null){
+            SqlInfo oldSqlInfo = jdbcService.getById(SqlInfo.class, id);
+            if(oldSqlInfo != null && !oldSqlInfo.getCode().equals(code)){
+                super.invalid(oldSqlInfo.getCode());
+            }
+        }
+        return null;
     }
 }

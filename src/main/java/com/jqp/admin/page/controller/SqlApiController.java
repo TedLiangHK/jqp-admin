@@ -4,9 +4,11 @@ import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.SqlInfoService;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.SqlApiContent;
 import com.jqp.admin.page.data.SqlApiContentArg;
 import com.jqp.admin.page.data.SqlInfo;
+import com.jqp.admin.page.data.SqlParam;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin/sqlApi")
@@ -32,15 +32,46 @@ public class SqlApiController {
     public Result execute(@PathVariable String code,@RequestParam Map<String,Object> params){
         log.info("code:{},params:{}",code,params);
         Map<String, Object> sqlApi = jdbcService.findOne("select * from sql_api where code = ? ", code);
+        if(sqlApi == null){
+            return Result.error("接口不存在"+code);
+        }
+
         String content = (String) sqlApi.get("content");
         SqlApiContent sqlApiContent = JSONUtil.toBean(content, SqlApiContent.class);
+
+        List<SqlParam> apiParams = new ArrayList<>();
+        getParams(sqlApiContent,apiParams,new HashSet<>());
+        for(SqlParam sqlParam:apiParams){
+            if(Whether.YES.equals(sqlParam.getMust())){
+                return Result.error(sqlParam.getLabel()+"不能为空");
+            }
+        }
         Object page = params.get("page");
         Object data = execute(sqlApiContent, params,page != null);
-
         return Result.success(data);
     }
 
-    public Object execute(SqlApiContent content,Map<String,Object> params,boolean openPage){
+    private void getParams(SqlApiContent content, List<SqlParam> params, Set<String> names){
+        String sqlCode = content.getSql();
+        SqlInfo sqlInfo = sqlInfoService.getSqlInfo(sqlCode);
+        List<SqlApiContentArg> args = content.getArgs();
+        Set<String> argNames = new HashSet<>();
+        for (SqlApiContentArg arg : args) {
+            argNames.add(arg.getName());
+        }
+        List<SqlParam> sqlParams = sqlInfo.getSqlParams();
+        for(SqlParam sqlParam:sqlParams){
+            if(!argNames.contains(sqlParam.getName()) && !names.contains(sqlParam.getName())){
+                params.add(sqlParam);
+                names.add(sqlParam.getName());
+            }
+        }
+        for (SqlApiContent prop : content.getProps()) {
+            getParams(prop,params,names);
+        }
+    }
+
+    private Object execute(SqlApiContent content,Map<String,Object> params,boolean openPage){
 
         String sqlCode = content.getSql();
 

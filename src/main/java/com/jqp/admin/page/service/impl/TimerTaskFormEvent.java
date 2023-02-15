@@ -19,20 +19,10 @@ public class TimerTaskFormEvent implements FormEvent {
     private TimerTaskService timerTaskService;
 
     @Override
-    public Result beforeSave(Map<String, Object> obj, String tableName, Form form) {
-        return null;
-    }
-
-    @Override
     public Result afterSave(Map<String, Object> obj, String tableName, Form form) {
         //更新定时任务
         Long id = (Long) obj.get("id");
         timerTaskService.updateTask(id);
         return null;
-    }
-
-    @Override
-    public void init(Map<String, Object> obj, Form form) {
-
     }
 }
