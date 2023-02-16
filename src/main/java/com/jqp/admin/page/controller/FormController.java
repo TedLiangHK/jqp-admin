@@ -113,7 +113,7 @@ public class FormController {
         return Result.success();
     }
 
-    @RequestMapping("/js/{code}.js")
+    @RequestMapping(value="/js/{code}.js",produces = "text/javascript; charset=utf-8")
     public String js(@PathVariable("code") String code, @RequestParam Map<String,Object> data){
         Form form = formService.get(code);
         BaseButton button = new BaseButton();

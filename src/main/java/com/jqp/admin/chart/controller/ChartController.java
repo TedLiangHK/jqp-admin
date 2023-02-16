@@ -35,10 +35,9 @@ public class ChartController {
         return "page";
     }
 
-    @RequestMapping("/js/{code}.js")
+    @RequestMapping(value="/js/{code}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public String js(@PathVariable("code") String code,HttpServletResponse response){
-        response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
         Chart chart = jdbcService.findOne(Chart.class, "code", code);
         String config = chart.getConfig();

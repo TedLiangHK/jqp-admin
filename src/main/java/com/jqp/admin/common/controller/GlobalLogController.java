@@ -29,7 +29,7 @@ public class GlobalLogController {
         model.addAttribute("js","/admin/operationLog/js/"+modelName+"/"+id+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
-    @RequestMapping("/js/{modelName}/{id}.js")
+    @RequestMapping(value="/js/{modelName}/{id}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public String js(Model model, @PathVariable String modelName, @PathVariable Long id){
         Map<String, Object> params = new HashMap<>();

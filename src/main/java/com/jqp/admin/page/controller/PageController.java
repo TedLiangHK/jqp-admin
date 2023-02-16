@@ -304,10 +304,9 @@ public class PageController {
         return null;
     }
 
-    @RequestMapping("/js/{pageCode}.js")
+    @RequestMapping(value = "/js/{pageCode}.js",produces = "text/javascript; charset=utf-8")
     public String js(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
 
-        response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
         Page page = pageService.get(pageCode);
 

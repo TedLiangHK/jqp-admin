@@ -109,10 +109,9 @@ public class PermissionController {
         return Result.success();
     }
 
-    @RequestMapping("/js/{id}/{ref}/{refId}.js")
+    @RequestMapping(value="/js/{id}/{ref}/{refId}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public String js(Model model, @PathVariable("id") Long id,@PathVariable("ref") String ref,@PathVariable("refId") Long refId, HttpServletResponse response){
-        response.setContentType("application/javascript");
         response.addHeader("Cache-Control","no-store");
 
         Permission permission = jdbcService.getById(Permission.class, id);

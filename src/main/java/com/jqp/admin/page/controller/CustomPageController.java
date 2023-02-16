@@ -31,7 +31,7 @@ public class CustomPageController {
         model.addAttribute("js","/admin/custom/js/"+code+".js?_rt="+System.currentTimeMillis()+params.toString());
         return "page";
     }
-    @RequestMapping("/js/{code}.js")
+    @RequestMapping(value = "/js/{code}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public String js(@PathVariable String code, @RequestParam Map<String,Object> data){
         CustomPage customPage = jdbcService.findOne(CustomPage.class, "code", code);

@@ -303,7 +303,7 @@ public class ActivitiModelController {
     /**
      *  任务js
      */
-    @RequestMapping("/task/js/{taskId}.js")
+    @RequestMapping(value="/task/js/{taskId}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public Object taskJs(@PathVariable String taskId) {
         HistoricTaskInstance task = processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
@@ -313,7 +313,7 @@ public class ActivitiModelController {
     /**
      *  任务js
      */
-    @RequestMapping("/auditRecord/js/{model}/{id}.js")
+    @RequestMapping(value="/auditRecord/js/{model}/{id}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
     public Object auditRecordJs(@PathVariable String model,@PathVariable Long id) {
         String tableName = StringUtil.toSqlColumn(model);
