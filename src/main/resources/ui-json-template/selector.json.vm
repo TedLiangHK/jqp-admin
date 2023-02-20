@@ -10,6 +10,7 @@
     "pickerSchema": {
         "mode": "table",
         "name": "${page.code}Selector",
+        "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
         "filter": {
           "title": ["<span style='line-height:30px;'>${page.name}</span>",
             {

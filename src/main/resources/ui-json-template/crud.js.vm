@@ -5,6 +5,7 @@ AMIS_JSON={
         "name":"mainTable",
         "api": "post:/admin/page/crudQuery/${pageCode}",
         "syncLocation": false,
+        "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
         "filter": {
           "title": ["<span style='line-height:30px;'>${pageName}</span>",
               ,{

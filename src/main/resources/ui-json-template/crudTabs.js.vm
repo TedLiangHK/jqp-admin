@@ -67,6 +67,7 @@ AMIS_JSON={
                 "target": "${target}"
             },
             "filterTogglable": false,
+            "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
             "headerToolbar": ${topButtons},
             "bulkActions": ${bulkButtons},
         },{

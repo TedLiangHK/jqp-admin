@@ -5,6 +5,7 @@
     "title": "${pageName}",
     "syncLocation": false,
     "filterTogglable": false,
+    "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
     "filter": {
       "title": ["<span style='line-height:30px;'>${pageName}</span>"
       ,{
