@@ -40,46 +40,6 @@ public class SwaggerConfiguration {
     @Value("${spring.profiles.active}")
     private String profile;
 
-//    @Bean
-//    public Docket commonDocket() {
-//        return new Docket(DocumentationType.OAS_30).groupName("热力云后台通用接口")
-//                .select().apis(RequestHandlerSelectors.basePackage("com.jqp.admin.common"))
-//                .paths(PathSelectors.any()).build()
-//                .globalRequestParameters(getGlobalRequestParameters())
-//                //正式环境不开启
-//                .apiInfo(setApiInfo()).enable(!"prod".equals(profile));
-//    }
-//
-//    @Bean
-//    public Docket pageDocket() {
-//        return new Docket(DocumentationType.OAS_30).groupName("热力云后台页面配置")
-//                .select().apis(RequestHandlerSelectors.basePackage("com.jqp.admin.page"))
-//                .paths(PathSelectors.any()).build()
-//                .globalRequestParameters(getGlobalRequestParameters())
-//                //正式环境不开启
-//                .apiInfo(setApiInfo()).enable(!"prod".equals(profile));
-//    }
-//
-//    @Bean
-//    public Docket rbacDocket() {
-//        return new Docket(DocumentationType.OAS_30).groupName("热力云后台组织机构")
-//                .select().apis(RequestHandlerSelectors.basePackage("com.jqp.admin.rbac"))
-//                .paths(PathSelectors.any()).build()
-//                .globalRequestParameters(getGlobalRequestParameters())
-//                //正式环境不开启
-//                .apiInfo(setApiInfo()).enable(!"prod".equals(profile));
-//    }
-//
-//    @Bean
-//    public Docket tcDocket() {
-//        return new Docket(DocumentationType.OAS_30).groupName("热力云后台接口")
-//                .select().apis(RequestHandlerSelectors.basePackage("com.jqp.admin.tc."))
-//                .paths(PathSelectors.any()).build()
-//                .globalRequestParameters(getGlobalRequestParameters())
-//                //正式环境不开启
-//                .apiInfo(setApiInfo()).enable(!"prod".equals(profile));
-//    }
-
     @Bean
     public Docket defaultApiDocket() {
         return new Docket(DocumentationType.OAS_30).groupName("默认接口")
