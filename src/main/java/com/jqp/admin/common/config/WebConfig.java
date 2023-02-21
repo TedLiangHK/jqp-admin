@@ -40,7 +40,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "/webjars/**",
                 "/swagger-resources",
                 "/swagger-resources/**",
-                "/openApi/**"
+                "/openApi/**",
+                "/v2/api-docs/**"
                 );
     }
 

@@ -20,7 +20,7 @@
         <poi.version>5.1.0</poi.version>
         <hutool-all.version>5.7.5</hutool-all.version>
         <velocity.version>1.7</velocity.version>
-        <magic-api.version>2.0.1</magic-api.version>
+        <magic-api.version>2.0.2</magic-api.version>
         <java-jwt.version>3.4.0</java-jwt.version>
         <aliyun-oss.version>3.12.0</aliyun-oss.version>
         <activiti.version>5.22.0</activiti.version>
@@ -82,6 +82,11 @@
         <dependency>
             <groupId>org.ssssssss</groupId>
             <artifactId>magic-api-spring-boot-starter</artifactId>
+            <version>${magic-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ssssssss</groupId>
+            <artifactId>magic-api-plugin-swagger</artifactId>
             <version>${magic-api.version}</version>
         </dependency>
         <dependency>
@@ -152,14 +157,25 @@
         </dependency>
 
         <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <!--引入Knife4j的官方ui包,OpenAPI3建议使用springdoc-openapi项目-->
+        <!-- 文档 -->
+        <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-ui</artifactId>
+            <!--在引用时请在maven中央仓库搜索3.X最新版本号-->
             <version>3.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
+
+
 
 
     </dependencies>

@@ -36,24 +36,35 @@ public class DocController {
     @Resource
     private FormService formService;
 
-    @GetMapping("/swagger-resources/configuration/ui")
-    public String ui(){
-        return "{\"deepLinking\":true,\"displayOperationId\":false,\"defaultModelsExpandDepth\":1,\"defaultModelExpandDepth\":1,\"defaultModelRendering\":\"example\",\"displayRequestDuration\":false,\"docExpansion\":\"none\",\"filter\":false,\"operationsSorter\":\"alpha\",\"showExtensions\":false,\"showCommonExtensions\":false,\"tagsSorter\":\"alpha\",\"validatorUrl\":\"\",\"supportedSubmitMethods\":[\"get\",\"put\",\"post\",\"delete\",\"options\",\"head\",\"patch\",\"trace\"],\"swaggerBaseUiUrl\":\"\"}";
-    }
-    @GetMapping("/swagger-resources")
-    public List<Object> swaggerResources(){
-
-        List<Map<String, Object>> menuTypes = dicService.options("menuType");
-        List<Object> list = new ArrayList<>();
-        for(Map<String, Object> item:menuTypes){
-            list.add(new JSONObject()
-                    .set("location","/openApi/"+item.get("value"))
-                    .set("name",item.get("label"))
-                    .set("swaggerVersion","3.0.3")
-                    .set("url","/openApi/"+item.get("value")));
-        }
-        return list;
-    }
+//    @GetMapping("/swagger-resources/configuration/ui")
+//    public String ui(){
+//        return "{\"deepLinking\":true,\"displayOperationId\":false,\"defaultModelsExpandDepth\":1,\"defaultModelExpandDepth\":1,\"defaultModelRendering\":\"example\",\"displayRequestDuration\":false,\"docExpansion\":\"none\",\"filter\":false,\"operationsSorter\":\"alpha\",\"showExtensions\":false,\"showCommonExtensions\":false,\"tagsSorter\":\"alpha\",\"validatorUrl\":\"\",\"supportedSubmitMethods\":[\"get\",\"put\",\"post\",\"delete\",\"options\",\"head\",\"patch\",\"trace\"],\"swaggerBaseUiUrl\":\"\"}";
+//    }
+//    @GetMapping("/swagger-resources")
+//    public List<Object> swaggerResources(){
+//
+//        List<Map<String, Object>> menuTypes = dicService.options("menuType");
+//        List<Object> list = new ArrayList<>();
+//        for(Map<String, Object> item:menuTypes){
+//            list.add(new JSONObject()
+//                    .set("location","/openApi/"+item.get("value"))
+//                    .set("name",item.get("label"))
+//                    .set("swaggerVersion","3.0.3")
+//                    .set("url","/openApi/"+item.get("value")));
+//        }
+//        list.add(new JSONObject()
+//                .set("location","/v2/api-docs/magic-api/swagger2.json")
+//                .set("name","MagicAPI接口")
+//                .set("swaggerVersion","2.0")
+//                .set("url","/v2/api-docs/magic-api/swagger2.json"));
+//        list.add(new JSONObject()
+//                .set("location","/v3/api-docs?group=默认接口")
+//                .set("name","默认接口")
+//                .set("swaggerVersion","3.0.3")
+//                .set("url","/v3/api-docs?group=默认接口"));
+//
+//        return list;
+//    }
     @GetMapping("/openApi/{menuType}")
     public JSONObject openApi(@PathVariable String menuType){
         // https://editor.swagger.io/?_ga=2.200610734.1652439241.1674876624-961416058.1667964762
