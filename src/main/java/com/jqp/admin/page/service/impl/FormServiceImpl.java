@@ -132,19 +132,52 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         }
         boolean formDisabled = Whether.YES.equals(f.getDisabled());
 
-        List<Map<String,Object>> items = new ArrayList<>();
-
-        Map<String,Object> grid = new HashMap<>();
-        grid.put("type","grid");
-        grid.put("columns",items);
-
 
         List<FormField> formFields = f.getFormFields();
+        Map<String,List<FormField>> groupFields = new HashMap<>();
+        List<String> groupNames = new ArrayList<>();
+        groupNames.add("");
         for(FormField field:formFields){
-            items.add(this.buildFormField(f,field));
+            String groupName = field.getGroupName();
+            if(StringUtils.isBlank(groupName)){
+                groupName = "";
+            }
+            if(!groupNames.contains(groupName)){
+                groupNames.add(groupName);
+            }
+            if(!groupFields.containsKey(groupName)){
+                groupFields.put(groupName,new ArrayList<>());
+            }
+            groupFields.get(groupName).add(field);
         }
-        form.put("body",grid);
 
+        List<Map<String,Object>> body = new ArrayList<>();
+        for(String groupName:groupNames){
+            List<FormField> fields = groupFields.get(groupName);
+            if(fields == null || fields.isEmpty()){
+               continue;
+            }
+            List<Map<String,Object>> items = new ArrayList<>();
+            for(FormField field:fields){
+                items.add(this.buildFormField(f,field));
+            }
+            Map<String,Object> grid = new HashMap<>();
+            grid.put("type","grid");
+            grid.put("columns",items);
+
+            if(StringUtils.isBlank(groupName)){
+                body.add(grid);
+            }else{
+                Map<String,Object> fieldSet = new HashMap<>();
+                fieldSet.put("type","fieldSet");
+                fieldSet.put("title",groupName);
+                fieldSet.put("collapsable",true);
+                fieldSet.put("body",grid);
+                body.add(fieldSet);
+            }
+        }
+
+        form.put("body",body);
 
         Map<String,Object> dialog = new HashMap<>();
         dialog.put("title",button.getLabel());
@@ -208,7 +241,6 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
 //            form.remove("body");
 
             List<Map<String,Object>> tabs = new ArrayList<>();
-            grid.put("title","基本信息");
 //            tabs.add(grid);
 
             List<String> targets = new ArrayList<>();
@@ -246,7 +278,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
 
             Map<String,Object> panel = new HashMap<>();
             panel.put("title","基本信息");
-            panel.put("body",grid);
+            panel.put("body",body);
             panel.put("type","panel");
             panel.put("header",dialogButtons);
 

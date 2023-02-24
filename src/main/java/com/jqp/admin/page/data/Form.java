@@ -49,6 +49,7 @@ public class Form extends BaseData {
     //表单事件
     private String formEvent = "";
 
+
     public String getInitSql() {
         return initSql == null ? "" : initSql;
     }

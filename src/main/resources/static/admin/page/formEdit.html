@@ -108,6 +108,15 @@
 						</div>
 					</template>
 				</el-table-column>
+				<el-table-column label="分组" width="150" >
+					<template  #default="scope">
+						<div class='el_input'>
+							<div class="el-input__wrapper">
+								<input class="el-input__inner" v-model.lazy="scope.row.groupName" />
+							</div>
+						</div>
+					</template>
+				</el-table-column>
 				<el-table-column label="宽度" width="100" >
 					<template  #default="scope">
 						<div class='el_input'>

@@ -18,4 +18,6 @@ public class FormField extends InputField{
     private String checkRepeatTip;
     //表单项校验
     private String validations;
+    //分组名称
+    private String groupName;
 }
