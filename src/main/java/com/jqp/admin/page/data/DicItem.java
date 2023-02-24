@@ -17,4 +17,8 @@ public class DicItem extends BaseData {
     private String value;
     //排序
     private Integer seq;
+    //字体颜色
+    private String color;
+    //背景颜色
+    private String bgColor;
 }

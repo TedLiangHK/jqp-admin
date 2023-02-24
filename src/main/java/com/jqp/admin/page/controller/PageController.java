@@ -184,6 +184,7 @@ public class PageController {
         param.putAll(pageParam);
         param.put("page",1);
         param.put("perPage",Integer.MAX_VALUE);
+        param.put("exportExcel",true);
 
         Result<CrudData<Map<String, Object>>> result = pageService.query(pageCode, param);
         Page page = pageService.get(pageCode);

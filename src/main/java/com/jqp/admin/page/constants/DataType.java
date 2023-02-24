@@ -40,9 +40,10 @@ public class DataType {
     //图片
     public static final String IMAGE = "image";
     public static final String FILE = "file";
+    public static final String TPL = "tpl";
 
     public static final boolean isStr(String type){
-        return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE,IMAGE,FILE).contains(type);
+        return Arrays.asList(STRING,DIC,LONG_STRING,LONG_TEXT,SQL,JS,ARTICLE,IMAGE,FILE,TPL).contains(type);
     }
     public static final boolean isDic(String type){
         return Arrays.asList(DIC).contains(type);

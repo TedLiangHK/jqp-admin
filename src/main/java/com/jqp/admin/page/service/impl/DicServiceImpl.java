@@ -24,7 +24,7 @@ public class DicServiceImpl implements DicService {
     private DicCacheService dicCacheService;
     @Override
     public List<Map<String, Object>> options(String code) {
-        List<Map<String, Object>> options = jdbcService.find("select label,value from dic_item where parent_id in(" +
+        List<Map<String, Object>> options = jdbcService.find("select label,value,color,bg_color from dic_item where parent_id in(" +
                 "select id from dic where dic_code = ? " +
                 ") order by seq asc,id asc ", code);
         return options;

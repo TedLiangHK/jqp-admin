@@ -18,6 +18,7 @@ import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -408,6 +409,8 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         crudData.setCount(pageData.getTotal());
         List<PageResultField> resultFields = page.getResultFields();
 
+        Boolean exportExcel = (Boolean) pageParam.get("exportExcel");
+
         for(PageResultField resultField:resultFields){
             if(Whether.YES.equals(resultField.getHidden())){
                 continue;
@@ -425,7 +428,25 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 DicCacheService dicCacheService = SpringUtil.getBean(DicCacheService.class);
                 List<Map<String, Object>> options = dicCacheService.options(resultField.getFormat());
                 options.forEach(o->{
-                    map.put((String)o.get("value"),o.get("label"));
+                    //字体颜色
+                    String color = (String) o.get("color");
+                    //背景色
+                    String bgColor = (String) o.get("bgColor");
+                    String value = (String)o.get("value");
+                    String label = (String) o.get("label");
+                    if(exportExcel != null && exportExcel || (StringUtils.isBlank(color) && StringUtils.isBlank(bgColor))){
+                        //导出用原始字段
+                        map.put(value,label);
+                    }else{
+                        StringBuilder style = new StringBuilder();
+                        if(StringUtils.isNotBlank(color)){
+                            style.append(StrUtil.format("color:{};",color));
+                        }
+                        if(StringUtils.isNotBlank(bgColor)){
+                            style.append(StrUtil.format("background-color:{};",bgColor));
+                        }
+                        map.put(value,StrUtil.format("<span class='label' style='{}'>{}</span>",style.toString(),label));
+                    }
                 });
                 columnData.put("map",map);
             }else if(DataType.IMAGE.equals(resultField.getType())){
@@ -435,6 +456,9 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 columnData.put("type","input-file");
                 columnData.put("multiple",true);
                 columnData.put("disabled",true);
+            }else if(DataType.TPL.equals(resultField.getType())){
+                columnData.put("type","tpl");
+                columnData.put("tpl",resultField.getFormat());
             }
             crudData.getColumns().add(columnData);
         }
