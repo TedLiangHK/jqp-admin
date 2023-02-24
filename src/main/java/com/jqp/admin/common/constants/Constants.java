@@ -6,6 +6,7 @@ package com.jqp.admin.common.constants;
  */
 public class Constants {
     public static final String USER_SESSION = "USER_SESSION";
+    public static final String USER_KEY_PREFIX = "ADMIN_USER";
     public static final String CAPTCHA_CODE = "CAPTCHA_CODE";
     public static final String CAPTCHA_TIMEOUT = "CAPTCHA_TIMEOUT";
     public static final String USER_CHOOSE_ENTERPRISE = "USER_CHOOSE_ENTERPRISE";

@@ -13,6 +13,7 @@ import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.constants.ResultCode;
+import com.jqp.admin.common.constants.UserStatus;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.service.FormService;
@@ -24,6 +25,7 @@ import com.jqp.admin.rbac.service.ConfigService;
 import com.jqp.admin.rbac.service.UserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -45,6 +47,7 @@ public class UserController {
     private FormService formService;
 
     @Resource
+    @Lazy
     private SessionContext sessionContext;
 
     @Resource
@@ -115,6 +118,9 @@ public class UserController {
         }
         if(!user.getPassword().equals(SecureUtil.md5(password + user.getSalt()))){
             return Result.error("用户名/密码错误");
+        }
+        if(UserStatus.Quit.equals(user.getUserStatus())){
+            return Result.error("用户已离职");
         }
         List<Enterprise> userEnterpriseList = userService.getUserEnterpriseList(user);
         if(userEnterpriseList.size() == 1){

@@ -3,10 +3,12 @@ package com.jqp.admin.common.config;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.constants.ResultCode;
+import com.jqp.admin.util.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -22,12 +24,14 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 @Slf4j
 public class AdminInterceptor implements HandlerInterceptor {
-    @Resource
-    SessionContext sessionContext;
+//    @Resource
+//    @Lazy
+//    SessionContext sessionContext;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("拦截url:"+request.getRequestURI());
         String uri = request.getRequestURI();
+        SessionContext sessionContext = SpringContextUtil.getBean(SessionContext.class);
         UserSession userSession = sessionContext.getSession(request);
         if(userSession == null){
             if(isAjax(request,handler)){

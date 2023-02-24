@@ -15,6 +15,7 @@ public class UserSession implements java.io.Serializable{
     private static final long serialVersionUID = -7946270162186590546L;
     private Long userId;
     private String token;
+    private String tokenName;
     private String userType;
     private Long enterpriseId;
     private Long deptId;
