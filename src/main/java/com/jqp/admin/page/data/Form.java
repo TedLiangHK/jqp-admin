@@ -49,6 +49,9 @@ public class Form extends BaseData {
     //表单事件
     private String formEvent = "";
 
+    //普通表单,向导表单,用向导表单时,分组字段为向导步骤
+    private String formType;
+
 
     public String getInitSql() {
         return initSql == null ? "" : initSql;

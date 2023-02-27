@@ -9,6 +9,7 @@ import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.page.constants.DataType;
+import com.jqp.admin.page.constants.FormType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
@@ -119,7 +120,11 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
     public Map<String, Object> getFormJson(Form f, BaseButton button) {
 
         Map<String,Object> form = new HashMap<>();
-        form.put("type","form");
+        String formType = FormType.Form;
+        if(FormType.Wizard.equals(f.getFormType())){
+            formType = FormType.Wizard;
+        }
+        form.put("type",formType);
         if(StrUtil.isNotBlank(f.getTableName())){
             form.put("initApi",StrUtil.format("post:/admin/common/{}/get",f.getCode())+"?id=${id}");
             form.put("api",StrUtil.format("post:/admin/common/{}/saveOrUpdate",f.getCode()));
@@ -169,15 +174,24 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
                 body.add(grid);
             }else{
                 Map<String,Object> fieldSet = new HashMap<>();
-                fieldSet.put("type","fieldSet");
+                if(!FormType.Wizard.equals(formType)){
+                    fieldSet.put("type","fieldSet");
+                }else{
+                    fieldSet.put("mode","horizontal");
+                }
                 fieldSet.put("title",groupName);
                 fieldSet.put("collapsable",true);
                 fieldSet.put("body",grid);
                 body.add(fieldSet);
             }
         }
+        if(FormType.Wizard.equals(formType)){
+            form.put("steps",body);
+        }else{
+            form.put("body",body);
+        }
+        form.put("mode","horizontal");
 
-        form.put("body",body);
 
         Map<String,Object> dialog = new HashMap<>();
         dialog.put("title",button.getLabel());
