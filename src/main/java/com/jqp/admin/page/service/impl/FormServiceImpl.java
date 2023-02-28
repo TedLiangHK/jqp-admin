@@ -191,7 +191,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             form.put("body",body);
         }
         form.put("mode","horizontal");
-
+//        if(formDisabled){
+//            form.put("static",true);
+//        }
 
         Map<String,Object> dialog = new HashMap<>();
         dialog.put("title",button.getLabel());
