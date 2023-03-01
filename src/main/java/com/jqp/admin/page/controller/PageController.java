@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -11,6 +12,7 @@ import com.jqp.admin.common.*;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.PageKey;
 import com.jqp.admin.page.constants.RefType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
@@ -432,8 +434,14 @@ public class PageController {
         }
         params.put("openPage",!Whether.NO.equals(page.getOpenPage()));
         js = TemplateUtil.getValue(js,params);
-        return js;
+
+        String json = js.substring(PageKey.AMIS_JSON.length()+1);
+        JSONObject jsonObject = JSONUtil.parseObj(json);
+        TemplateUtil.filterDefinitions(jsonObject);
+        return PageKey.AMIS_JSON + "="+jsonObject.toStringPretty();
     }
+
+
 
     @RequestMapping("/queryConfigs/{pageCode}")
     public Result queryConfigs(@PathVariable("pageCode") String pageCode){

@@ -52,6 +52,8 @@ public class Form extends BaseData {
     //普通表单,向导表单,用向导表单时,分组字段为向导步骤
     private String formType;
 
+    //自定义表单
+    private String customForm;
 
     public String getInitSql() {
         return initSql == null ? "" : initSql;

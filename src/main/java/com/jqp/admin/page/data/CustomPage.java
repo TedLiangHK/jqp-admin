@@ -2,12 +2,14 @@ package com.jqp.admin.page.data;
 
 import com.jqp.admin.common.BaseData;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 /***
  * @date 2022-07-21 15:09:09
  * @remark 自定义页面
  */
 @Data
+@FieldNameConstants
 public class CustomPage extends BaseData {
     //编号
     private String code;

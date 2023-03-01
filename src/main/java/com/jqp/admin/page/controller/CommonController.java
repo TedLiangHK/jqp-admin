@@ -133,6 +133,11 @@ public class CommonController {
             }
 
             if(!Whether.YES.equals(formField.getMulti())){
+                if(value instanceof Map || value instanceof List){
+                    value = JSONUtil.toJsonStr(value);
+                }else{
+                    value = value.toString();
+                }
                 Object realValue = DataType.getValue(type, value.toString(), formField.getFormat());
                 obj.put(formField.getField(),realValue);
             }
@@ -241,7 +246,8 @@ public class CommonController {
             log.error("保存异常",e);
             return Result.error(e.getMessage());
         }
-        return Result.success(obj);
+        return get((Long)obj.get("id"),formCode);
+        //return Result.success(obj);
     }
 
     @RequestMapping("/{model}/delete/{id}")

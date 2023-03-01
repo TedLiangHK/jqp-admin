@@ -71,6 +71,9 @@
 						<el-option label="分步表单" value="wizard" ></el-option>
 					</el-select>
 				</el-form-item>
+				<el-form-item label="自定义表单">
+					<el-input v-model="form.customForm" placeholder="自定义表单内容,通过自定义页面配置,此处填写自定义页面的编号" />
+				</el-form-item>
 				<el-form-item label="表单事件">
 					<el-input v-model="form.formEvent" placeholder="在获取/保存/更新时执行一些自定义的代码,实现接口FormEvent,原理请看CommonController源码" />
 				</el-form-item>

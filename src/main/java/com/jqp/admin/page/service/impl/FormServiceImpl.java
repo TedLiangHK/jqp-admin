@@ -3,6 +3,7 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.service.impl.AbstractCacheService;
@@ -325,7 +326,12 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
 
             dialog.put("actions",dialogButtons);
         }
-
+        if(StringUtils.isNotBlank(f.getCustomForm())){
+            CustomPage customPage = jdbcService.findOne(CustomPage.class, CustomPage.Fields.code, f.getCustomForm());
+            if(customPage != null){
+                form = JSONUtil.parseObj(customPage.getContent());
+            }
+        }
         dialog.put("body",form);
         return dialog;
     }

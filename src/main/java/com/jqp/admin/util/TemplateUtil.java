@@ -2,8 +2,11 @@ package com.jqp.admin.util;
 
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import cn.hutool.core.io.IoUtil;
 import com.jqp.admin.common.service.TemplateService;
@@ -19,7 +22,7 @@ public class TemplateUtil {
 		}
 		context.put("jq","$");
 		context.put("service",SpringContextUtil.getBean(TemplateService.class));
-		
+
 		StringWriter sw = new StringWriter();
 
 		try {
@@ -28,7 +31,7 @@ public class TemplateUtil {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return sw.toString();
 	}
 
@@ -37,5 +40,37 @@ public class TemplateUtil {
 		String template = IoUtil.readUtf8(in);
 		IoUtil.close(in);
 		return TemplateUtil.getValue(template,params);
+	}
+	//definitions 属性只允许在最顶层定义
+	public static void filterDefinitions(Map<String,Object> json){
+		filterDefinitions(json,json);
+	}
+	public static void filterDefinitions(Map<String,Object> json,Map<String,Object> top){
+		Map<String,Object> definitions = (Map<String, Object>) top.get("definitions");
+		if(definitions == null){
+			definitions = new HashMap<>();
+			top.put("definitions",definitions);
+		}
+		Set<Entry<String, Object>> entries = json.entrySet();
+		for(Entry<String, Object> en:entries){
+			Object value = en.getValue();
+			if(en.getKey().equals("definitions")){
+				if(top != json ){
+					definitions.putAll((Map<String, ?>) value);
+
+				}
+			}else if(value instanceof Map){
+				filterDefinitions((Map<String, Object>) value,top);
+			}else if(value instanceof List){
+				for(Object item: ((List) value)){
+					if(item instanceof Map){
+						filterDefinitions((Map<String, Object>) item,top);
+					}
+				}
+			}
+		}
+		if(json != top){
+			json.remove("definitions");
+		}
 	}
 }
