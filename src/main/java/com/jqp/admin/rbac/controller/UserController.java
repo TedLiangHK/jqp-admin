@@ -91,7 +91,10 @@ public class UserController {
 
         return Result.success(data);
     }
-
+    @PostMapping("/postLogin")
+    public Result postLogin(@RequestBody Map<String,Object> map, HttpServletRequest request, HttpServletResponse response){
+        return this.login((String)map.get("username"),(String)map.get("password"),(String)map.get("captcha"),request,response);
+    }
     @PostMapping("/login")
     @ResponseBody
     public Result login(String username,String password,String captcha, HttpServletRequest request, HttpServletResponse response){
@@ -175,6 +178,11 @@ public class UserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    @RequestMapping("/postLogout")
+    public Result postLogout(HttpServletRequest request, HttpServletResponse response){
+        sessionContext.deleteSession(request);
+        return Result.success();
     }
 
     @PostMapping("/saveEnterpriseUser")

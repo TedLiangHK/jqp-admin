@@ -306,7 +306,12 @@ public class PageController {
         }
         return null;
     }
-
+    @RequestMapping("/json/{pageCode}")
+    public Result json(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
+        String json = this.js(pageCode, response);
+        json = json.substring(PageKey.AMIS_JSON.length()+1);
+        return Result.success(JSONUtil.parse(json));
+    }
     @RequestMapping(value = "/js/{pageCode}.js",produces = "text/javascript; charset=utf-8")
     public String js(@PathVariable("pageCode") String pageCode,HttpServletResponse response){
 

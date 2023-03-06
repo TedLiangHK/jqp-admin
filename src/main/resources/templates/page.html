@@ -97,10 +97,17 @@
             responseAdaptor: function(api, response, query, request){
                 if(response.status == 1){
                     //需要登录;
-                    if(window.top){
-                        window.top.location.href="/";
-                    }else{
-                        window.location.href="/";
+                    try {
+                        window.top.location.href;
+                        //前后端不分离的
+                        if(window.top){
+                            window.top.location.href="/";
+                        }else{
+                            window.location.href="/";
+                        }
+                    }catch (e){
+                        //前后端分离的
+                        window.top.postMessage("login","*")
                     }
                 }
                 return response;
