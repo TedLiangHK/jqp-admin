@@ -21,7 +21,7 @@ public class Result <T>{
 
     public Result(int status, String msg, T data) {
         this.status = status;
-        this.msg = StrUtil.isNotBlank(msg) ? msg:"操作成功";
+        this.msg = StrUtil.isNotBlank(msg) ? msg: Status.SUCCESS == status ? "操作成功" : "系统异常";
         this.data = data;
     }
 

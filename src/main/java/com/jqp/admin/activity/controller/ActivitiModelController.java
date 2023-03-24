@@ -426,7 +426,9 @@ public class ActivitiModelController {
         formJson.remove("api");
 
         List<Map<String,Object>> actions = (List<Map<String, Object>>) dialog.get("actions");
-        List<Map<String,Object>> columns = (List<Map<String, Object>>) ((Map<String,Object>)formJson.get("body")).get("columns");
+//        List<Map<String,Object>> columns = (List<Map<String, Object>>) ((Map<String,Object>)formJson.get("body")).get("columns");
+
+        List<Map<String,Object>> columns = (List<Map<String, Object>>) formJson.get("body");
 
         Map<String,Object> flowImg = new HashMap<>();
         flowImg.put("type","iframe");

@@ -22,7 +22,7 @@ public class InputFieldServiceImpl implements InputFieldService {
             inputRender = inputDefaultRender;
         }
         Map<String, Object> config = inputRender.render(field);
-        if(selector){
+        if(selector && !config.get("name").toString().toLowerCase().contains("id")){
             config.put("name", Constants.QUERY_KEY_START+config.get("name"));
         }
         return config;
