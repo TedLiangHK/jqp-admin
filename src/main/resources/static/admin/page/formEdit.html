@@ -99,7 +99,7 @@
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
 					</template>
 				</el-table-column>
-				<el-table-column fixed  label="字段" width="300" >
+				<el-table-column fixed  label="字段" width="200" >
 					<template  #default="scope">
 						<div class='el_input'>
 							<div class="el-input__wrapper" style="width:100%;">
@@ -108,7 +108,7 @@
 						</div>
 					</template>
 				</el-table-column>
-				<el-table-column fixed  label="名称" width="180" >
+				<el-table-column  label="名称" width="180" >
 					<template  #default="scope">
 						<div class='el_input'>
 							<div class="el-input__wrapper">
@@ -315,7 +315,6 @@
 					</template>
 				</el-table-column>
 			</el-table>
-
 		</el-tab-pane>
 		<el-tab-pane label="表单按钮" name="formButton">
 			<el-button type="primary" @click="onAddButton">添加</el-button>
@@ -368,6 +367,15 @@ post:/xxx(会携带)requestBody参数
 						</div>
 					</template>
 				</el-table-column>
+				<el-table-column  label="图标" width="180" >
+					<template  #default="scope">
+						<div class='el_input'>
+							<div class="el-input__wrapper">
+								<input class="el-input__inner" v-model.lazy="scope.row.icon" />
+							</div>
+						</div>
+					</template>
+				</el-table-column>
 				<el-table-column label="样式" width="140" >
 					<template  #default="scope">
 						<el-select v-model="scope.row.level" placeholder="请选择" clearable  >
@@ -397,6 +405,14 @@ post:/xxx(会携带)requestBody参数
 						<div class='el-textarea'>
 							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.confirmText" style="height:80px;"></textarea>
 						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="是否提示" width="200" >
+					<template  #default="scope">
+						<el-select v-model="scope.row.whetherConfirm" placeholder="默认提示" clearable  >
+							<el-option label="YES" value="YES"  ></el-option>
+							<el-option label="NO" value="NO"  ></el-option>
+						</el-select>
 					</template>
 				</el-table-column>
 				<el-table-column label="禁用规则" width="300" >

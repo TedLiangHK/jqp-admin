@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class Page extends BaseData {
@@ -44,4 +45,24 @@ public class Page extends BaseData {
 
     //是否开启分页,默认为YES
     private String openPage;
+    //页面介绍
+    private String introduce;
+    //开启行号
+    private String openRowNum;
+    //每页数量
+    private Integer perPage;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Page page = (Page) o;
+        return Objects.equals(code, page.code) && Objects.equals(name, page.name) && Objects.equals(querySql, page.querySql) && Objects.equals(pageType, page.pageType) && Objects.equals(orderBy, page.orderBy) && Objects.equals(js, page.js) && Objects.equals(labelField, page.labelField) && Objects.equals(valueField, page.valueField) && Objects.equals(width, page.width) && Objects.equals(beforeApi, page.beforeApi) && Objects.equals(openPage, page.openPage) && Objects.equals(introduce, page.introduce) && Objects.equals(openRowNum, page.openRowNum)&& Objects.equals(perPage, page.perPage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), code, name, querySql, pageType, orderBy, js, labelField, valueField, width, beforeApi, openPage, introduce, openRowNum,perPage);
+    }
 }

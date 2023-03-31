@@ -36,7 +36,12 @@ public class StaticPageController {
 
     @RequestMapping("/taskAudit/{taskId}")
     public String taskAudit(Model model,@PathVariable("taskId") String taskId){
-        model.addAttribute("js","/admin/models/task/js/"+taskId+".js?_rt="+System.currentTimeMillis());
+        model.addAttribute("js","/admin/models/taskAudit/js/"+taskId+".js?_rt="+System.currentTimeMillis());
+        return "page";
+    }
+    @RequestMapping("/taskView/{taskId}")
+    public String taskView(Model model,@PathVariable("taskId") String taskId){
+        model.addAttribute("js","/admin/models/taskView/js/"+taskId+".js?_rt="+System.currentTimeMillis());
         return "page";
     }
     @RequestMapping("/auditRecord/{modelName}/{id}")

@@ -1,13 +1,16 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.page.constants.ActionType;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,9 @@ public class PageButtonServiceImpl implements PageButtonService {
         btn.put("type","button");
         btn.put("label",baseButton.getLabel());
         btn.put("level",baseButton.getLevel());
+        if(StringUtils.isNotBlank(baseButton.getIcon())){
+            btn.put("icon",baseButton.getIcon());
+        }
 //        btn.put("reload","mainTable");
         if(StrUtil.isNotBlank(baseButton.getJsRule())){
             btn.put("disabledOn",baseButton.getJsRule());
@@ -73,10 +79,28 @@ public class PageButtonServiceImpl implements PageButtonService {
             btn.put("api",baseButton.getOptionValue());
 
             String confirmText = StrUtil.isBlank(baseButton.getConfirmText()) ? "确定" + baseButton.getLabel()+"操作吗?" : baseButton.getConfirmText();
-            btn.put("confirmText",confirmText);
+            if(!Whether.NO.equals(baseButton.getWhetherConfirm())){
+                btn.put("confirmText",confirmText);
+            }
         }else if(ActionType.OpenNew.equals(baseButton.getOptionType())){
             btn.put("actionType","url");
             btn.put("url",baseButton.getOptionValue());
+        }else if(ActionType.IframeAjax.equals(baseButton.getOptionType())){
+            btn.put("actionType","ajax");
+            String method = "post";
+            String url = baseButton.getOptionValue();
+            if(baseButton.getOptionValue().contains(":")){
+                String[] arr = baseButton.getOptionValue().split(":");
+                method = arr[0];
+                url = arr[1];
+            }
+            btn.put("api", new JSONObject()
+                    .set("method",method)
+                    .set("url",url)
+                    .set("adaptor","if(payload.status == 0){parent.amisScoped.getComponentById('mainTable').search(); parent.jQuery('.cxd-Modal-close')[0].click();}return payload")
+            );
+            String confirmText = StrUtil.isBlank(baseButton.getConfirmText()) ? "确定" + baseButton.getLabel()+"操作吗?" : baseButton.getConfirmText();
+            btn.put("confirmText",confirmText);
         }
         return btn;
     }
@@ -128,7 +152,15 @@ public class PageButtonServiceImpl implements PageButtonService {
             }
             if(isRow){
                 if("row".equals(pageButton.getButtonLocation())){
-                    pageButtonData.getRowButtons().add(getButton(pageButton));
+                    if(Whether.YES.equals(pageButton.getAddToMore())){
+                        Map<String, Object> button = getButton(pageButton);
+                        if(StringUtils.isNotBlank(pageButton.getLevel())){
+                            button.put("className","my-dropdown-button my-dropdown-button-"+pageButton.getLevel());
+                        }
+                        pageButtonData.getRowMoreButtons().add(button);
+                    }else{
+                        pageButtonData.getRowButtons().add(getButton(pageButton));
+                    }
                 }
             }else{
                 if("top".equals(pageButton.getButtonLocation())){
@@ -137,6 +169,17 @@ public class PageButtonServiceImpl implements PageButtonService {
                     pageButtonData.getBulkButtons().add(getButton(pageButton));
                 }
             }
+        }
+        if(isRow && !pageButtonData.getRowMoreButtons().isEmpty()){
+            Map<String,Object> dropdownButton = new HashMap<>();
+            dropdownButton.put("type","dropdown-button");
+            dropdownButton.put("label","更多");
+//                    dropdownButton.put("primary",true);
+            dropdownButton.put("level","success");
+            dropdownButton.put("menuClassName","my-dropdown");
+            dropdownButton.put("buttons",pageButtonData.getRowMoreButtons());
+
+            pageButtonData.getRowButtons().add(dropdownButton);
         }
 
         if(!pageButtonData.getBulkButtons().isEmpty()){

@@ -11,4 +11,6 @@ public interface PageConfigService {
     List<Map<String,Object>> queryConfigs(Page page,boolean selector);
 
     Map<String,Object> getCurdJson(String code);
+    Map<String,Object> getCurdJson(String code,boolean addTab);
+    void setPageConfig(Page page,Map<String,Object> params);
 }

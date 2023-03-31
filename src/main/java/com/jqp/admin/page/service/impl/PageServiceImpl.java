@@ -1,8 +1,11 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.*;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.service.TemplateService;
@@ -17,6 +20,7 @@ import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import com.jqp.admin.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -80,47 +84,51 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         if(oPage!=null && !page.getCode().equals(oPage.getCode())){
             super.invalid(oPage.getCode());
         }
-        jdbcService.saveOrUpdate(page);
-        jdbcService.delete("delete from page_result_field where page_id = ? ", page.getId());
-        int seq = 0;
+        oPage = get(page.getCode());
+        if(!page.equals(oPage)){
+            jdbcService.saveOrUpdate(page);
+        }
 
         Collections.sort(page.getPageButtons(), SeqComparator.instance);
         Collections.sort(page.getResultFields(), SeqComparator.instance);
         Collections.sort(page.getPageRefs(), SeqComparator.instance);
         Collections.sort(page.getQueryFields(), SeqComparator.instance);
-        for (PageResultField field : page.getResultFields()) {
-            field.setId(null);
-            field.setPageId(page.getId());
-            field.setSeq(++seq);
-            jdbcService.saveOrUpdate(field);
-        }
-        jdbcService.delete("delete from page_query_field where page_id = ? ", page.getId());
-        seq = 0;
-        for (PageQueryField field : page.getQueryFields()) {
-            field.setId(null);
-            field.setPageId(page.getId());
-            field.setSeq(++seq);
-            jdbcService.saveOrUpdate(field);
-        }
 
-        jdbcService.delete("delete from page_button where page_id = ? ", page.getId());
-        seq = 0;
-        for (PageButton button : page.getPageButtons()) {
-            button.setId(null);
-            button.setPageId(page.getId());
-            button.setSeq(++seq);
-            jdbcService.saveOrUpdate(button);
-        }
+        compareAndUpdate(page,PageResultField.class,page.getResultFields(),oPage == null ? null :oPage.getResultFields());
+        compareAndUpdate(page,PageQueryField.class,page.getQueryFields(),oPage == null ? null :oPage.getQueryFields());
+        compareAndUpdate(page,PageButton.class,page.getPageButtons(),oPage == null ? null :oPage.getPageButtons());
+        compareAndUpdate(page,PageRef.class,page.getPageRefs(),oPage == null ? null :oPage.getPageRefs());
 
-        jdbcService.delete("delete from page_ref where page_id = ? ", page.getId());
-        seq = 0;
-        for (PageRef ref : page.getPageRefs()) {
-            ref.setId(null);
-            ref.setPageId(page.getId());
-            ref.setSeq(++seq);
-            jdbcService.saveOrUpdate(ref);
-        }
         super.invalid(page.getCode());
+    }
+
+    private void compareAndUpdate(Page page,Class<?> clz,List<?> objects,List<?> oldObjects){
+        boolean change = false;
+        if(oldObjects == null || objects.size() != oldObjects.size()){
+            change = true;
+        }else{
+            for(int i=0;i<objects.size();i++){
+                Object o = objects.get(i);
+                ReflectUtil.setFieldValue(o,"seq",i+1);
+                ReflectUtil.setFieldValue(o,"pageId",page.getId());
+                Object oldObj = oldObjects.get(i);
+                if(!o.equals(oldObj)){
+                    change = true;
+                    break;
+                }
+            }
+        }
+        if(change){
+            jdbcService.delete(StrUtil.format("delete from {} where page_id = ? ",StringUtil.toSqlColumn(clz.getSimpleName())), page.getId());
+            for(int i=0;i<objects.size();i++){
+                Object o = objects.get(i);
+                ReflectUtil.setFieldValue(o,"seq",i+1);
+                ReflectUtil.setFieldValue(o,"pageId",page.getId());
+                ReflectUtil.setFieldValue(o,"id",null);
+
+                jdbcService.saveOrUpdate((BaseData) o);
+            }
+        }
     }
 
     @Override
@@ -189,7 +197,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             sql.append(page.getOrderBy());
         }
 
-        if(Whether.NO.equals(page.getOpenPage())){
+        if(PageType.tree.equals(page.getPageType())||Whether.NO.equals(page.getOpenPage())){
             pageParam.put("page",1);
             pageParam.put("perPage",Integer.MAX_VALUE);
         }
@@ -207,13 +215,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                     Object value = item.get(en.getKey());
                     if(value != null){
                         String format = StrUtil.isBlank(en.getValue().getFormat()) ? "yyyy-MM-dd":en.getValue().getFormat();
-                        if(value instanceof LocalDateTime){
-                            item.put(en.getKey(), DateUtil.format((LocalDateTime) value,format));
-                        }else if(value instanceof java.sql.Date){
-                            item.put(en.getKey(), DateUtil.format((java.sql.Date) value,format));
-                        }else if(value instanceof java.util.Date){
-                            item.put(en.getKey(), DateUtil.format((java.util.Date) value,format));
-                        }
+                        item.put(en.getKey(),Util.dateFormat(value,format));
                     }
                 }
             }
@@ -299,13 +301,8 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                             Object value = child.get(en.getKey());
                             if(value != null){
                                 String format = StrUtil.isBlank(en.getValue().getFormat()) ? "yyyy-MM-dd":en.getValue().getFormat();
-                                if(value instanceof LocalDateTime){
-                                    child.put(en.getKey(), DateUtil.format((LocalDateTime) value,format));
-                                }else if(value instanceof java.sql.Date){
-                                    child.put(en.getKey(), DateUtil.format((java.sql.Date) value,format));
-                                }else if(value instanceof java.util.Date){
-                                    child.put(en.getKey(), DateUtil.format((java.util.Date) value,format));
-                                }
+                                value = Util.dateFormat(value,format);
+                                child.put(en.getKey(),Util.dateFormat(value,format));
                             }
                         }
                     }
@@ -407,9 +404,20 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         CrudData<Map<String,Object>> crudData = new CrudData<>();
         crudData.setRows(pageData.getItems());
         crudData.setCount(pageData.getTotal());
+        crudData.getParams().putAll(pageParam);
+        if(Whether.YES.equals(page.getOpenRowNum())){
+            Util.addRowNum(result.getData().getItems(),pageParam.getPage(),pageParam.getPerPage());
+        }
         List<PageResultField> resultFields = page.getResultFields();
 
         Boolean exportExcel = (Boolean) pageParam.get("exportExcel");
+
+        if(Whether.YES.equals(page.getOpenRowNum())){
+            ColumnData columnData = new ColumnData();
+            columnData.setName("rowNum");
+            columnData.setLabel("序号");
+            crudData.getColumns().add(columnData);
+        }
 
         for(PageResultField resultField:resultFields){
             if(Whether.YES.equals(resultField.getHidden())){
@@ -419,6 +427,12 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             columnData.setName(StringUtil.toFieldColumn(resultField.getField()));
             columnData.setLabel(resultField.getLabel());
             columnData.put("sortable",true);
+            if(StringUtils.isNotBlank(resultField.getFixed())){
+                columnData.put("fixed",resultField.getField());
+            }
+            if(Whether.NO.equals(resultField.getToggled())){
+                columnData.put("toggled",false);
+            }
             if(resultField.getWidth() != null){
                 columnData.put("width",resultField.getWidth());
             }
@@ -460,6 +474,14 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 columnData.put("type","tpl");
                 columnData.put("tpl",resultField.getFormat());
             }
+            if(StringUtils.isNotEmpty(resultField.getExtraJson())){
+                try{
+                    JSONObject json = JSONUtil.parseObj(resultField.getExtraJson());
+                    columnData.putAll(json);
+                }catch (Exception e){
+                    throw new RuntimeException(StrUtil.format("字段["+resultField.getLabel()+"]扩展json配置错误"));
+                }
+            }
             crudData.getColumns().add(columnData);
         }
         Boolean selector = (Boolean) pageParam.get("selector");
@@ -473,6 +495,9 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 String label = (String) btn.get("label");
                 if(label!= null){
                     optionWidth += label.length()*fontWidth+padding;
+                }
+                if(btn.get("icon") != null){
+                    optionWidth += 30;
                 }
             }
             if(optionWidth>400){
@@ -488,8 +513,24 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
                 crudData.getColumns().add(columnData);
             }
         }
-        if(Whether.NO.equals(page.getOpenPage())){
+        if(PageType.tree.equals(page.getPageType())||Whether.NO.equals(page.getOpenPage())){
             crudData.setCount(null);
+        }
+        StringBuilder statisticsSql = new StringBuilder();
+        for(PageResultField resultField:resultFields){
+            if(StringUtils.isNotBlank(resultField.getStatisticsLabel()) && StringUtils.isNotBlank(resultField.getStatisticsSql())){
+                statisticsSql.append(StrUtil.format("{} {},",resultField.getStatisticsSql(),resultField.getField()));
+            }
+        }
+        if(statisticsSql.length() != 0){
+            Map<String, Object> statistics = jdbcService.findOne(
+                    StrUtil.format("select {} from ({}) t "
+                            , statisticsSql.substring(0, statisticsSql.length() - 1)
+                            , sql.toString()
+                    ),
+                    values.toArray()
+            );
+            crudData.setStatistics(statistics);
         }
         return Result.success(crudData);
     }
@@ -590,4 +631,6 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
         }
         return this.query(pageCode,pageParam);
     }
+
+
 }

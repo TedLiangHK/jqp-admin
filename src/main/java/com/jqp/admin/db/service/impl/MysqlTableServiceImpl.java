@@ -33,6 +33,11 @@ public class MysqlTableServiceImpl extends AbstractCacheService<Result<TableInfo
     private JdbcDao jdbcDao;
 
     @Override
+    protected boolean isNull(Result<TableInfo> value) {
+        return value == null || value.getData() == null;
+    }
+
+    @Override
     public Result<PageData<TableInfo>> queryTable(PageParam pageParam) {
 
         String sql = getTableSql();

@@ -3,6 +3,8 @@ package com.jqp.admin.page.data;
 import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 @OrderBy
 public class FormField extends InputField{
@@ -20,4 +22,18 @@ public class FormField extends InputField{
     private String validations;
     //分组名称
     private String groupName;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FormField formField = (FormField) o;
+        return Objects.equals(formId, formField.formId) && Objects.equals(disabled, formField.disabled) && Objects.equals(checkRepeatType, formField.checkRepeatType) && Objects.equals(checkRepeatConfig, formField.checkRepeatConfig) && Objects.equals(checkRepeatTip, formField.checkRepeatTip) && Objects.equals(validations, formField.validations) && Objects.equals(groupName, formField.groupName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), formId, disabled, checkRepeatType, checkRepeatConfig, checkRepeatTip, validations, groupName);
+    }
 }

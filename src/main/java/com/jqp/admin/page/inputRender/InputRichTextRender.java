@@ -1,6 +1,7 @@
 package com.jqp.admin.page.inputRender;
 
 import com.jqp.admin.page.data.InputField;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,9 @@ public class InputRichTextRender  extends InputDefaultRender{
     @Override
     protected void extra(Map<String, Object> config, InputField field) {
         config.put("receiver","/admin/upload");
-        config.put("size",field.getFormat());
+        if(StringUtils.isNotBlank(field.getFormat())){
+            config.put("size",field.getFormat());
+        }
 
         //使用绝对路径地址
         Map<String, Object> options = new HashMap<>();

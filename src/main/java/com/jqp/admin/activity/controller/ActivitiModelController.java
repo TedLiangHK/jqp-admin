@@ -26,6 +26,7 @@ import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import com.jqp.admin.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
@@ -303,11 +304,20 @@ public class ActivitiModelController {
     /**
      *  任务js
      */
-    @RequestMapping(value="/task/js/{taskId}.js",produces = "text/javascript; charset=utf-8")
+    @RequestMapping(value="/taskAudit/js/{taskId}.js",produces = "text/javascript; charset=utf-8")
     @ResponseBody
-    public Object taskJs(@PathVariable String taskId) {
+    public Object taskAudit(@PathVariable String taskId) {
         HistoricTaskInstance task = processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
-        return auditJs(task,task.getProcessInstanceId());
+        return auditJs(task,task.getProcessInstanceId(),false);
+    }
+    /**
+     *  任务js
+     */
+    @RequestMapping(value="/taskView/js/{taskId}.js",produces = "text/javascript; charset=utf-8")
+    @ResponseBody
+    public Object taskView(@PathVariable String taskId) {
+        HistoricTaskInstance task = processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+        return auditJs(task,task.getProcessInstanceId(),true);
     }
 
     /**
@@ -324,10 +334,10 @@ public class ActivitiModelController {
             json.put("body","暂无审核记录");
             return "AMIS_JSON="+JSONUtil.toJsonPrettyStr(json);
         }
-        return auditJs(null,processInstanceId);
+        return auditJs(null,processInstanceId,true);
     }
 
-    private String auditJs(HistoricTaskInstance task,String processInstanceId){
+    private String auditJs(HistoricTaskInstance task,String processInstanceId,boolean view){
         HistoricProcessInstance processInstance = processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
 
         ProcessDefinition processDefinition = processEngine.
@@ -350,6 +360,10 @@ public class ActivitiModelController {
             viewForm = task.getFormKey();
         }
         Form f = formService.get(viewForm);
+        f = Util.clone(f);
+        if(view){
+            f.setDisabled(Whether.YES);
+        }
         BaseButton baseButton = new BaseButton();
         baseButton.setLabel("审核");
         if(task != null){
@@ -396,7 +410,7 @@ public class ActivitiModelController {
                 for(SequenceFlow node:nodes){
                     FormButton formButton = new FormButton();
                     formButton.setLabel(node.getName());
-                    formButton.setOptionType(ActionType.Ajax);
+                    formButton.setOptionType(ActionType.IframeAjax);
                     formButton.setOptionValue(StrUtil.format("post:/admin/models/task/complete/{}/{}",
                             task.getId(),node.getDocumentation()));
                     if(node.getName().contains("不")
@@ -513,9 +527,9 @@ public class ActivitiModelController {
 
         columns.add(1,records);
         actions = actions == null ? new ArrayList<>():actions;
-        if(!actions.isEmpty()){
-            actions.remove(actions.size()-1);
-        }
+//        if(!actions.isEmpty()){
+//            actions.remove(actions.size()-1);
+//        }
         if(task != null){
             actions.forEach(m->{
                 m.put("redirect",StrUtil.format("/taskAudit/{}?t=",task.getId(), System.currentTimeMillis()));

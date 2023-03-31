@@ -115,21 +115,26 @@ AMIS_JSON={
                     "className":"m-l float-right relative jqp-top-btn"
                 }],
             "submitText": "",
+            "mode": "horizontal",
             "body": [
                 {
-                    "type": "input-text",
-                    "name": "tableName",
-                    "label":"表名",
-                    "placeholder": "表名"
-                },
-                {
-                    "type": "input-text",
-                    "name": "tableComment",
-                    "label":"注释",
-                    "placeholder": "注释"
-                },{
-                    "label": "搜索",
-                    "type": "submit"
+                    "type":"grid",
+                    "columns":[{
+                        "type": "input-text",
+                        "name": "tableName",
+                        "label":"表名",
+                        "placeholder": "表名"
+                    },
+                    {
+                        "type": "input-text",
+                        "name": "tableComment",
+                        "label":"注释",
+                        "placeholder": "注释"
+                    },{
+                        "label": "查询",
+                        "primary":true,
+                        "type": "submit"
+                    }]
                 }
             ]
         },

@@ -4,6 +4,8 @@ import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
+import java.util.Objects;
+
 /***
  * @date 2022-02-25 10:22:41
  * @remark 页面关联
@@ -23,4 +25,18 @@ public class PageRef extends BaseData {
     private Long pageId;
     //名称
     private String refName;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PageRef pageRef = (PageRef) o;
+        return Objects.equals(refType, pageRef.refType) && Objects.equals(refField, pageRef.refField) && Objects.equals(refPageCode, pageRef.refPageCode) && Objects.equals(seq, pageRef.seq) && Objects.equals(pageId, pageRef.pageId) && Objects.equals(refName, pageRef.refName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), refType, refField, refPageCode, seq, pageId, refName);
+    }
 }

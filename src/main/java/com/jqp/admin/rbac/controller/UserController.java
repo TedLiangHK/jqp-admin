@@ -14,6 +14,7 @@ import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.constants.ResultCode;
 import com.jqp.admin.common.constants.UserStatus;
+import com.jqp.admin.common.service.DbCacheService;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TransactionOption;
 import com.jqp.admin.page.service.FormService;
@@ -52,6 +53,14 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+//    @Resource
+//    private DbCacheService dbCacheService;
+//
+//    @RequestMapping("/get/{code}")
+//    public Result getByCode(@PathVariable String code){
+//        return Result.success(dbCacheService.getData("user",code));
+//    }
 
     @RequestMapping("/{formCode}/save")
     public Result save(@RequestBody User user, @PathVariable("formCode") String formCode){

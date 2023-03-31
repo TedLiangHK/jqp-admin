@@ -16,10 +16,7 @@ import com.jqp.admin.page.service.FormEvent;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
-import com.jqp.admin.util.CollectionUtil;
-import com.jqp.admin.util.SpringContextUtil;
-import com.jqp.admin.util.StringUtil;
-import com.jqp.admin.util.TemplateUtil;
+import com.jqp.admin.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -267,6 +264,20 @@ public class CommonController {
             formService.del(form);
         }else{
             jdbcService.delete(id,tableName);
+        }
+        return Result.success();
+    }
+    @RequestMapping("/{model}/bathDelete/{ids}")
+    public Result bathDelete(@PathVariable("ids") String ids, @PathVariable("model") String model) {
+        String tableName = StringUtil.toSqlColumn(model);
+        Long enterpriseId = SessionContext.getSession().getEnterpriseId();
+
+//        if (id != null && StringUtils.isNotBlank(id.toString()) && !jdbcService.ownerEnterprise(tableName, id, enterpriseId)) {
+//            return Result.error("没有数据权限.");
+//        }
+        String[] arr = StringUtil.splitStr(ids,",");
+        for(String id:arr){
+            jdbcService.delete(Long.parseLong(id),tableName);
         }
         return Result.success();
     }
@@ -562,9 +573,9 @@ public class CommonController {
                     if(value == null){
                         continue;
                     }
-                    if(value instanceof LocalDateTime){
+                    if(value.getClass().getSimpleName().toLowerCase().contains("date")){
                         String format = StrUtil.isBlank(formField.getFormat()) ? "yyyy-MM-dd":formField.getFormat();
-                        String realValue = DateUtil.format((LocalDateTime) value, format);
+                        String realValue = Util.dateFormat(value, format);
                         obj.put(formField.getField(),realValue);
                     }
                     data.put(formField.getField(),obj.get(formField.getField()));

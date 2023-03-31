@@ -9,15 +9,21 @@ import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.config.UserSession;
 import com.jqp.admin.common.data.GlobalLog;
+import com.jqp.admin.common.data.LogTable;
+import com.jqp.admin.common.service.CacheService;
 import com.jqp.admin.common.service.DataListenerService;
+import com.jqp.admin.common.service.DbCacheService;
 import com.jqp.admin.common.service.LogService;
 import com.jqp.admin.db.data.ColumnInfo;
 import com.jqp.admin.db.data.TableInfo;
 import com.jqp.admin.db.service.JdbcService;
 import com.jqp.admin.db.service.TableService;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.rbac.data.User;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.Util;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +45,10 @@ public class LogServiceImpl implements LogService {
 
     @Resource
     @Lazy
+    private DbCacheServiceImpl dbCacheService;
+
+    @Resource
+    @Lazy
     private DataListenerService dataListenerService;
     @Override
     public void log(Map<String, Object> beforeObj, Map<String, Object> afterObj,String tableName) {
@@ -49,8 +59,8 @@ public class LogServiceImpl implements LogService {
             return;
         }
 
-        Long logTableId = jdbcService.findOneForObject("select id from log_table where lower(table_name) = ?", Long.class, tableName.toLowerCase());
-        if(logTableId == null){
+        LogTable logTable = jdbcService.findOne("select * from log_table where lower(table_name) = ? ", LogTable.class, tableName);
+        if(logTable == null){
             return;
         }
 
@@ -82,6 +92,7 @@ public class LogServiceImpl implements LogService {
             globalLog.setRefId(Long.valueOf(beforeObj.get("id").toString()));
             jdbcService.saveOrUpdate(globalLog);
             dataListenerService.deleteObj(tableName,beforeObj);
+            invalidCache(logTable,beforeObj);
         }else{
             operation = "修改";
             globalLog.setOptionType(operation);
@@ -113,8 +124,25 @@ public class LogServiceImpl implements LogService {
             }
             if(isUpdate){
                 dataListenerService.updateObj(tableName,beforeObj,afterObj);
+                invalidCache(logTable,beforeObj);
+                invalidCache(logTable,afterObj);
             }
         }
+    }
+
+    private void invalidCache(LogTable logTable,Map<String,Object> obj){
+        if(!Whether.YES.equals(logTable.getOpenCache()) || StringUtils.isBlank(logTable.getCacheKeyFields())){
+            return;
+        }
+
+        String[] fields = logTable.getCacheKeyFields().split(",");
+        String[] values = new String[fields.length];
+        for(int i=0;i<fields.length;i++){
+            values[i] = getValueStr(obj.get(StringUtil.toFieldColumn(fields[i])));
+        }
+        String dataKey = dbCacheService.getDataKey(logTable.getTableName(), StringUtil.concatStr(values, ","));
+        dbCacheService.invalid(dataKey);
+        log.info("清理缓存:{}",dataKey);
     }
 
     private String getValueStr(Object value){
@@ -122,15 +150,7 @@ public class LogServiceImpl implements LogService {
             return "";
         }
         String format = "yyyy-MM-dd HH:mm:ss";
-        if(value instanceof LocalDateTime){
-            value = DateUtil.format((LocalDateTime) value,format);
-        }else if(value instanceof java.sql.Date){
-            value = DateUtil.format((java.sql.Date) value,format);
-        }else if(value instanceof java.util.Date){
-            value = DateUtil.format((java.util.Date) value,format);
-        }else{
-            value = value.toString();
-        }
+        value = Util.dateFormat(value,format);
         return (String) value;
     }
 

@@ -31,44 +31,99 @@
 	  <el-button type="primary" @click="onSubmit" style="position:fixed;bottom:10px;right:10px;z-index:999;" >保存</el-button>
 	  <el-tabs class="demo-tabs" model-value="basic" >
 		<el-tab-pane label="基本信息" name="basic">
-			<el-form :model="page" ref="page" :rules="rules" label-width="120px"  >
-				<el-form-item label="编号"  prop="code">
-				  <el-input v-model="page.code" />
-				</el-form-item>
-				<el-form-item label="名称"  prop="name">
-				  <el-input v-model="page.name" />
-				</el-form-item>
-				<el-form-item label="排序">
-				  <el-input v-model="page.orderBy" />
-				</el-form-item>
-				<el-form-item label="名称字段">
-				  <el-input v-model="page.labelField" placeholder="用于选择器的名称展示" />
-				</el-form-item>
-				<el-form-item label="值字段">
-				  <el-input v-model="page.valueField" placeholder="用于选择器的值" />
-				</el-form-item>
-				<el-form-item label="页面类型">
-				  <el-select v-model="page.pageType" placeholder="默认为列表" >
-					<el-option label="列表" value="list"  ></el-option>
-					<el-option label="树" value="tree"  ></el-option>
-				  </el-select>
-				</el-form-item>
-				<el-form-item label="是否开启分页">
-					<el-select v-model="page.openPage" placeholder="默认开启分页" >
-						<el-option label="YES" value="YES" ></el-option>
-						<el-option label="NO" value="NO" ></el-option>
-					</el-select>
-				</el-form-item>
+			<el-form :model="page" ref="page" :rules="rules" label-width="80px"  >
+				<el-row>
+					<el-col :span="6">
+						<el-form-item label="编号"  prop="code">
+							<el-input v-model="page.code" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="名称"  prop="name">
+							<el-input v-model="page.name" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="排序">
+							<el-input v-model="page.orderBy" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="页面类型">
+							<el-select v-model="page.pageType" style="width:100%" placeholder="默认为列表" >
+								<el-option label="列表" value="list"  ></el-option>
+								<el-option label="树" value="tree"  ></el-option>
+							</el-select>
+						</el-form-item>
+
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<el-form-item label="名称字段">
+							<el-input v-model="page.labelField" placeholder="用于选择器的名称展示" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="值字段">
+							<el-input v-model="page.valueField" placeholder="用于选择器的值" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="开启分页">
+							<el-select v-model="page.openPage" style="width:100%"  placeholder="默认开启分页" >
+								<el-option label="YES" value="YES" ></el-option>
+								<el-option label="NO" value="NO" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="开启序号">
+							<el-select v-model="page.openRowNum" style="width:100%"  placeholder="默认不开启序号" >
+								<el-option label="YES" value="YES" ></el-option>
+								<el-option label="NO" value="NO" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<el-form-item label="前置接口">
+							<el-input v-model="page.beforeApi" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="页面宽度">
+							<el-input v-model="page.width" placeholder="一对多页面占比左侧宽度,最大为12,默认值为6" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="每页数量">
+							<el-select v-model="page.perPage" style="width:100%;"  placeholder="默认为10" >
+								<el-option label="5" value="5" ></el-option>
+								<el-option label="10" value="10" ></el-option>
+								<el-option label="20" value="20" ></el-option>
+								<el-option label="50" value="50" ></el-option>
+								<el-option label="100" value="100" ></el-option>
+								<el-option label="300" value="300" ></el-option>
+								<el-option label="500" value="500" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+
+					</el-col>
+				</el-row>
+
 				<el-form-item label="查询sql" prop="querySql" >
 					<div class='el-textarea'>
 						<textarea class='el-textarea__inner'  v-model.lazy="page.querySql" style="height:300px;"></textarea>
 					</div>
 				</el-form-item>
-				<el-form-item label="前置接口">
-					<el-input v-model="page.beforeApi" />
-				</el-form-item>
-				<el-form-item label="页面宽度">
-					<el-input v-model="page.width" placeholder="一对多页面占比左侧宽度,最大为12,默认值为6" />
+				<el-form-item label="页面介绍" prop="introduce" >
+					<div class='el-textarea'>
+						<textarea class='el-textarea__inner'  v-model.lazy="page.introduce" style="height:100px;"></textarea>
+					</div>
 				</el-form-item>
 
 			  </el-form>
@@ -84,7 +139,7 @@
 						<el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
 					</template>
 				</el-table-column>
-				<el-table-column fixed  label="字段" width="300" >
+				<el-table-column fixed  label="字段" width="200" >
 					<template  #default="scope">
 						<div class='el_input'>
 							<div class="el-input__wrapper" style="width:100%;" >
@@ -93,7 +148,7 @@
 						</div>
 					</template>
 				</el-table-column>
-				<el-table-column fixed  label="名称" width="180" >
+				<el-table-column  label="名称" width="180" >
 					<template  #default="scope">
 						<div class='el_input'>
 							<div class="el-input__wrapper">
@@ -146,6 +201,43 @@
 						</el-select>
 					</template>
 				</el-table-column>
+				<el-table-column label="是否展示" width="100"   >
+					<template  #default="scope">
+						<el-select v-model="scope.row.toggled"  placeholder="配置为展示,需要在选择列哪里勾选" clearable >
+							<el-option label="YES" value="YES" ></el-option>
+							<el-option label="NO" value="NO" ></el-option>
+						</el-select>
+					</template>
+				</el-table-column>
+				<el-table-column label="冻结位置" width="100"   >
+					<template  #default="scope">
+						<el-select v-model="scope.row.fixed"  placeholder="请选择" clearable >
+							<el-option label="左侧" value="left" ></el-option>
+							<el-option label="右侧" value="right" ></el-option>
+						</el-select>
+					</template>
+				</el-table-column>
+				<el-table-column label="扩展json" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.extraJson" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="统计标签" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner' placeholder="tpl模板"  v-model.lazy="scope.row.statisticsLabel" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="统计sql" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.statisticsSql" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
 				<!--
 				<el-table-column fixed="right" label="操作" width="200" >
 					<template  #default="{row,column,$index}">
@@ -164,7 +256,7 @@
 						  <el-input-number v-model="scope.row.seq" style="width:150" :step="10" />
 					  </template>
 				  </el-table-column>
-				  <el-table-column fixed  label="字段" width="300" >
+				  <el-table-column fixed  label="字段" width="200" >
 					  <template  #default="scope">
 						  <div class='el_input'>
 							  <div class="el-input__wrapper" style="width:100%;">
@@ -173,7 +265,7 @@
 						  </div>
 					  </template>
 				  </el-table-column>
-				  <el-table-column fixed  label="名称" width="180" >
+				  <el-table-column  label="名称" width="180" >
 					  <template  #default="scope">
 						  <div class='el_input'>
 							  <div class="el-input__wrapper">
@@ -424,6 +516,15 @@ post:/xxx(会携带)requestBody参数
 						</div>
 					</template>
 				</el-table-column>
+				<el-table-column  label="图标" width="180" >
+					<template  #default="scope">
+						<div class='el_input'>
+							<div class="el-input__wrapper">
+								<input class="el-input__inner" v-model.lazy="scope.row.icon" />
+							</div>
+						</div>
+					</template>
+				</el-table-column>
 				<el-table-column label="样式" width="140" >
 					<template  #default="scope">
 						<el-select v-model="scope.row.level" placeholder="请选择" clearable  >
@@ -440,11 +541,27 @@ post:/xxx(会携带)requestBody参数
 						</el-select>
 					</template>
 				</el-table-column>
+				<el-table-column label="添加到更多" width="140" >
+					<template  #default="scope">
+						<el-select v-model="scope.row.addToMore" placeholder="请选择" clearable  >
+							<el-option label="YES" value="YES"  ></el-option>
+							<el-option label="NO" value="NO"  ></el-option>
+						</el-select>
+					</template>
+				</el-table-column>
 				<el-table-column label="二次确认提示" width="300" >
 					<template  #default="scope">
 						<div class='el-textarea'>
 							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.confirmText" style="height:80px;"></textarea>
 						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="是否提示" width="200" >
+					<template  #default="scope">
+						<el-select v-model="scope.row.whetherConfirm" placeholder="默认提示" clearable  >
+							<el-option label="YES" value="YES"  ></el-option>
+							<el-option label="NO" value="NO"  ></el-option>
+						</el-select>
 					</template>
 				</el-table-column>
 				<el-table-column label="禁用规则" width="300" >

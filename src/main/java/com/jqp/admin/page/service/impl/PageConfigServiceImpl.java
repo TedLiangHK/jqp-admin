@@ -1,30 +1,30 @@
 package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.constants.Constants;
+import com.jqp.admin.common.data.Obj;
+import com.jqp.admin.page.constants.DataType;
+import com.jqp.admin.page.constants.PageType;
+import com.jqp.admin.page.constants.RefType;
 import com.jqp.admin.page.constants.Whether;
-import com.jqp.admin.page.data.Page;
-import com.jqp.admin.page.data.PageButtonData;
-import com.jqp.admin.page.data.PageQueryField;
-import com.jqp.admin.page.service.InputFieldService;
-import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageConfigService;
-import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.page.data.*;
+import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
+import com.jqp.admin.util.UrlUtil;
+import com.jqp.admin.util.Util;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("pageConfigService")
 public class PageConfigServiceImpl implements PageConfigService {
@@ -32,24 +32,26 @@ public class PageConfigServiceImpl implements PageConfigService {
     PageService pageService;
     @Resource
     InputFieldService inputFieldService;
+    @Resource
+    @Lazy
+    FormService formService;
     @Override
     public Map<String, Object> getSelectorConfig(String code,String field) {
         Page page = pageService.get(code);
 
-        InputStream in = PageConfigServiceImpl.class.getClassLoader().getResourceAsStream("ui-json-template/selector.json.vm");
-        String template = IoUtil.readUtf8(in);
-        IoUtil.close(in);
         Map<String,Object> params = new HashMap<>();
         params.put("page",page);
         params.put("formField",field);
         params.put("queryConfigs",JSONUtil.toJsonPrettyStr(queryConfigs(page,true)));
 
-        String jsonConfig = TemplateUtil.getValue(template,params);
+        String jsonConfig = TemplateUtil.getValueByPath("ui-json-template/selector.json.vm",params);
         JSONObject json = JSONUtil.parseObj(jsonConfig);
-        JSONObject body = json.getJSONObject("pickerSchema");
-        if("tree".equals(page.getPageType())){
-            body.set("perPage",100000);
-        }
+        //设置分页
+        setPage(page,params);
+        params.put("pageName",page.getName());
+        //设置隐藏条件
+        setHiddenQueryFilter(page,params);
+        setAffixRow(page,params);
         return json;
     }
     @Override
@@ -70,17 +72,45 @@ public class PageConfigServiceImpl implements PageConfigService {
             if(StringUtils.isNotBlank(field.getValue())){
                 queryConfig.put("value", SessionContext.getTemplateValue(field.getValue()));
             }
+            if(Arrays.asList(DataType.DIC,DataType.Selector).contains(field.getType())){
+                queryConfig.put("submitOnChange",true);
+            }
+//            List<Map<String,Object>> options = (List<Map<String, Object>>) queryConfig.get("options");
+//            if(options != null && !Whether.YES.equals(field.getMulti())){
+//                List<Map<String,Object>> newOptions = new ArrayList<>();
+//                Map<String,Object> allOption = new HashMap<>();
+//                allOption.put("label","全部");
+//                allOption.put("value","");
+//                newOptions.add(allOption);
+//                newOptions.addAll(options);
+//                queryConfig.put("options",newOptions);
+//            }
             queryConfigs.add(queryConfig);
         }
         return queryConfigs;
     }
-
     @Override
     public Map<String, Object> getCurdJson(String code) {
+        return getCurdJson(code,false);
+    }
+    @Override
+    public Map<String, Object> getCurdJson(String code,boolean addTab) {
         Page page = pageService.get(code);
         Map<String,Object> params = new HashMap<>();
+        setPageConfig(page,params);
+        String template = "ui-json-template/crud.json.vm";
+        if(addTab && !page.getPageRefs().isEmpty()){
+            template = "ui-json-template/crudTabs.json.vm";
+        }
+        String ui = TemplateUtil.getValueByPath(template, params);
+        JSONObject json = JSONUtil.parseObj(ui);
+        return json;
+    }
+
+    @Override
+    public void setPageConfig(Page page, Map<String, Object> params) {
         params.put("pageTitle",page.getName());
-        params.put("pageCode",code);
+        params.put("pageCode",page.getCode());
 
         StringBuffer downloadParam = new StringBuffer("?1=1");
         page.getQueryFields().forEach(f->{
@@ -96,35 +126,204 @@ public class PageConfigServiceImpl implements PageConfigService {
         });
 
         List<Map<String,Object>> queryConfigs = this.queryConfigs(page);
-
         params.put("pageName",page.getName());
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
         params.put("downloadParam",downloadParam);
-
+        setHiddenQueryFilter(page,params);
 
         PageButtonService pageButtonService = SpringUtil.getBean(PageButtonService.class);
         PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), false);
         params.put("topButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getTopButtons()));
         params.put("bulkButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getBulkButtons()));
+        //设置分页
+        setPage(page,params);
+        if(StringUtils.isNotBlank(page.getIntroduce())){
+            params.put("introduce",page.getIntroduce());
+        }
+        //设置统计
+        setAffixRow(page,params);
+        //设置关联页面
+        setPageRef(page,params);
+    }
 
+    private void setAffixRow(Page page,Map<String,Object> params){
+        List<PageResultField> resultFields = page.getResultFields();
+        boolean hasStatistics = false;
+        List<Map<String,Object>> affixRow = new ArrayList<>();
+        if(Whether.YES.equals(page.getOpenRowNum())){
+            Map<String,Object> data = new HashMap<>();
+            data.put("type","tpl");
+            data.put("tpl","");
+            affixRow.add(data);
+        }
+        for(PageResultField resultField:resultFields){
+            if(Whether.YES.equals(resultField.getHidden())){
+                continue;
+            }
+            Map<String,Object> data = new HashMap<>();
+            data.put("type","tpl");
+            data.put("tpl","");
+            if(StringUtils.isNotBlank(resultField.getStatisticsLabel()) && StringUtils.isNotBlank(resultField.getStatisticsSql())){
+                hasStatistics = true;
+                data.put("tpl",resultField.getStatisticsLabel());
+            }
+            affixRow.add(data);
+        }
+        if(hasStatistics){
+            params.put("affixRow", JSONUtil.toJsonPrettyStr(affixRow));
+        }
+    }
+    private void setHiddenQueryFilter(Page page,Map<String,Object> params){
+        boolean hiddenQueryFilter = true;
+        for(PageQueryField queryField :page.getQueryFields()){
+            if(!Whether.YES.equals(queryField.getHidden())){
+                hiddenQueryFilter = false;
+                break;
+            }
+        }
+        params.put("hiddenQueryFilter",hiddenQueryFilter);
+    }
+    //设置分页
+    private void setPage(Page page,Map<String,Object> params){
         int perPage = 10;
+        if(page.getPerPage()!= null){
+            perPage = page.getPerPage();
+        }
         List<Integer> perPageAvailable = new ArrayList<>();
+        perPageAvailable.add(5);
         perPageAvailable.add(10);
         perPageAvailable.add(20);
         perPageAvailable.add(50);
         perPageAvailable.add(100);
         perPageAvailable.add(300);
         perPageAvailable.add(500);
-        if("tree".equals(page.getPageType())){
-            perPage = 10000;
+        boolean openPage = true;
+        if(PageType.tree.equals(page.getPageType()) ||Whether.NO.equals(page.getOpenPage())){
+            perPage = Integer.MAX_VALUE;
             perPageAvailable.clear();
-            perPageAvailable.add(10000);
+            //perPageAvailable.add(10000);
+            openPage = false;
         }
         params.put("perPage",perPage);
         params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
-        params.put("openPage",!Whether.NO.equals(page.getOpenPage()));
-        String ui = TemplateUtil.getUi("crud.json.vm", params);
-        JSONObject json = JSONUtil.parseObj(ui);
-        return json;
+        params.put("openPage",openPage);
     }
+    //设置关联页面
+    private void setPageRef(Page page,Map<String,Object> params){
+
+        if (!page.getPageRefs().isEmpty()) {
+            int width = page.getWidth() != null ? page.getWidth() : 6;
+            int tabWidth = 12 - width;
+            params.put("width", width);
+            params.put("tabWidth", tabWidth);
+            if(page.getPageRefs().size() == 1){
+                params.put("rightType","grid");
+                params.put("rightTypeKey","columns");
+            }else{
+                params.put("rightType","tabs");
+                params.put("rightTypeKey","tabs");
+            }
+            List<String> targets = new ArrayList<>();
+            List<Map<String,Object>> columns = new ArrayList<>();
+            for(PageRef pageRef:page.getPageRefs()){
+                targets.add(getTarget(pageRef));
+                setLinkage(pageRef,columns,page.getPageRefs().size() ==1);
+            }
+            params.put("target", StringUtil.concatStr(targets, ","));
+            params.put("columns", JSONUtil.toJsonPrettyStr(columns));
+        }
+    }
+
+    //设置联动页面
+    private void setLinkage(PageRef pageRef,List<Map<String,Object>> pages,boolean removeTitle){
+
+        Map<String,Object> refJson = null;
+        if(RefType.Page.equals(pageRef.getRefType())){
+            Page page = pageService.get(pageRef.getRefPageCode());
+            refJson = getCurdJson(page.getCode());
+            refJson.put("title", page.getName());
+            pages.add(refJson);
+            if (!page.getPageRefs().isEmpty()) {
+                if(page.getPageRefs().size() == 1){
+                    PageRef ref = page.getPageRefs().get(0);
+                    Map<String,Object> itemAction = new HashMap<>();
+                    itemAction.put("type","action");
+                    itemAction.put("actionType","reload");
+                    itemAction.put("target",getTarget(ref));
+                    refJson.put("itemAction",itemAction);
+
+                    setLinkage(ref,pages,true);
+                }else{
+                    Map<String,Object> tab = new HashMap<>();
+                    tab.put("type","tabs");
+                    List<Map<String,Object>> tabs = new ArrayList<>();
+                    tab.put("tabs",tabs);
+                    pages.add(tab);
+                    List<String> targets = new ArrayList<>();
+                    for(PageRef childRef:page.getPageRefs()){
+                        targets.add(getTarget(childRef));
+
+                        setLinkage(childRef,tabs,false);
+                    }
+                    Map<String,Object> itemAction = new HashMap<>();
+                    itemAction.put("type","action");
+                    itemAction.put("actionType","reload");
+                    itemAction.put("target",StringUtil.concatStr(targets,","));
+                    refJson.put("itemAction",itemAction);
+                }
+            }
+        }else if(RefType.Form.equals(pageRef.getRefType())){
+            Form form = formService.get(pageRef.getRefPageCode());
+            Map<String, Object> formJson = formService.getFormJson(pageRef.getRefPageCode(), new BaseButton());
+            Map<String, Object> formBody = (Map<String, Object>) formJson.get("body");
+            List<Map<String, Obj>> actions = (List<Map<String, Obj>>) formJson.get("actions");
+            formBody.put("name", form.getCode() + "Form");
+            if (actions != null && !actions.isEmpty()) {
+                formBody.put("actions", actions);
+            }
+            refJson = formBody;
+            refJson.put("title", form.getName());
+            pages.add(refJson);
+        }else if(RefType.Iframe.equals(pageRef.getRefType())){
+            refJson = new HashMap<>();
+            refJson.put("type", "iframe");
+            refJson.put("src", pageRef.getRefPageCode());
+            refJson.put("name", pageRef.getId() + "tabFrame");
+            refJson.put("id", pageRef.getId() + "tabFrame");
+            refJson.put("height", "600px");
+            refJson.put("title", "关联页面");
+            pages.add(refJson);
+        }
+
+        String[] dataArr = StringUtil.splitStr(pageRef.getRefField(), "&");
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", "");
+        for (String p : dataArr) {
+            String[] kv = StringUtil.splitStr(p, "=");
+//            data.put(kv[0], kv[1]);
+            data.put(UrlUtil.getPathArgNames(kv[1]).get(0), "");
+        }
+        if(StringUtils.isNotBlank(pageRef.getRefName())){
+            refJson.put("title",pageRef.getRefName());
+        }
+        refJson.put("xs","12");
+        if(RefType.Page.equals(pageRef.getRefType()) && removeTitle){
+            refJson.remove("title");
+        }
+        refJson.put("data",data);
+
+    }
+
+    private String getTarget(PageRef pageRef){
+        if(RefType.Page.equals(pageRef.getRefType())) {
+            return StrUtil.format("{}Table?{}", pageRef.getRefPageCode(), pageRef.getRefField
+                    ());
+        }else if(RefType.Form.equals(pageRef.getRefType())){
+            return StrUtil.format("{}Form?{}", pageRef.getRefPageCode(), pageRef.getRefField());
+        }else if(RefType.Iframe.equals(pageRef.getRefType())){
+            return StrUtil.format("{}tabFrame?{}", pageRef.getId(), pageRef.getRefField());
+        }
+        return null;
+    }
+
 }

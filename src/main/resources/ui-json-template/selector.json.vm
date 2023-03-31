@@ -10,7 +10,19 @@
     "pickerSchema": {
         "mode": "table",
         "name": "${page.code}Selector",
-        "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
+        "className":"#if(${hiddenQueryFilter}) noFilter #end",
+        #if($affixRow)
+          "affixRow":${affixRow},
+        #end
+        #if($openPage)
+          "footerToolbar": [
+            "statistics",
+            "switch-per-page",
+            "pagination"
+          ],
+          "perPage":${perPage},
+          "perPageAvailable":${perPageAvailable},
+        #end
         "filter": {
           "title": ["<span style='line-height:30px;'>${page.name}</span>",
             {

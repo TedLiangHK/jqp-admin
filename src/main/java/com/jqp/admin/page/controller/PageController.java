@@ -331,122 +331,15 @@ public class PageController {
             template = "ui-json-template/crudTabs.js.vm";
         }
 
-        InputStream in = getClass().getClassLoader().getResourceAsStream(template);
-        String js = IoUtil.readUtf8(in);
-        IoUtil.close(in);
         Map<String,Object> params = new HashMap<>();
-        params.put("pageCode",pageCode);
-
-
-
-        StringBuffer downloadParam = new StringBuffer("?1=1");
-        page.getQueryFields().forEach(f->{
-            String fieldName = StringUtil.toFieldColumn(f.getField());
-            if(!fieldName.toLowerCase().contains("id")&& !Whether.YES.equals(f.getRef())){
-                fieldName = Constants.QUERY_KEY_START+fieldName;
-            }
-            downloadParam.append("&")
-                    .append(fieldName)
-                    .append("=${")
-                    .append(fieldName)
-                    .append("}");
-        });
-
-        List<Map<String,Object>> queryConfigs = pageConfigService.queryConfigs(page);
-
-        params.put("pageName",page.getName());
-        params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
-        params.put("downloadParam",downloadParam);
-
-        PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), false);
-
-        int perPage = 10;
-        List<Integer> perPageAvailable = new ArrayList<>();
-        perPageAvailable.add(10);
-        perPageAvailable.add(20);
-        perPageAvailable.add(50);
-        perPageAvailable.add(100);
-        perPageAvailable.add(300);
-        perPageAvailable.add(500);
-        if("tree".equals(page.getPageType())){
-            perPage = 10000;
-            perPageAvailable.clear();
-            perPageAvailable.add(10000);
-        }
-        params.put("perPage",perPage);
-        params.put("perPageAvailable",JSONUtil.toJsonPrettyStr(perPageAvailable));
-        params.put("topButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getTopButtons()));
-        params.put("bulkButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getBulkButtons()));
-
-        if(!page.getPageRefs().isEmpty()){
-            int width = page.getWidth() != null ? page.getWidth() : 6;
-            int tabWidth = 12-width;
-            params.put("width",width);
-            params.put("tabWidth",tabWidth);
-
-
-            List<String> targets = new ArrayList<>();
-
-            List<Map<String, Object>> tabs = new ArrayList<>();
-            for(PageRef pageRef:page.getPageRefs()){
-                Map<String,Object> tab = new HashMap<>();
-                String refType = pageRef.getRefType();
-                Map<String,Object> tabBody = null;
-                String title = null;
-
-                String[] arr = StringUtil.splitStr(pageRef.getRefField(), "&");
-                Map<String,Object> data = new HashMap<>();
-                data.put("id","");
-                for(String p:arr){
-                    String[] kv = StringUtil.splitStr(p, "=");
-                    data.put(kv[0],kv[1]);
-                }
-
-                if(RefType.Page.equals(refType)){
-                    Page tabPage = pageService.get(pageRef.getRefPageCode());
-                    title = tabPage.getName();
-                    tabBody = pageConfigService.getCurdJson(pageRef.getRefPageCode());
-                    tabBody.remove("title");
-                    targets.add(StrUtil.format("{}Table?{}",tabPage.getCode(),pageRef.getRefField()));
-                }else if(RefType.Form.equals(refType)){
-                    Form form = formService.get(pageRef.getRefPageCode());
-                    Map<String, Object> formJson = formService.getFormJson(pageRef.getRefPageCode(), new BaseButton());
-                    Map<String,Object> formBody = (Map<String, Object>) formJson.get("body");
-                    List<Map<String,Obj>> actions = (List<Map<String, Obj>>) formJson.get("actions");
-                    formBody.put("name",form.getCode()+"Form");
-                    if(actions != null && !actions.isEmpty()){
-                        formBody.put("actions",actions);
-                    }
-                    targets.add(StrUtil.format("{}Form?{}",form.getCode(),pageRef.getRefField()));
-                    title = form.getName();
-                    tabBody = formBody;
-                }else if(RefType.Iframe.equals(refType)){
-                    tabBody = new HashMap<>();
-                    tabBody.put("type","iframe");
-                    tabBody.put("src",pageRef.getRefPageCode());
-                    tabBody.put("name",pageRef.getId()+"tabFrame");
-                    tabBody.put("height","95%");
-                    title = "关联页面";
-                    targets.add(StrUtil.format("{}tabFrame?{}",pageRef.getId(),pageRef.getRefField()));
-                }
-                tabBody.put("data",data);
-                tab.put("title",StringUtils.isBlank(pageRef.getRefName()) ? title:pageRef.getRefName());
-                tab.put("body",tabBody);
-                tabs.add(tab);
-            }
-            params.put("target",StringUtil.concatStr(targets,","));
-            params.put("tabs",JSONUtil.toJsonPrettyStr(tabs));
-        }
-        params.put("openPage",!Whether.NO.equals(page.getOpenPage()));
-        js = TemplateUtil.getValue(js,params);
-
+        pageConfigService.setPageConfig(page,params);
+        String js = TemplateUtil.getValueByPath(template,params);
         String json = js.substring(PageKey.AMIS_JSON.length()+1);
+        //System.out.println(json);
         JSONObject jsonObject = JSONUtil.parseObj(json);
         TemplateUtil.filterDefinitions(jsonObject);
         return PageKey.AMIS_JSON + "="+jsonObject.toStringPretty();
     }
-
-
 
     @RequestMapping("/queryConfigs/{pageCode}")
     public Result queryConfigs(@PathVariable("pageCode") String pageCode){

@@ -107,6 +107,7 @@ public class InputDefaultRender implements InputRender{
             config.put("options",options);
             config.remove("source");
         }
+        this.extra(config,field);
         if(StringUtils.isNotBlank(field.getExtraJson())){
             try{
                 JSONObject json = JSONUtil.parseObj(field.getExtraJson());
@@ -115,7 +116,6 @@ public class InputDefaultRender implements InputRender{
                 throw new RuntimeException(StrUtil.format("字段["+field.getLabel()+"]扩展json配置错误"));
             }
         }
-        this.extra(config,field);
         return config;
     }
 

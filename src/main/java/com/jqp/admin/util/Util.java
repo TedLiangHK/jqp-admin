@@ -1,12 +1,15 @@
 package com.jqp.admin.util;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.TreeData;
+import com.jqp.admin.common.data.Obj;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -83,5 +86,43 @@ public class Util {
         //根节点排序
         Collections.sort(roots);
         return roots;
+    }
+    public static void addRowNum(List<Map<String,Object>> list, int page,int perPage){
+        int start = (page - 1) * perPage;
+        addRowNum(list,new Obj<>(start));
+    }
+    private static void addRowNum(List<Map<String,Object>> list, Obj<Integer> rowNum){
+        if(list == null){
+            return;
+        }
+        for(Map<String,Object> item:list){
+            Integer curValue = rowNum.getValue()+1;
+            item.put("rowNum",curValue);
+            rowNum.setValue(curValue);
+            List<Map<String,Object>> children = (List<Map<String, Object>>) item.get("children");
+            addRowNum(children,rowNum);
+        }
+    }
+
+    public static <T> T clone(T obj){
+        if(obj instanceof List && !((List<?>) obj).isEmpty()){
+            return (T) JSONUtil.toList(JSONUtil.toJsonStr(obj),((List<?>) obj).get(0).getClass());
+        }else{
+            return (T) JSONUtil.toBean(JSONUtil.toJsonStr(obj),obj.getClass());
+        }
+    }
+    public static String dateFormat(Object value,String format){
+        if(value == null){
+            return null;
+        }
+        if(value instanceof LocalDateTime){
+            return DateUtil.format((LocalDateTime) value,format);
+        }else if(value instanceof java.sql.Date){
+            return DateUtil.format((java.sql.Date) value,format);
+        }else if(value instanceof java.util.Date){
+            return DateUtil.format((java.util.Date) value,format);
+        }else{
+            return value.toString();
+        }
     }
 }

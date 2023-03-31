@@ -9,6 +9,7 @@ import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.common.service.impl.AbstractCacheService;
 import com.jqp.admin.db.data.ColumnMeta;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.ComponentType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.FormType;
 import com.jqp.admin.page.constants.Whether;
@@ -43,40 +44,50 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         if(oForm!=null && !form.getCode().equals(oForm.getCode())){
             super.invalid(oForm.getCode());
         }
-
-        jdbcService.saveOrUpdate(form);
+        oForm = this.get(form.getCode());
+        if(!form.equals(oForm)){
+            jdbcService.saveOrUpdate(form);
+        }
         Collections.sort(form.getFormButtons(), SeqComparator.instance);
         Collections.sort(form.getFormFields(), SeqComparator.instance);
         Collections.sort(form.getFormRefs(), SeqComparator.instance);
 
-        jdbcService.delete("delete from form_field where form_id = ? ", form.getId());
-        int seq = 0;
-        for (FormField item : form.getFormFields()) {
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(++seq);
-            jdbcService.saveOrUpdate(item);
-        }
+        this.compareAndUpdate(form,FormField.class,form.getFormFields(),oForm == null ? null :oForm.getFormFields());
+        this.compareAndUpdate(form,FormRef.class,form.getFormRefs(),oForm == null ? null :oForm.getFormRefs());
+        this.compareAndUpdate(form,FormButton.class,form.getFormButtons(),oForm == null ? null :oForm.getFormButtons());
 
-        jdbcService.delete("delete from form_ref where form_id = ? ", form.getId());
-        seq = 0;
-        for (FormRef item : form.getFormRefs()) {
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(++seq);
-            jdbcService.saveOrUpdate(item);
-        }
-
-        jdbcService.delete("delete from form_button where form_id = ? ", form.getId());
-        seq = 0;
-        for (FormButton item : form.getFormButtons()) {
-            item.setId(null);
-            item.setFormId(form.getId());
-            item.setSeq(++seq);
-            jdbcService.saveOrUpdate(item);
-        }
         super.invalid(form.getCode());
     }
+
+    private void compareAndUpdate(Form form,Class<?> clz,List<?> objects,List<?> oldObjects){
+        boolean change = false;
+        if(oldObjects == null || objects.size() != oldObjects.size()){
+            change = true;
+        }else{
+            for(int i=0;i<objects.size();i++){
+                Object o = objects.get(i);
+                ReflectUtil.setFieldValue(o,"seq",i+1);
+                ReflectUtil.setFieldValue(o,"formId",form.getId());
+                Object oldObj = oldObjects.get(i);
+                if(!o.equals(oldObj)){
+                    change = true;
+                    break;
+                }
+            }
+        }
+        if(change){
+            jdbcService.delete(StrUtil.format("delete from {} where form_id = ? ",StringUtil.toSqlColumn(clz.getSimpleName())), form.getId());
+            for(int i=0;i<objects.size();i++){
+                Object o = objects.get(i);
+                ReflectUtil.setFieldValue(o,"seq",i+1);
+                ReflectUtil.setFieldValue(o,"formId",form.getId());
+                ReflectUtil.setFieldValue(o,"id",null);
+
+                jdbcService.saveOrUpdate((BaseData) o);
+            }
+        }
+    }
+
     @Override
     public Form get(Long id){
         Form form = jdbcService.getById(Form.class, id);
@@ -126,6 +137,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             formType = FormType.Wizard;
         }
         form.put("type",formType);
+        form.put("title","");
         if(StrUtil.isNotBlank(f.getTableName())){
             form.put("initApi",StrUtil.format("post:/admin/common/{}/get",f.getCode())+"?id=${id}");
             form.put("api",StrUtil.format("post:/admin/common/{}/saveOrUpdate",f.getCode()));
@@ -143,6 +155,8 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         Map<String,List<FormField>> groupFields = new HashMap<>();
         List<String> groupNames = new ArrayList<>();
         groupNames.add("");
+        //解决2.0版本以上  富文本编辑器在dom未加载完成时,initApi先请求完成,报错
+        boolean hasInputRichText = false;
         for(FormField field:formFields){
             String groupName = field.getGroupName();
             if(StringUtils.isBlank(groupName)){
@@ -155,6 +169,21 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
                 groupFields.put(groupName,new ArrayList<>());
             }
             groupFields.get(groupName).add(field);
+            if(ComponentType.InputRichText.equals(field.getComponentType())){
+                hasInputRichText = true;
+            }
+        }
+        if(hasInputRichText && form.get("initApi") != null){
+            String initApi = (String) form.get("initApi");
+            if(StringUtils.isNotBlank(initApi)){
+                if(initApi.contains("?")){
+                    initApi += "&";
+                }else{
+                    initApi += "?";
+                }
+                initApi += "_delay=200";
+                form.put("initApi",initApi);
+            }
         }
 
         List<Map<String,Object>> body = new ArrayList<>();
@@ -378,6 +407,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         }else{
             pageCode = code.substring(0,code.indexOf("?"));
             String[] arr = code.substring(code.indexOf("?") + 1).split("&");
+            data.put("id","");
             for(String s:arr){
                 String[] split = s.split("=");
                 data.put(split[0],split[1]);
@@ -390,7 +420,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         List<Map<String,Object>> dialogButtons = new ArrayList<>();
 
         dialog.put("actions",dialogButtons);
-        Map<String, Object> curdJson = pageConfigService.getCurdJson(pageCode);
+        Map<String, Object> curdJson = pageConfigService.getCurdJson(pageCode,true);
         curdJson.put("data",data);
         dialog.put("body",curdJson);
         return dialog;
@@ -461,6 +491,8 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             }else if(columnMeta.getColumnClassName().equalsIgnoreCase(Float.class.getCanonicalName())
                     || columnMeta.getColumnClassName().equalsIgnoreCase(Double.class.getCanonicalName())){
                 field.setType(DataType.DOUBLE);
+                //两位小数
+                field.setExtraJson("{\"precision\":2}");
             }
             form.getFormFields().add(field);
         }

@@ -53,7 +53,7 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public int update(String sql, Object... args) {
-        return this.update("执行sql",sql,args);
+        return this.update("执行sql ",sql,args);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
 
     @Override
     public Long insert(String sql, Object... args) {
-        return this.insert("执行insert",sql,args);
+        return this.insert("执行insert ",sql,args);
     }
 
     @Override
@@ -115,6 +115,12 @@ public class MysqlJdbcDaoImpl implements JdbcDao {
     public <T> List<T> find(String sql, Class<T> clz, Object... args) {
         log.info(StrUtil.format("查询 {},{}"),sql,args);
         return jdbcTemplate.query(sql,RowMapperUtil.newRowMapper(clz),args);
+    }
+
+    @Override
+    public <T> T findOne(String sql, Class<T> clz, Object... args) {
+        List<T> list = find(sql, clz, args);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.jqp.admin.page.data;
 import com.jqp.admin.common.annotations.OrderBy;
 import lombok.Data;
 
+import java.util.Objects;
+
 /***
  * 页面查询字段
  */
@@ -15,4 +17,18 @@ public class PageQueryField extends InputField  {
     private String opt;
     //是否关联字段
     private String ref;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PageQueryField that = (PageQueryField) o;
+        return Objects.equals(pageId, that.pageId) && Objects.equals(opt, that.opt) && Objects.equals(ref, that.ref);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), pageId, opt, ref);
+    }
 }

@@ -1,65 +1,16 @@
 AMIS_JSON={
     "type": "page",
-    "body":{
+    "body":[
+#if($introduce)
+    {
+        "type":"tpl",
+        "tpl":"<div>${introduce}</div>"
+    },
+#end
+    {
         "type": "crud",
         "name":"mainTable",
-        "api": "post:/admin/page/crudQuery/${pageCode}",
-        "syncLocation": false,
-        "className":"#if(${queryConfigs.replaceAll("\s","").equals("[]")}) noFilter #end",
-        "filter": {
-          "title": ["<span style='line-height:30px;'>${pageName}</span>",
-              ,{
-                  "type":"button",
-                  "label":"刷新页面",
-                  "actionType": "url",
-                  "url":"",
-                  "blank":false,
-                  "level":"secondary",
-                  "className":"m-l float-right relative jqp-top-btn"
-              },{
-                  "type":"button",
-                  "label":"导出Excel",
-                  "actionType": "url",
-                  "level":"success",
-                  "url":"/admin/page/crudExport/${pageCode}${downloadParam}",
-                  "className":"m-l float-right relative jqp-top-btn"
-              },{
-                  "type":"button",
-                  "label":"重置",
-                  "actionType":"reset",
-                  "level":"warning",
-                  "className":"mr-1 float-right relative jqp-top-btn"
-              },
-              {
-                  "type":"button",
-                  "label":"查询",
-                  "primary":true,
-                  "actionType":"submit",
-                  "className":"m-l float-right relative jqp-top-btn"
-              }
-
-          ],
-          "submitText": "",
-          "mode": "horizontal",
-          "body":{
-            "type":"grid",
-            "columns":${queryConfigs}
-          },
-          "actions":[]
-        },
-        "filterTogglable": false,
-        "headerToolbar": ${topButtons},
-        "bulkActions": ${bulkButtons},
-#if($openPage)
-        "footerToolbar": [
-            "statistics",
-            "switch-per-page",
-            "pagination"
-        ],
-        "perPage":${perPage},
-        "perPageAvailable":${perPageAvailable},
-#end
-        "autoFillHeight": true,
-        "affixHeader":true
-    }
+        "id":"mainTable",
+        #parse("ui-json-template/common/crudCommon.vm")
+    }]
 }

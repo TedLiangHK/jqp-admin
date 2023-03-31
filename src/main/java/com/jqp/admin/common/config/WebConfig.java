@@ -14,6 +14,8 @@ import javax.annotation.Resource;
 public class WebConfig implements WebMvcConfigurer {
     @Resource
     private AdminInterceptor adminInterceptor;
+    @Resource
+    private AllInterceptor allInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         InterceptorRegistration interceptorRegistration = registry.addInterceptor(adminInterceptor);
@@ -44,6 +46,9 @@ public class WebConfig implements WebMvcConfigurer {
                 "/openApi/**",
                 "/v2/api-docs/**"
                 );
+
+        InterceptorRegistration allInterceptorRegistration = registry.addInterceptor(allInterceptor);
+        allInterceptorRegistration.addPathPatterns("/**");
     }
 
     @Override

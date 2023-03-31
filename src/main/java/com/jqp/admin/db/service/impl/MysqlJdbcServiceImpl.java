@@ -78,7 +78,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             values.add(value);
         }
 
-        Long id = this.insert("执行" + tableName + "insert", sql, values.toArray());
+        Long id = this.insert("执行" + tableName + "insert ", sql, values.toArray());
         obj.setId(id);
 
         logService.log(null,obj);
@@ -118,7 +118,7 @@ public class MysqlJdbcServiceImpl extends MysqlJdbcDaoImpl implements JdbcServic
             values.add(value);
         }
 
-        Long id = this.insert("执行" + tableName + "insert", sql, values.toArray());
+        Long id = this.insert("执行" + tableName + "insert ", sql, values.toArray());
         obj.put("id",id);
         logService.log(null,obj,tableName);
     }

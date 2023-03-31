@@ -70,19 +70,24 @@ AMIS_JSON={
                     "className":"m-l float-right relative jqp-top-btn"
                 }],
             "submitText": "",
+            "mode": "horizontal",
             "body": [
                 {
-                    "type": "input-text",
-                    "name": "code",
-                    "label":"编号"
-                },
-                {
-                    "type": "input-text",
-                    "name": "name",
-                    "label":"名称"
-                },{
-                    "label": "搜索",
-                    "type": "submit"
+                    "type":"grid",
+                    "columns":[{
+                        "type": "input-text",
+                        "name": "code",
+                        "label":"编号"
+                    },
+                    {
+                        "type": "input-text",
+                        "name": "name",
+                        "label":"名称"
+                    },{
+                        "label": "查询",
+                        "primary":true,
+                        "type": "submit"
+                    }]
                 }
             ]
         },
