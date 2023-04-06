@@ -8,5 +8,6 @@ public class InputImageRender  extends InputDefaultRender{
     @Override
     protected void extra(Map<String, Object> config, InputField field) {
         config.put("receiver","/admin/upload");
+        config.put("useChunk",false);
     }
 }
