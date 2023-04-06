@@ -22,6 +22,7 @@
                 "actionType": "reload",
                 "target": "${target}"
             },
+            "autoFillHeight": true,
             #parse("ui-json-template/common/crudCommon.vm")
         },{
             "type":"${rightType}",

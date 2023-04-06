@@ -14,6 +14,7 @@
         #if($affixRow)
           "affixRow":${affixRow},
         #end
+        "autoFillHeight": true,
         #if($openPage)
           "footerToolbar": [
             "statistics",

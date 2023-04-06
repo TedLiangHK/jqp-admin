@@ -1,6 +1,5 @@
 package com.jqp.admin.page.service.impl;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
@@ -17,13 +16,11 @@ import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
 import com.jqp.admin.util.UrlUtil;
-import com.jqp.admin.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.InputStream;
 import java.util.*;
 
 @Service("pageConfigService")
@@ -223,53 +220,87 @@ public class PageConfigServiceImpl implements PageConfigService {
                 params.put("rightType","tabs");
                 params.put("rightTypeKey","tabs");
             }
+
             List<String> targets = new ArrayList<>();
+            List<String> childTargets = new ArrayList<>();
+            List<List<String>> treeChildTargets = new ArrayList<>();
+            treeChildTargets.add(childTargets);
             List<Map<String,Object>> columns = new ArrayList<>();
             for(PageRef pageRef:page.getPageRefs()){
                 targets.add(getTarget(pageRef));
-                setLinkage(pageRef,columns,page.getPageRefs().size() ==1);
+                setLinkage(pageRef,columns,page.getPageRefs().size() !=1,treeChildTargets);
             }
+            targets.addAll(childTargets);
             params.put("target", StringUtil.concatStr(targets, ","));
             params.put("columns", JSONUtil.toJsonPrettyStr(columns));
         }
     }
 
     //设置联动页面
-    private void setLinkage(PageRef pageRef,List<Map<String,Object>> pages,boolean removeTitle){
+    //设置联动页面
+    private void setLinkage(PageRef pageRef,List<Map<String,Object>> pages,boolean isTab,List<List<String>> treeChildTargets){
 
         Map<String,Object> refJson = null;
         if(RefType.Page.equals(pageRef.getRefType())){
             Page page = pageService.get(pageRef.getRefPageCode());
             refJson = getCurdJson(page.getCode());
             refJson.put("title", page.getName());
-            pages.add(refJson);
+            if(StringUtils.isNotBlank(pageRef.getRefName())){
+                refJson.put("title",pageRef.getRefName());
+            }
+            addItem(refJson,isTab,pages,page);
+            //pages.add(refJson);
             if (!page.getPageRefs().isEmpty()) {
                 if(page.getPageRefs().size() == 1){
                     PageRef ref = page.getPageRefs().get(0);
                     Map<String,Object> itemAction = new HashMap<>();
                     itemAction.put("type","action");
                     itemAction.put("actionType","reload");
-                    itemAction.put("target",getTarget(ref));
+
+                    List<String> targets = new ArrayList<>();
+                    targets.add(getTarget(ref));
+                    List<String> childTargets = new ArrayList<>();
+                    treeChildTargets.add(childTargets);
+
+                    addTreeTarget(treeChildTargets,getChildTarget(getTarget(ref)),childTargets);
+
+                    setLinkage(ref,pages,false,treeChildTargets);
+
+                    targets.addAll(childTargets);
+                    itemAction.put("target",StringUtil.concatStr(targets,","));
                     refJson.put("itemAction",itemAction);
 
-                    setLinkage(ref,pages,true);
+                    treeChildTargets.remove(treeChildTargets);
+
+
                 }else{
                     Map<String,Object> tab = new HashMap<>();
                     tab.put("type","tabs");
                     List<Map<String,Object>> tabs = new ArrayList<>();
                     tab.put("tabs",tabs);
-                    pages.add(tab);
+                    //pages.add(tab);
+                    addItem(tab,isTab,pages,null);
                     List<String> targets = new ArrayList<>();
+
+                    List<String> childTargets = new ArrayList<>();
+                    treeChildTargets.add(childTargets);
                     for(PageRef childRef:page.getPageRefs()){
                         targets.add(getTarget(childRef));
+                        //不能添加当前子节点,需要添加 孙子节点及以下节点
+                        addTreeTarget(treeChildTargets,getChildTarget(getTarget(childRef)),childTargets);
 
-                        setLinkage(childRef,tabs,false);
+                        setLinkage(childRef,tabs,true,treeChildTargets);
                     }
                     Map<String,Object> itemAction = new HashMap<>();
                     itemAction.put("type","action");
                     itemAction.put("actionType","reload");
+
+                    targets.addAll(childTargets);
+
                     itemAction.put("target",StringUtil.concatStr(targets,","));
                     refJson.put("itemAction",itemAction);
+
+                    treeChildTargets.remove(treeChildTargets);
                 }
             }
         }else if(RefType.Form.equals(pageRef.getRefType())){
@@ -283,16 +314,25 @@ public class PageConfigServiceImpl implements PageConfigService {
             }
             refJson = formBody;
             refJson.put("title", form.getName());
-            pages.add(refJson);
+            if(StringUtils.isNotBlank(pageRef.getRefName())){
+                refJson.put("title",pageRef.getRefName());
+            }
+            addItem(refJson,isTab,pages,null);
+            //pages.add(refJson);
         }else if(RefType.Iframe.equals(pageRef.getRefType())){
             refJson = new HashMap<>();
+            if(StringUtils.isNotBlank(pageRef.getRefName())){
+                refJson.put("title",pageRef.getRefName());
+            }
             refJson.put("type", "iframe");
             refJson.put("src", pageRef.getRefPageCode());
             refJson.put("name", pageRef.getId() + "tabFrame");
             refJson.put("id", pageRef.getId() + "tabFrame");
             refJson.put("height", "600px");
             refJson.put("title", "关联页面");
-            pages.add(refJson);
+            addItem(refJson,isTab,pages,null);
+            //pages.add(refJson);
+
         }
 
         String[] dataArr = StringUtil.splitStr(pageRef.getRefField(), "&");
@@ -303,15 +343,38 @@ public class PageConfigServiceImpl implements PageConfigService {
 //            data.put(kv[0], kv[1]);
             data.put(UrlUtil.getPathArgNames(kv[1]).get(0), "");
         }
-        if(StringUtils.isNotBlank(pageRef.getRefName())){
-            refJson.put("title",pageRef.getRefName());
-        }
+
         refJson.put("xs","12");
-        if(RefType.Page.equals(pageRef.getRefType()) && removeTitle){
-            refJson.remove("title");
-        }
         refJson.put("data",data);
 
+    }
+
+    private void addItem(Map<String,Object> item,boolean isTab,List<Map<String,Object>> items,Page page){
+        if(isTab){
+            Map<String,Object> column = new HashMap<>();
+            column.put("title",item.remove("title"));
+            column.put("tab",item);
+//            if(page != null && Whether.YES.equals(page.getCloseQuery())){
+//                Map<String,Object> filter = (Map<String, Object>) item.get("filter");
+//                if(filter != null){
+//                    filter.put("title","");
+//                }
+//            }
+            items.add(column);
+        }else{
+            if(page != null){
+                item.remove("title");
+            }
+            items.add(item);
+        }
+    }
+
+    private void addTreeTarget(List<List<String>> treeChildTargets,String target,List<String> notAddList){
+        for (int i = 0; i < treeChildTargets.size(); i++) {
+            if(i!=treeChildTargets.size()-1 || treeChildTargets.get(i) != notAddList){
+                treeChildTargets.get(i).add(target);
+            }
+        }
     }
 
     private String getTarget(PageRef pageRef){
@@ -322,6 +385,17 @@ public class PageConfigServiceImpl implements PageConfigService {
             return StrUtil.format("{}Form?{}", pageRef.getRefPageCode(), pageRef.getRefField());
         }else if(RefType.Iframe.equals(pageRef.getRefType())){
             return StrUtil.format("{}tabFrame?{}", pageRef.getId(), pageRef.getRefField());
+        }
+        return null;
+    }
+    private String getChildTarget(String target){
+        if(StringUtils.isNotBlank(target)){
+            List<String> pathArgNames = UrlUtil.getPathArgNames(target);
+            Map<String,Object> values = new HashMap<>();
+            for(String name:pathArgNames){
+                values.put(name,"-1");
+            }
+            return TemplateUtil.getValue(target,values);
         }
         return null;
     }

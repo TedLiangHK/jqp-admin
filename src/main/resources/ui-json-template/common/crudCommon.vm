@@ -21,29 +21,17 @@
     "title": ["<span style='line-height:30px;'>${pageName}</span>",
         {
         "type":"button",
-        "label":"刷新页面",
-        "actionType": "url",
-        "url":"",
-        "blank":false,
-        "level":"secondary",
-        "className":"m-l float-right relative jqp-top-btn"
-        },{
-        "type":"button",
-        "label":"导出Excel",
+        "label":"导出",
         "actionType": "url",
         "level":"success",
+        "icon":"fa fa-download",
         "url":"/admin/page/crudExport/${pageCode}${downloadParam}",
         "className":"m-l float-right relative jqp-top-btn"
-        },{
-        "type":"button",
-        "label":"重置",
-        "actionType":"reset",
-        "level":"warning",
-        "className":"mr-1 float-right relative jqp-top-btn"
         },
         {
         "type":"button",
         "label":"查询",
+        "icon":"fa fa-magnifying-glass",
         "primary":true,
         "actionType":"submit",
         "className":"m-l float-right relative jqp-top-btn"
@@ -57,5 +45,4 @@
 },
 "actions":[]
 },
-"affixHeader":true,
-"autoFillHeight": false
+"affixHeader":true

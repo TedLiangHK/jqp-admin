@@ -129,6 +129,7 @@ public class TableInfoController {
             add.setOptionType(ActionType.PopForm);
             add.setOptionValue(pageCode);
             add.setLevel("primary");
+            add.setIcon("fa fa-plus");
             page.getPageButtons().add(add);
 
             PageButton edit = new PageButton();
@@ -136,7 +137,9 @@ public class TableInfoController {
             edit.setButtonLocation(ButtonLocation.Row);
             edit.setOptionType(ActionType.PopForm);
             edit.setOptionValue(pageCode);
+            edit.setIcon("fa fa-pen-to-square");
             edit.setLevel("primary");
+
             page.getPageButtons().add(edit);
 
             PageButton delete = new PageButton();
@@ -145,6 +148,7 @@ public class TableInfoController {
             delete.setOptionType(ActionType.Ajax);
             delete.setOptionValue("post:/admin/common/"+pageCode+"/delete/${id}");
             delete.setLevel("danger");
+            delete.setIcon("fa fa-trash-can");
             delete.setConfirmText("确定删除"+tableInfo.getTableComment()+"${name}吗?");
             page.getPageButtons().add(delete);
 
