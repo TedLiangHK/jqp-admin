@@ -27,6 +27,8 @@ AMIS_JSON={
         "api": "post:/admin/form/query",
         "syncLocation": false,
         "filterTogglable": false,
+        "affixHeader":true,
+        "autoFillHeight": true,
         "headerToolbar": [
             "filter-toggler",{
                 "label": "新增",

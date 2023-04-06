@@ -73,6 +73,8 @@ AMIS_JSON={
         "type": "crud",
         "api": "post:/tableInfo/queryTable",
         "syncLocation": false,
+        "affixHeader":true,
+        "autoFillHeight": true,
         "headerToolbar": [
             "filter-toggler",
             {

@@ -28,6 +28,8 @@ AMIS_JSON={
         "api": "post:/admin/page/query",
         "syncLocation": false,
         "filterTogglable": false,
+        "affixHeader":true,
+        "autoFillHeight": true,
         "headerToolbar": [
             "filter-toggler",
             {

@@ -12,7 +12,64 @@
 <link href="css/materialdesignicons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="js/bootstrap-multitabs/multitabs.min.css">
 <link href="css/style.min.css" rel="stylesheet">
-
+<style>
+  .topbar-left .navbar-nav {
+    margin: 0px;
+  }
+  .topbar-left .navbar-nav a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    line-height: 20px;
+  }
+  .topbar-left .navbar-nav a i {
+    display: none;
+  }
+  .topbar-left .navbar-nav li {
+    float: left;
+  }
+  li.active a{
+      background-color:white !important;
+      color:#33cabb !important;
+  }
+  @media screen and (max-width: 980px) {
+    .header-icon-menu {
+      display: block;
+      height: 68px;
+      line-height: 68px;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0 12px;
+      text-align: center;
+    }
+    .topbar-left .icon-menu-ul li {
+      float: none;
+    }
+  }
+  @media (min-width: 980px) {
+    .header-icon-menu {
+      display: none;
+    }
+    .topbar-left .navbar-nav.dropdown-menu {
+      display: block;
+      position: inherit;
+      box-shadow: none;
+      background-color: transparent;
+    }
+   [data-headerbg*='color_'] .topbar-left .navbar-nav a {
+      color: rgba(255, 255, 255, .75);
+    }
+    [data-headerbg*='color_'] .topbar-left .navbar-nav a:focus,
+    [data-headerbg*='color_'] .topbar-left .navbar-nav a:hover {
+      color: #fff;
+    }
+    [data-headerbg*='color_'] .topbar-left .navbar-nav>.active>a,
+    [data-headerbg*='color_'] .topbar-left .navbar-nav>.active>a:focus,
+    [data-headerbg*='color_'] .topbar-left .navbar-nav>.active>a:hover {
+      background-color: rgba(255,255,255,.125);
+      color: #fff;
+    }
+  }
+</style>
 <script>
     // if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
     //     //该页面是在移动端打开的，
@@ -33,29 +90,12 @@
       </div>
       <div class="lyear-layout-sidebar-scroll">
 
-        <nav class="sidebar-main">
-          <ul class="nav nav-drawer" id="menus">
+        <nav class="sidebar-main" id="menus">
+          <!--
+          <ul class="nav nav-drawer" >
               <li class="nav-item active"> <a class="multitabs" href="lyear_main.html"><i class="mdi mdi-home"></i> <span>首页</span></a> </li>
-              <!--
-            <li class="nav-item active"> <a class="multitabs" href="lyear_main.html"><i class="mdi mdi-home"></i> <span>后台首页</span></a> </li>
-              <li class="nav-item nav-item-has-subnav">
-                  <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> <span>系统管理</span></a>
-                  <ul class="nav nav-subnav">
-                      <li> <a class="multitabs" href="/page/static/sys/tableInfo">数据库表管理</a> </li>
-                      <li> <a class="multitabs" href="/crud/foreignKey">外键管理</a> </li>
-                      <li> <a class="multitabs" href="/page/static/sys/page">页面管理</a> </li>
-                      <li> <a class="multitabs" href="/page/static/sys/form">表单管理</a> </li>
-                      <li> <a class="multitabs" href="/crud/test1">测试页面</a> </li>
-                      <li> <a class="multitabs" href="/crud/menu">菜单管理</a> </li>
-                      <li> <a class="multitabs" href="/crud/test">测试查询页面</a> </li>
-                      <li> <a class="multitabs" href="/oneToMany/dic/dic_item">数据字典</a> </li>
-                      <li> <a class="multitabs" href="/page/static/sys/test">测试页面</a> </li>
-                      <li> <a class="multitabs" href="/magic/web/index.html">magic-api</a> </li>
-                  </ul>
-              </li>
-            </li>
-            -->
           </ul>
+          -->
         </nav>
       </div>
 
@@ -74,12 +114,19 @@
               <span class="lyear-toggler-bar"></span>
               <span class="lyear-toggler-bar"></span>
             </div>
+            <div class="dropdown">
+              <span class="header-icon-menu" data-toggle="dropdown"><i class="mdi mdi-apps"></i></span>
+              <ul class="nav navbar-nav dropdown-menu icon-menu-ul" id="topNav">
+              </ul>
+            </div>
           </div>
 
           <ul class="topbar-right">
             <li class="dropdown dropdown-profile">
               <a href="javascript:void(0)" data-toggle="dropdown">
+                  <!--
                 <img id="userAvatar" class="img-avatar img-avatar-48 m-r-10" src="images/users/avatar.jpg" />
+                -->
                 <span><span id="userName">****</span><span class="caret"></span></span>
               </a>
               <ul class="dropdown-menu dropdown-menu-right">
@@ -206,7 +253,7 @@
 				</li>
 			  </ul>
 			</li>
-			-->
+              -->
             <!--切换主题配色-->
           </ul>
 
@@ -263,9 +310,45 @@
             if(data.avatar){
                 $("#userAvatar").attr("src",data.avatar);
             }
-            buildMenu($("#menus"),data.menus);
+            var topUl = $("#topNav");
+            for(let i=0;i<data.menus.length;i++){
+              let menu = data.menus[i];
+              let iconCls = "";
+              if(menu.icon && menu.icon != ""){
+                  iconCls = 'mdi '+menu.icon;
+              }
+              let cls = i==0?"class='active'":"";
+
+              topUl.append('<li '+cls+'><a href="javascript:void(0)" onclick="showMenus(this, \''+menu.id+'\')">'+'<span  class="'+iconCls+'">'+menu.menuName+'</span></a></li>');
+
+              let leftUl = $('<ul class="nav nav-drawer '+(i!=0?'collapse':'')+'" id="menus-'+menu.id+'" ></ul>');
+
+              if(menu.children && menu.children.length>0 ){
+                // let li = '<li class="nav-item nav-item-has-subnav">';
+                // li += '<a href="javascript:void(0)">'+icon+' <span>'+menu.menuName+'</span></a>'
+                // li += '</li>';
+                // li = $(li);
+                // let childUl = $('<ul class="nav nav-subnav"></ul>');
+                // li.append(childUl);
+                // leftUl.append(li);
+                buildMenu(leftUl,menu.children);
+              }else{
+                menu.url += "?v="+new Date().getTime();
+                leftUl.append('<li class="nav-item"> <a class="multitabs" href="'+menu.url+'">'+'<span class="'+iconCls+'">'+menu.menuName+'</span></a> </li>');
+              }
+
+              $("#menus").append(leftUl);
+            }
         }
     });
+
+    function showMenus(obj, id)
+    {
+      $('.sidebar-main .nav-drawer').slideUp('slow');
+      $('#menus-'+id).slideDown('slow');
+      $(obj).parent('li').addClass('active').siblings().removeClass('active');
+      $('.lyear-layout-sidebar-scroll').animate({scrollTop: 0}, 300);  // 处理滚动条到最上方
+    }
 </script>
 
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
