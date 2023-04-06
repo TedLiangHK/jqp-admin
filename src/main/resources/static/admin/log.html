@@ -69,7 +69,7 @@
             if (stompClient == null) {
 
                 $("#status").text("通道连接成功,静默等待.....");
-                var socket = new SockJS('/websocket?token=kl');
+                var socket = new SockJS('/websocket');
 
                 stompClient = Stomp.over(socket);
 
