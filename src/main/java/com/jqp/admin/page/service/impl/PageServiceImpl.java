@@ -428,7 +428,7 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             columnData.setLabel(resultField.getLabel());
             columnData.put("sortable",true);
             if(StringUtils.isNotBlank(resultField.getFixed())){
-                columnData.put("fixed",resultField.getField());
+                columnData.put("fixed",resultField.getFixed());
             }
             if(Whether.NO.equals(resultField.getToggled())){
                 columnData.put("toggled",false);

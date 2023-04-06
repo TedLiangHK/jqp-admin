@@ -294,7 +294,7 @@
                 ul.append(li);
                 buildMenu(childUl,menu.children);
             }else{
-                menu.url += "?v="+new Date().getTime();
+                menu.url += "?v="+new Date().getTime() //+ "&amisDebug=1"; //amisDebug模式
                 ul.append('<li class="nav-item"> <a class="multitabs" href="'+menu.url+'">'+icon+'<span>'+menu.menuName+'</span></a> </li>');
             }
         }
@@ -333,7 +333,7 @@
                 // leftUl.append(li);
                 buildMenu(leftUl,menu.children);
               }else{
-                menu.url += "?v="+new Date().getTime();
+                menu.url += "?v="+new Date().getTime() //+ "&amisDebug=1"; //amisDebug模式
                 leftUl.append('<li class="nav-item"> <a class="multitabs" href="'+menu.url+'">'+'<span class="'+iconCls+'">'+menu.menuName+'</span></a> </li>');
               }
 

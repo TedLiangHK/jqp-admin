@@ -59,8 +59,8 @@ AMIS_JSON={
             }
         ],
         "filter": {
-            "title":["<span style='line-height:30px;'>表单管理</span>",
-                ,{
+            "title":["<span style='line-height:30px;'>表单管理</span>"
+                /*,{
                     "type":"button",
                     "label":"刷新页面",
                     "actionType": "url",
@@ -68,7 +68,7 @@ AMIS_JSON={
                     "blank":false,
                     "level":"secondary",
                     "className":"m-l float-right relative jqp-top-btn"
-                }],
+                }*/],
             "submitText": "",
             "mode": "horizontal",
             "body": [
@@ -143,31 +143,13 @@ AMIS_JSON={
                     },{
                         "label": "预览",
                         "type": "button",
-                        "actionType": "dialog",
-                        "dialog": {
-                            "title": "预览-${name}",
-                            "size": "full",
-                            "body": {
-                                "type":"iframe",
-                                "src":"/form/${code}",
-                                "height":"calc( 100% - 10px )"
-                            },
-                            "actions":[]
-                        }
+                        "actionType": "url",
+                        "url":"/form/${code}"
                     },{
                         "label": "预览js",
                         "type": "button",
-                        "actionType": "dialog",
-                        "dialog": {
-                            "title": "预览js-${name}",
-                            "size": "full",
-                            "body": {
-                                "type":"iframe",
-                                "src":"/admin/form/js/${code}.js",
-                                "height":"calc( 100% - 10px )"
-                            },
-                            "actions":[]
-                        }
+                        "actionType": "url",
+                        "url":"/admin/form/js/${code}.js"
                     },{
                         "type": "button",
                         "level":"danger",
