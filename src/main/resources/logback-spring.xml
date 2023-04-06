@@ -190,9 +190,6 @@
     -->
 
     <root level="info">
-        <!--
-        <appender-ref ref="CONSOLE" />
-        -->
         <appender-ref ref="STDOUT" />
         <appender-ref ref="DEBUG_FILE" />
         <appender-ref ref="INFO_FILE" />
@@ -207,8 +204,7 @@
     </springProfile>
     -->
     <!--生产环境:输出到文件-->
-    <!--
-    <springProfile name="dev">
+    <springProfile name="prod">
         <root level="info">
             <appender-ref ref="STDOUT" />
             <appender-ref ref="CONSOLE" />
@@ -218,6 +214,5 @@
             <appender-ref ref="WARN_FILE" />
         </root>
     </springProfile>
-    -->
 
 </configuration>
