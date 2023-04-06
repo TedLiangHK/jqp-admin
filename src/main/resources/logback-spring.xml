@@ -44,10 +44,10 @@
         </filter>
         <!--encoder 默认配置为PatternLayoutEncoder-->
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
             <!--
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level -&#45;&#45; [%thread] %logger Line:%-3L - %msg%n</pattern>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
             -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5level] %4line %40.40logger{39}.%-30.30method : %m%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
 
