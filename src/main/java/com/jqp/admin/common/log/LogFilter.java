@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class LogFilter extends Filter<ILoggingEvent> {
         }
         LoggerMessage loggerMessage = new LoggerMessage(
                 StrUtil.format(event.getMessage(),event.getArgumentArray())
-                , DateFormat.getDateTimeInstance().format(new Date(event.getTimeStamp())),
+                , DateUtil.format(new Date(event.getTimeStamp()),"yyyy-MM-dd HH:mm:ss SSS"),
                 event.getThreadName(),
                 event.getLoggerName(),
                 event.getLevel().levelStr,
