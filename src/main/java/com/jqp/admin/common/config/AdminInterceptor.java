@@ -33,6 +33,9 @@ public class AdminInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         SessionContext sessionContext = SpringContextUtil.getBean(SessionContext.class);
         UserSession userSession = sessionContext.getSession(request);
+        if(uri.startsWith("/websocket")){
+            return true;
+        }
         if(userSession == null){
             if(isAjax(request,handler)){
                 response.setContentType("application/json");

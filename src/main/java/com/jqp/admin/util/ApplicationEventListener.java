@@ -1,5 +1,6 @@
 package com.jqp.admin.util;
 
+import com.jqp.admin.common.log.service.LogService;
 import com.jqp.admin.common.service.SysFileService;
 import com.jqp.admin.rbac.service.DynamicTaskService;
 import com.jqp.admin.rbac.service.TimerTaskService;
@@ -47,6 +48,10 @@ public class ApplicationEventListener implements ApplicationListener {
             DynamicTaskService dynamicTaskService = SpringContextUtil.getBean(DynamicTaskService.class);
             dynamicTaskService.start();
             log.info("结束初始化动态任务");
+
+            LogService logService = SpringContextUtil.getBean(LogService.class);
+            logService.startLog();
+            log.info("启动在线日志");
 
         } else if (event instanceof ContextStartedEvent) {
             log.info("应用启动！！");
