@@ -1,5 +1,7 @@
 package com.jqp.admin.page.controller;
 
+import com.jqp.admin.common.Result;
+import com.jqp.admin.rbac.service.ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -7,10 +9,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -18,6 +23,9 @@ import java.util.Map;
 public class StaticPageController {
 
     public static final String PREFIX = "/page/static";
+
+    @Resource
+    private ApiService apiService;
 
     @RequestMapping(PREFIX +"/**")
     public String page(HttpServletRequest request, Model model){
@@ -71,5 +79,16 @@ public class StaticPageController {
         }
     }
 
+    @RequestMapping("/page/**")
+    @ResponseBody
+    public String templatePage(HttpServletRequest request,@RequestParam Map<String,Object> params){
+        log.info(request.getRequestURI());
+        String api = request.getRequestURI().substring("/page/".length());
+
+        Map<String,Object> context = new HashMap<>();
+        context.put("params",params);
+        Result result = apiService.call("get", "/_page/" + api, context);
+        return (String) result.getData();
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.jqp.admin.rbac.service.impl;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.StringUtil;
@@ -38,5 +40,11 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         return Result.success();
+    }
+
+    @Override
+    public Result call(String method, String api, Map<String, Object> context) {
+        Map<String,Object> result = magicAPIService.call(method, api, context);
+        return JSONUtil.toBean(JSONUtil.toJsonPrettyStr(result),Result.class);
     }
 }
