@@ -29,7 +29,7 @@ public class LogFilter extends Filter<ILoggingEvent> {
             }
         }
         LoggerMessage loggerMessage = new LoggerMessage(
-                StrUtil.format(event.getMessage(),event.getArgumentArray())
+                StrUtil.format(event.getMessage(),event.getArgumentArray()).replaceAll("\n","<br/>").replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;")
                 , DateUtil.format(new Date(event.getTimeStamp()),"yyyy-MM-dd HH:mm:ss SSS"),
                 event.getThreadName(),
                 event.getLoggerName(),
