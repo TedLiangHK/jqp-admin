@@ -51,6 +51,9 @@ public class InputTableRender extends InputDefaultRender{
             if(Whether.YES.equals(srcFormField.getDisabled())){
                 fieldConfig.put("disabled",true);
             }
+            if(formField.getWidth() != null){
+                fieldConfig.put("width",formField.getWidth());
+            }
         }
         config.put("columns",columns);
     }
