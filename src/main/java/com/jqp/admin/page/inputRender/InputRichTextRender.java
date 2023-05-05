@@ -18,6 +18,7 @@ public class InputRichTextRender  extends InputDefaultRender{
         Map<String, Object> options = new HashMap<>();
         options.put("relative_urls",false);
         options.put("remove_script_host",true);
+        config.put("useChunk",false);
 
         config.put("options",options);
     }

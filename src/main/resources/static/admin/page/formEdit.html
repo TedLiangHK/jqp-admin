@@ -32,61 +32,110 @@
 	  <el-tabs class="demo-tabs" model-value="basic" >
 		<el-tab-pane label="基本信息" name="basic">
 			<el-form :model="form" ref="form" :rules="rules" label-width="120px"  >
-				<el-form-item label="编号"  prop="code">
-				  <el-input v-model="form.code" />
-				</el-form-item>
-				<el-form-item label="名称"  prop="name">
-				  <el-input v-model="form.name" />
-				</el-form-item>
-				<el-form-item label="表名">
-				  <el-input v-model="form.tableName" />
-				</el-form-item>
-				<el-form-item label="初始化接口">
-				  <el-input v-model="form.initApi" placeholder="默认配置:post:/admin/common/{formCode}/get?id=${id}" />
-				</el-form-item>
-				<el-form-item label="保存接口">
-				  <el-input v-model="form.api" placeholder="默认配置:post:/admin/common/{formCode}/saveOrUpdate" />
-				</el-form-item>
-				<el-form-item label="窗口大小">
-				  <el-select v-model="form.size" >
-					<el-option label="较小" value="sm"  ></el-option>
-					<el-option label="标准" value="default"  ></el-option>
-					<el-option label="较大" value="lg"  ></el-option>
-					<el-option label="很大" value="xl"  ></el-option>
-					<el-option label="全屏" value="full" ></el-option>
-				  </el-select>
-				</el-form-item>
-				<el-form-item label="字段宽度">
-				  <el-input v-model="form.fieldWidth" placeholder="栅格布局,一行为12,一半为6" />
-				</el-form-item>
-				<el-form-item label="是否只读">
-				  <el-select v-model="form.disabled" >
-					<el-option label="YES" value="YES" ></el-option>
-					<el-option label="NO" value="NO" ></el-option>
-				  </el-select>
-				</el-form-item>
-				<el-form-item label="表单类型">
-					<el-select v-model="form.formType" placeholder="默认为普通表单">
-						<el-option label="普通表单" value="form" ></el-option>
-						<el-option label="分步表单" value="wizard" ></el-option>
-					</el-select>
-				</el-form-item>
-				<el-form-item label="自定义表单">
-					<el-input v-model="form.customForm" placeholder="自定义表单内容,通过自定义页面配置,此处填写自定义页面的编号" />
-				</el-form-item>
-				<el-form-item label="表单事件">
-					<el-input v-model="form.formEvent" placeholder="在获取/保存/更新时执行一些自定义的代码,实现接口FormEvent,原理请看CommonController源码" />
-				</el-form-item>
-				<el-form-item label="初始化sql">
-				  <el-input v-model="form.initSql" type="textarea" placeholder="在表单根据id获取数据时,本表中数据不够,可以写sql查询更多的数据"/>
-				</el-form-item>
-				<el-form-item label="前置接口">
-				  <el-input v-model="form.beforeApi" placeholder="保存前校验,调用magic-api"/>
-				</el-form-item>
+				<el-row>
+					<el-col :span="6">
+						<el-form-item label="编号"  prop="code">
+							<el-input v-model="form.code" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="名称"  prop="name">
+							<el-input v-model="form.name" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="表名">
+							<el-input v-model="form.tableName" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="窗口大小">
+							<el-select v-model="form.size" style="width:100%;" >
+								<el-option label="较小" value="sm"  ></el-option>
+								<el-option label="标准" value="default"  ></el-option>
+								<el-option label="较大" value="lg"  ></el-option>
+								<el-option label="很大" value="xl"  ></el-option>
+								<el-option label="全屏" value="full" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
 
-				<el-form-item label="后置接口" >
-				  <el-input v-model="form.afterApi" placeholder="保存后写更多的业务逻辑,调用magic-api"/>
-				</el-form-item>
+				<el-row>
+					<el-col :span="6">
+						<el-form-item label="字段宽度">
+							<el-input v-model="form.fieldWidth" placeholder="栅格布局,一行为12,一半为6" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="是否只读">
+							<el-select v-model="form.disabled" style="width:100%;"  >
+								<el-option label="YES" value="YES" ></el-option>
+								<el-option label="NO" value="NO" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+						<el-form-item label="表单类型">
+							<el-select v-model="form.formType" placeholder="默认为普通表单" style="width:100%;" >
+								<el-option label="普通表单" value="form" ></el-option>
+								<el-option label="分步表单" value="wizard" ></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
+
+					</el-col>
+				</el-row>
+
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="表单事件">
+							<el-input v-model="form.formEvent" placeholder="在获取/保存/更新时执行一些自定义的代码,实现接口FormEvent,原理请看CommonController源码" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="自定义表单">
+							<el-input v-model="form.customForm" placeholder="自定义表单内容,通过自定义页面配置,此处填写自定义页面的编号" />
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="初始化接口">
+							<el-input v-model="form.initApi" placeholder="默认配置:post:/admin/common/{formCode}/get?id=${id}" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="保存接口">
+							<el-input v-model="form.api" placeholder="默认配置:post:/admin/common/{formCode}/saveOrUpdate" />
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="前置接口">
+							<el-input v-model="form.beforeApi" placeholder="保存前校验,调用magic-api"/>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="后置接口" >
+							<el-input v-model="form.afterApi" placeholder="保存后写更多的业务逻辑,调用magic-api"/>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="扩展json">
+							<el-input v-model="form.extraJson" type="textarea" placeholder="参考amis文档,覆盖表单配置信息" rows="10"/>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="初始化sql">
+							<el-input v-model="form.initSql" type="textarea" placeholder="在表单根据id获取数据时,本表中数据不够,可以写sql查询更多的数据" rows="10"/>
+						</el-form-item>
+					</el-col>
+				</el-row>
 
 			  </el-form>
 		</el-tab-pane>
@@ -419,6 +468,20 @@ post:/xxx(会携带)requestBody参数
 					<template  #default="scope">
 						<div class='el-textarea'>
 							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.jsRule" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="弹出前接口" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.beforePopApi" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="扩展json" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.extraJson" style="height:80px;"></textarea>
 						</div>
 					</template>
 				</el-table-column>

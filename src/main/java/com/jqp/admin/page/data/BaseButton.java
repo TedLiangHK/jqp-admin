@@ -27,6 +27,10 @@ public class BaseButton extends BaseData {
     private String icon;
     //是否提示,默认提示
     private String whetherConfirm;
+    //弹出前校验
+    private String beforePopApi;
+    //扩展json配置
+    private String extraJson;
 
     @Override
     public boolean equals(Object o) {
@@ -34,11 +38,11 @@ public class BaseButton extends BaseData {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         BaseButton that = (BaseButton) o;
-        return seq == that.seq && Objects.equals(label, that.label) && Objects.equals(optionType, that.optionType) && Objects.equals(optionValue, that.optionValue) && Objects.equals(level, that.level) && Objects.equals(confirmText, that.confirmText) && Objects.equals(jsRule, that.jsRule) && Objects.equals(code, that.code) && Objects.equals(icon, that.icon) && Objects.equals(whetherConfirm, that.whetherConfirm);
+        return seq == that.seq && Objects.equals(label, that.label) && Objects.equals(optionType, that.optionType) && Objects.equals(optionValue, that.optionValue) && Objects.equals(level, that.level) && Objects.equals(confirmText, that.confirmText) && Objects.equals(jsRule, that.jsRule) && Objects.equals(code, that.code) && Objects.equals(icon, that.icon) && Objects.equals(whetherConfirm, that.whetherConfirm)&& Objects.equals(beforePopApi, that.beforePopApi)&& Objects.equals(extraJson, that.extraJson);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), label, optionType, optionValue, level, confirmText, seq, jsRule, code, icon, whetherConfirm);
+        return Objects.hash(super.hashCode(), label, optionType, optionValue, level, confirmText, seq, jsRule, code, icon, whetherConfirm,beforePopApi,extraJson);
     }
 }

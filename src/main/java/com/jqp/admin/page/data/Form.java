@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class Form extends BaseData {
@@ -55,6 +56,9 @@ public class Form extends BaseData {
     //自定义表单
     private String customForm;
 
+    //扩展json
+    private String extraJson;
+
     public String getInitSql() {
         return initSql == null ? "" : initSql;
     }
@@ -65,5 +69,19 @@ public class Form extends BaseData {
 
     public String getAfterApi() {
         return afterApi == null ? "" : afterApi;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Form form = (Form) o;
+        return Objects.equals(code, form.code) && Objects.equals(name, form.name) && Objects.equals(tableName, form.tableName) && Objects.equals(initApi, form.initApi) && Objects.equals(api, form.api) && Objects.equals(size, form.size) && Objects.equals(fieldWidth, form.fieldWidth) && Objects.equals(disabled, form.disabled) && Objects.equals(initSql, form.initSql) && Objects.equals(beforeApi, form.beforeApi) && Objects.equals(afterApi, form.afterApi) && Objects.equals(formEvent, form.formEvent) && Objects.equals(formType, form.formType) && Objects.equals(customForm, form.customForm) && Objects.equals(extraJson, form.extraJson);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), code, name, tableName, initApi, api, size, fieldWidth, disabled, initSql, beforeApi, afterApi, formEvent, formType, customForm, extraJson);
     }
 }

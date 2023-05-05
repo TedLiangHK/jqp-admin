@@ -17,6 +17,7 @@ import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.rbac.service.ApiService;
 import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.TemplateUtil;
@@ -44,6 +45,9 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
     @Resource
     @Lazy
     TemplateService templateService;
+
+    @Resource
+    ApiService apiService;
 
     @Override
     public Page load(String pageCode) {
@@ -532,6 +536,11 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             );
             crudData.setStatistics(statistics);
         }
+        if(StringUtils.isNotBlank(page.getAfterQueryApi())){
+            Map<String,Object> context = new HashMap<>();
+            context.put("crudData",crudData);
+            apiService.call("post",page.getAfterQueryApi(),context);
+        }
         return Result.success(crudData);
     }
 
@@ -586,6 +595,19 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             }
             page.getResultFields().add(field);
         }
+
+        PageResultField prev = null;
+        for (PageResultField resultField : page.getResultFields()) {
+            if(resultField.getSeq() == 0){
+                if(prev != null){
+                    resultField.setSeq(prev.getSeq()+10);
+                }else{
+                    resultField.setSeq(10);
+                }
+            }
+            prev = resultField;
+        }
+        Collections.sort(page.getResultFields(), SeqComparator.instance);
 
         log.info("元数据信息:{}",columnMetas);
     }

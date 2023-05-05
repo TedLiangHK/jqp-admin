@@ -3,6 +3,7 @@ package com.jqp.admin.page.service.impl;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.config.SessionContext;
@@ -14,14 +15,12 @@ import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.FormType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
-import com.jqp.admin.page.service.FormService;
-import com.jqp.admin.page.service.InputFieldService;
-import com.jqp.admin.page.service.PageButtonService;
-import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.SeqComparator;
 import com.jqp.admin.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,6 +36,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
     PageConfigService pageConfigService;
     @Resource
     InputFieldService inputFieldService;
+    @Resource
+    @Lazy
+    PageService pageService;
 
     @Override
     public void save(Form form){
@@ -141,6 +143,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         if(StrUtil.isNotBlank(f.getTableName())){
             form.put("initApi",StrUtil.format("post:/admin/common/{}/get",f.getCode())+"?id=${id}");
             form.put("api",StrUtil.format("post:/admin/common/{}/saveOrUpdate",f.getCode()));
+            if(button != null && StringUtils.isNotBlank(button.getLabel()) && button.getLabel().contains("复制")){
+                form.put("initApi",StrUtil.format("post:/admin/common/{}/copy",f.getCode())+"?copyId=${id}");
+            }
         }
         if(StrUtil.isNotBlank(f.getInitApi())){
             form.put("initApi",f.getInitApi());
@@ -309,8 +314,10 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
                 List<Map<String,Object>> tabContent = new ArrayList<>();
                 tabContent.add(curdJson);
 
+                Page page = pageService.get(ref.getRefPageCode());
+
                 Map<String,Object> tab = new HashMap<>();
-                tab.put("title",title);
+                tab.put("title",page.getName());
                 tab.put("body",tabContent);
 
                 tabs.add(tab);
@@ -361,6 +368,16 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
                 form = JSONUtil.parseObj(customPage.getContent());
             }
         }
+
+        if(StringUtils.isNotBlank(f.getExtraJson())){
+            try{
+                JSONObject json = JSONUtil.parseObj(f.getExtraJson());
+                form.putAll(json);
+            }catch (Exception e){
+                throw new RuntimeException(StrUtil.format("表单["+f.getName()+"]扩展json配置错误"));
+            }
+        }
+
         dialog.put("body",form);
         return dialog;
     }
@@ -496,5 +513,18 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             }
             form.getFormFields().add(field);
         }
+
+        FormField prev = null;
+        for (FormField formField : form.getFormFields()) {
+            if(formField.getSeq() == 0){
+                if(prev != null){
+                    formField.setSeq(prev.getSeq()+10);
+                }else{
+                    formField.setSeq(10);
+                }
+            }
+            prev = formField;
+        }
+        Collections.sort( form.getFormFields(), SeqComparator.instance);
     }
 }

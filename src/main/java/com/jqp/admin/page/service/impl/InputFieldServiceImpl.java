@@ -1,7 +1,9 @@
 package com.jqp.admin.page.service.impl;
 
 import com.jqp.admin.common.constants.Constants;
+import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.InputField;
+import com.jqp.admin.page.data.PageQueryField;
 import com.jqp.admin.page.inputRender.*;
 import com.jqp.admin.page.service.InputFieldService;
 import org.apache.commons.lang3.StringUtils;
@@ -22,8 +24,11 @@ public class InputFieldServiceImpl implements InputFieldService {
             inputRender = inputDefaultRender;
         }
         Map<String, Object> config = inputRender.render(field);
-        if(selector && !config.get("name").toString().toLowerCase().contains("id")){
-            config.put("name", Constants.QUERY_KEY_START+config.get("name"));
+        String name = (String) config.get("name");
+        if(selector && field instanceof PageQueryField){
+            if(!Whether.YES.equals(((PageQueryField) field).getRef()) && (name == null || !name.toLowerCase().contains("id"))){
+                config.put("name", Constants.QUERY_KEY_START+name);
+            }
         }
         return config;
     }

@@ -132,6 +132,16 @@ public class PageConfigServiceImpl implements PageConfigService {
         PageButtonData pageButtonData = pageButtonService.dealPageButton(page.getPageButtons(), false);
         params.put("topButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getTopButtons()));
         params.put("bulkButtons",JSONUtil.toJsonPrettyStr(pageButtonData.getBulkButtons()));
+        params.put("extraJson","");
+        if(StringUtils.isNotBlank(page.getExtraJson())){
+            try{
+                JSONObject extraJson = JSONUtil.parseObj(page.getExtraJson());
+                String str = extraJson.toString();
+                params.put("extraJson",str.substring(1,str.length()-1)+",");
+            }catch (Exception e){
+                throw new RuntimeException(page.getName()+"扩展json配置错误");
+            }
+        }
         //设置分页
         setPage(page,params);
         if(StringUtils.isNotBlank(page.getIntroduce())){
@@ -276,6 +286,10 @@ public class PageConfigServiceImpl implements PageConfigService {
                 }else{
                     Map<String,Object> tab = new HashMap<>();
                     tab.put("type","tabs");
+
+                    //全部加载,不在点击tab的时候才渲染,  如果点击tab才渲染会导致 前面点击传不到这个组件
+                    tab.put("mountOnEnter",false);
+
                     List<Map<String,Object>> tabs = new ArrayList<>();
                     tab.put("tabs",tabs);
                     //pages.add(tab);

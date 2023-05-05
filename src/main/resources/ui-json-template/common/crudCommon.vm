@@ -16,7 +16,7 @@
 #if($affixRow)
 "affixRow":${affixRow},
 #end
-
+$!{extraJson}
 "filter": {
     "title": ["<span style='line-height:30px;'>${pageName}</span>",
         {

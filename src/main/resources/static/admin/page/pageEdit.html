@@ -31,7 +31,7 @@
 	  <el-button type="primary" @click="onSubmit" style="position:fixed;bottom:10px;right:10px;z-index:999;" >保存</el-button>
 	  <el-tabs class="demo-tabs" model-value="basic" >
 		<el-tab-pane label="基本信息" name="basic">
-			<el-form :model="page" ref="page" :rules="rules" label-width="80px"  >
+			<el-form :model="page" ref="page" :rules="rules" label-width="120px"  >
 				<el-row>
 					<el-col :span="6">
 						<el-form-item label="编号"  prop="code">
@@ -93,6 +93,11 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="6">
+						<el-form-item label="查询后接口">
+							<el-input v-model="page.afterQueryApi" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
 						<el-form-item label="页面宽度">
 							<el-input v-model="page.width" placeholder="一对多页面占比左侧宽度,最大为12,默认值为6" />
 						</el-form-item>
@@ -118,6 +123,11 @@
 				<el-form-item label="查询sql" prop="querySql" >
 					<div class='el-textarea'>
 						<textarea class='el-textarea__inner'  v-model.lazy="page.querySql" style="height:300px;"></textarea>
+					</div>
+				</el-form-item>
+				<el-form-item label="扩展json" prop="extraJson" >
+					<div class='el-textarea'>
+						<textarea class='el-textarea__inner'  v-model.lazy="page.extraJson" style="height:300px;"></textarea>
 					</div>
 				</el-form-item>
 				<el-form-item label="页面介绍" prop="introduce" >
@@ -568,6 +578,20 @@ post:/xxx(会携带)requestBody参数
 					<template  #default="scope">
 						<div class='el-textarea'>
 							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.jsRule" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="弹出前接口" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.beforePopApi" style="height:80px;"></textarea>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="扩展json" width="300" >
+					<template  #default="scope">
+						<div class='el-textarea'>
+							<textarea class='el-textarea__inner'  v-model.lazy="scope.row.extraJson" style="height:80px;"></textarea>
 						</div>
 					</template>
 				</el-table-column>

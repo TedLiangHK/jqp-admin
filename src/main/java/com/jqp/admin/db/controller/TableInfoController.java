@@ -113,10 +113,15 @@ public class TableInfoController {
             page.setName(tableInfo.getTableComment()+"列表");
             page.setCode(pageCode);
             List<String> columnNames = tableInfo.getColumnInfos().stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
+
             if(columnNames.contains("parent_id")){
                 page.setPageType(PageType.tree);
+                page.setOpenRowNum(Whether.NO);
+                page.setOpenPage(Whether.NO);
             }else{
                 page.setPageType(PageType.list);
+                page.setOpenRowNum(Whether.YES);
+                page.setOpenPage(Whether.YES);
             }
             page.setOrderBy(" order by id desc ");
             Map<String, String> codeMap = tableService.generateCode(tableName);

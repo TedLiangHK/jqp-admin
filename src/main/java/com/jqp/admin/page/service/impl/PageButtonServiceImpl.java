@@ -2,6 +2,7 @@ package com.jqp.admin.page.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.page.constants.ActionType;
 import com.jqp.admin.page.constants.Whether;
@@ -101,6 +102,24 @@ public class PageButtonServiceImpl implements PageButtonService {
             );
             String confirmText = StrUtil.isBlank(baseButton.getConfirmText()) ? "确定" + baseButton.getLabel()+"操作吗?" : baseButton.getConfirmText();
             btn.put("confirmText",confirmText);
+        }
+
+        if(StringUtils.isNotBlank(baseButton.getBeforePopApi())){
+            //dialog弹出前校验,校验接口成功的message不要有提示,否则会显示,错误需要有提示,错误了就不会弹出了
+            Object actionType = btn.get("actionType");
+            if("dialog".equals(actionType)){
+                btn.put("actionType","ajax");
+                btn.put("api",baseButton.getBeforePopApi());
+                btn.put("feedback",btn.remove("dialog"));
+            }
+        }
+        if(StringUtils.isNotBlank(baseButton.getExtraJson())){
+            try{
+                JSONObject json = JSONUtil.parseObj(baseButton.getExtraJson());
+                btn.putAll(json);
+            }catch (Exception e){
+                throw new RuntimeException(StrUtil.format("按钮["+baseButton.getLabel()+"]扩展json配置错误"));
+            }
         }
         return btn;
     }

@@ -216,6 +216,11 @@ public class MenuController {
         this.add(menuCode,StrUtil.format("保存{}",form.getName()),api,menuUrls);
         this.add(menuCode,form.getFormFields(),menuUrls);
 
+        if(StrUtil.isNotBlank(form.getInitApi())){
+            String copyApi = StrUtil.format("/admin/common/{}/copy",form.getCode());
+            this.add(menuCode,StrUtil.format("复制{}",form.getName()),copyApi,menuUrls);
+        }
+
         List<FormButton> formButtons = form.getFormButtons();
         //页面表单按钮
         for(FormButton formButton:formButtons){

@@ -51,6 +51,10 @@ public class Page extends BaseData {
     private String openRowNum;
     //每页数量
     private Integer perPage;
+    //扩展json
+    private String extraJson;
+    //查询后接口
+    private String afterQueryApi;
 
     @Override
     public boolean equals(Object o) {
@@ -58,11 +62,11 @@ public class Page extends BaseData {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Page page = (Page) o;
-        return Objects.equals(code, page.code) && Objects.equals(name, page.name) && Objects.equals(querySql, page.querySql) && Objects.equals(pageType, page.pageType) && Objects.equals(orderBy, page.orderBy) && Objects.equals(js, page.js) && Objects.equals(labelField, page.labelField) && Objects.equals(valueField, page.valueField) && Objects.equals(width, page.width) && Objects.equals(beforeApi, page.beforeApi) && Objects.equals(openPage, page.openPage) && Objects.equals(introduce, page.introduce) && Objects.equals(openRowNum, page.openRowNum)&& Objects.equals(perPage, page.perPage);
+        return Objects.equals(code, page.code) && Objects.equals(name, page.name) && Objects.equals(querySql, page.querySql) && Objects.equals(pageType, page.pageType) && Objects.equals(orderBy, page.orderBy) && Objects.equals(js, page.js) && Objects.equals(labelField, page.labelField) && Objects.equals(valueField, page.valueField) && Objects.equals(width, page.width) && Objects.equals(beforeApi, page.beforeApi) && Objects.equals(openPage, page.openPage) && Objects.equals(introduce, page.introduce) && Objects.equals(openRowNum, page.openRowNum)&& Objects.equals(perPage, page.perPage)&& Objects.equals(extraJson, page.extraJson)&& Objects.equals(afterQueryApi, page.afterQueryApi);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), code, name, querySql, pageType, orderBy, js, labelField, valueField, width, beforeApi, openPage, introduce, openRowNum,perPage);
+        return Objects.hash(super.hashCode(), code, name, querySql, pageType, orderBy, js, labelField, valueField, width, beforeApi, openPage, introduce, openRowNum,perPage,extraJson,afterQueryApi);
     }
 }

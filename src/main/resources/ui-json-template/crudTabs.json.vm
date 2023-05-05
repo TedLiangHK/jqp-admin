@@ -30,6 +30,7 @@
             "xs":${tabWidth},
             "sm":${tabWidth},
             "lg":${tabWidth},
+            "className":"#if($width<12) rightHeight #end",
             "${rightTypeKey}":${columns}
         }]
     }]
