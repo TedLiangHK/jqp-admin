@@ -82,7 +82,9 @@ public class LogServiceImpl implements LogService {
             globalLog.setRemark(StrUtil.format("{}在{}创建了记录",globalLog.getUserName(),now));
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(afterObj.get("id").toString()));
-            jdbcService.saveOrUpdate(globalLog);
+            if(Whether.YES.equals(logTable.getSaveLog())){
+                jdbcService.saveOrUpdate(globalLog);
+            }
             dataListenerService.newObj(tableName,afterObj);
         }else if(beforeObj != null && afterObj == null){
             operation = "删除";
@@ -90,7 +92,9 @@ public class LogServiceImpl implements LogService {
             globalLog.setRemark(StrUtil.format("{}在{}删除了记录",globalLog.getUserName(),now));
             globalLog.setOptionType(operation);
             globalLog.setRefId(Long.valueOf(beforeObj.get("id").toString()));
-            jdbcService.saveOrUpdate(globalLog);
+            if(Whether.YES.equals(logTable.getSaveLog())){
+                jdbcService.saveOrUpdate(globalLog);
+            }
             dataListenerService.deleteObj(tableName,beforeObj);
             invalidCache(logTable,beforeObj);
         }else{
@@ -118,7 +122,9 @@ public class LogServiceImpl implements LogService {
                     continue;
                 }
                 pLog.setRemark(StrUtil.format("{}在{}将字段{}的值从{}改为{}",pLog.getUserName(),now,columnInfo.getColumnComment(),beforeValue,afterValue));
-                jdbcService.saveOrUpdate(pLog);
+                if(Whether.YES.equals(logTable.getSaveLog())){
+                    jdbcService.saveOrUpdate(pLog);
+                }
                 dataListenerService.updateObjColumn(tableName,columnInfo.getColumnName(),beforeObj,afterObj,beforeValue,afterValue);
                 isUpdate = true;
             }

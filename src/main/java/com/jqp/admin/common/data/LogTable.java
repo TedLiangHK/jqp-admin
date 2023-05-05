@@ -17,4 +17,6 @@ public class LogTable extends BaseData {
     private String openCache;
     //缓存key字段列表
     private String cacheKeyFields;
+    //保存日志
+    private String saveLog;
 }

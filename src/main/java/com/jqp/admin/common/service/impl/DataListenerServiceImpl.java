@@ -27,7 +27,7 @@ public class DataListenerServiceImpl implements DataListenerService {
     public void newObj(String tableName, Map<String, Object> obj) {
         List<DataListener> list = jdbcService.find("select * from data_listener " +
                 "where table_name =? " +
-                "and event_type = ? " +
+                "and FIND_IN_SET(?,event_type) > 0 " +
                 "order by seq asc ",
                 DataListener.class,
                 tableName,
@@ -46,7 +46,7 @@ public class DataListenerServiceImpl implements DataListenerService {
     public void deleteObj(String tableName, Map<String, Object> obj) {
         List<DataListener> list = jdbcService.find("select * from data_listener " +
                         "where table_name =? " +
-                        "and event_type = ? " +
+                        "and FIND_IN_SET(?,event_type) > 0 " +
                         "order by seq asc ",
                 DataListener.class,
                 tableName,
@@ -65,7 +65,7 @@ public class DataListenerServiceImpl implements DataListenerService {
     public void updateObj(String tableName, Map<String, Object> beforeObj, Map<String, Object> afterObj) {
         List<DataListener> list = jdbcService.find("select * from data_listener " +
                         "where table_name =? " +
-                        "and event_type = ? " +
+                        "and FIND_IN_SET(?,event_type) > 0 " +
                         "order by seq asc ",
                 DataListener.class,
                 tableName,
@@ -85,7 +85,7 @@ public class DataListenerServiceImpl implements DataListenerService {
     public void updateObjColumn(String tableName, String columnName, Map<String, Object> beforeObj, Map<String, Object> afterObj, Object beforeValue, Object afterValue) {
         List<DataListener> list = jdbcService.find("select * from data_listener " +
                         "where table_name =? " +
-                        "and event_type = ? " +
+                        "and FIND_IN_SET(?,event_type) > 0 " +
                         "and column_name =? " +
                         "order by seq asc ",
                 DataListener.class,
