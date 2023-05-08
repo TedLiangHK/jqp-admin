@@ -18,10 +18,7 @@ import com.jqp.admin.page.service.DicCacheService;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.service.ApiService;
-import com.jqp.admin.util.SeqComparator;
-import com.jqp.admin.util.StringUtil;
-import com.jqp.admin.util.TemplateUtil;
-import com.jqp.admin.util.Util;
+import com.jqp.admin.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -431,6 +428,13 @@ public class PageServiceImpl extends AbstractCacheService<Page> implements PageS
             columnData.setName(StringUtil.toFieldColumn(resultField.getField()));
             columnData.setLabel(resultField.getLabel());
             columnData.put("sortable",true);
+            if(SpringContextUtil.isTest()){
+                if(DataType.DIC.equals(resultField.getType())){
+                    columnData.put("remark",StrUtil.format("{}-{}",columnData.getName(),Util.getDic(resultField.getFormat())));
+                }else{
+                    columnData.put("remark",StrUtil.format("{}",columnData.getName()));
+                }
+            }
             if(StringUtils.isNotBlank(resultField.getFixed())){
                 columnData.put("fixed",resultField.getFixed());
             }

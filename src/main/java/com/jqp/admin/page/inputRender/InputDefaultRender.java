@@ -6,13 +6,16 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.page.constants.ComponentType;
 import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
+import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.InputField;
-import com.jqp.admin.page.service.DicCacheService;
-import com.jqp.admin.page.service.DicService;
-import com.jqp.admin.page.service.PageConfigService;
+import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.service.*;
+import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.Util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -107,6 +110,32 @@ public class InputDefaultRender implements InputRender{
             config.put("options",options);
             config.remove("source");
         }
+
+        if(SpringContextUtil.isTest()) {
+            if (DataType.Selector.equals(field.getType()) || DataType.SelectorPop.equals(field.getType())){
+                PageService pageService = SpringContextUtil.getBean(PageService.class);
+                Page page = pageService.get(field.getFormat());
+                if(page != null){
+                    config.put("labelRemark",field.getField()+"-"+ Util.getPageTitle(page));
+                }
+            }else if(DataType.DIC.equals(field.getType())){
+                config.put("labelRemark",field.getField()+"-"+ Util.getDic(field.getFormat()));
+            }else if(ComponentType.InputTable.equals(field.getComponentType())){
+                String format = field.getFormat();
+                if(!org.apache.commons.lang.StringUtils.isBlank(format)){
+                    String[] arr = format.split(",");
+                    //表单编号
+                    String formCode = arr[0];
+                    //关联字段,暂时忽略
+                    String refField = arr[1];
+                    FormService formService = SpringContextUtil.getBean(FormService.class);
+                    config.put("labelRemark",field.getField()+"-"+ Util.getFormTitle(formService.get(formCode)));
+                }
+            }else{
+                config.put("labelRemark",field.getField()+"-"+ StringUtil.getStr(field.getFormat()));
+            }
+        }
+
         this.extra(config,field);
         if(StringUtils.isNotBlank(field.getExtraJson())){
             try{

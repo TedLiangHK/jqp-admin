@@ -11,6 +11,9 @@ import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageButtonDao;
 import com.jqp.admin.page.service.PageButtonService;
 import com.jqp.admin.page.service.PageService;
+import com.jqp.admin.util.SpringContextUtil;
+import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,24 @@ public class PageButtonServiceImpl implements PageButtonService {
         btn.put("type","button");
         btn.put("label",baseButton.getLabel());
         btn.put("level",baseButton.getLevel());
+        if(SpringContextUtil.isTest()){
+            if(ActionType.PopForm.equals(baseButton.getOptionType())){
+                btn.put("tooltip", Util.getFormTitle(formService.get(baseButton.getOptionValue())));
+            }else if(ActionType.PopPage.equals(baseButton.getOptionType())){
+                String pageCode = null;
+                String code = baseButton.getOptionValue();
+                Map<String,Object> data = new HashMap<>();
+                if(code.contains(",")){
+                    String[] arr = StringUtil.splitStr(code,",");
+                    pageCode = arr[0];
+                }else{
+                    pageCode = code.substring(0,code.indexOf("?"));
+                }
+                btn.put("tooltip", Util.getPageTitle(pageService.get(pageCode)));
+            }else{
+                btn.put("tooltip",baseButton.getOptionValue());
+            }
+        }
         if(StringUtils.isNotBlank(baseButton.getIcon())){
             btn.put("icon",baseButton.getIcon());
         }

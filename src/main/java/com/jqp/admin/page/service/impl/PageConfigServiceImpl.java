@@ -13,9 +13,7 @@ import com.jqp.admin.page.constants.RefType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.*;
-import com.jqp.admin.util.StringUtil;
-import com.jqp.admin.util.TemplateUtil;
-import com.jqp.admin.util.UrlUtil;
+import com.jqp.admin.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -124,6 +122,11 @@ public class PageConfigServiceImpl implements PageConfigService {
 
         List<Map<String,Object>> queryConfigs = this.queryConfigs(page);
         params.put("pageName",page.getName());
+        if(SpringContextUtil.isTest()){
+            params.put("pageName",
+                    Util.getPageTitle(page));
+        }
+
         params.put("queryConfigs", JSONUtil.toJsonPrettyStr(queryConfigs));
         params.put("downloadParam",downloadParam);
         setHiddenQueryFilter(page,params);
@@ -255,8 +258,14 @@ public class PageConfigServiceImpl implements PageConfigService {
             Page page = pageService.get(pageRef.getRefPageCode());
             refJson = getCurdJson(page.getCode());
             refJson.put("title", page.getName());
+            if(SpringContextUtil.isTest() && !isTab){
+                refJson.put("title", Util.getPageTitle(page));
+            }
             if(StringUtils.isNotBlank(pageRef.getRefName())){
                 refJson.put("title",pageRef.getRefName());
+                if(SpringContextUtil.isTest() && !isTab){
+                    refJson.put("title", Util.getRefTitle(pageRef));
+                }
             }
             addItem(refJson,isTab,pages,page);
             //pages.add(refJson);

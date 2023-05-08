@@ -1,10 +1,16 @@
 package com.jqp.admin.util;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.TreeData;
+import com.jqp.admin.common.constants.Constants;
 import com.jqp.admin.common.data.Obj;
+import com.jqp.admin.page.constants.RefType;
+import com.jqp.admin.page.data.Form;
+import com.jqp.admin.page.data.Page;
+import com.jqp.admin.page.data.PageRef;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
@@ -124,5 +130,37 @@ public class Util {
         }else{
             return value.toString();
         }
+    }
+
+    public static String getPageTitle(Page page){
+        return getPageTitle(page.getName(),page.getCode());
+    }
+    public static String getPageTitle(String name,String code){
+        return StrUtil.format("<a href='/page/static/sys/page?code={}' target='_blank'>{}</a>"
+                ,code
+                ,name);
+    }
+    public static String getFormTitle(Form form){
+        return getFormTitle(form.getName(),form.getCode());
+    }
+    public static String getFormTitle(String name,String code){
+        return StrUtil.format("<a href='/page/static/sys/form?code={}' target='_blank'>{}</a>"
+                ,code
+                ,name);
+    }
+    public static String getDic(String code){
+        return StrUtil.format("<a href='/crud/dic?{}dicCode={}' target='_blank'>{}</a>"
+                , Constants.QUERY_KEY_START,code
+                ,code);
+    }
+
+    public static String getRefTitle(PageRef ref){
+        if(RefType.Page.equals(ref.getRefType())){
+            return getPageTitle(ref.getRefName(),ref.getRefPageCode());
+        }
+        if(RefType.Form.equals(ref.getRefType())){
+            return getFormTitle(ref.getRefName(),ref.getRefPageCode());
+        }
+        return ref.getRefName()+"-"+ref.getRefPageCode();
     }
 }

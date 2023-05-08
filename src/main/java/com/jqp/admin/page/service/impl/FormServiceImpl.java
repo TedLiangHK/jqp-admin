@@ -17,7 +17,9 @@ import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.*;
 import com.jqp.admin.util.SeqComparator;
+import com.jqp.admin.util.SpringContextUtil;
 import com.jqp.admin.util.StringUtil;
+import com.jqp.admin.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -138,6 +140,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         if(FormType.Wizard.equals(f.getFormType())){
             formType = FormType.Wizard;
         }
+        if(SpringContextUtil.isTest()){
+            form.put("debug",true);
+        }
         form.put("type",formType);
         form.put("title","");
         if(StrUtil.isNotBlank(f.getTableName())){
@@ -225,6 +230,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         }else{
             form.put("body",body);
         }
+        form.put("labelWidth",120);
         form.put("mode","horizontal");
 //        if(formDisabled){
 //            form.put("static",true);
@@ -232,6 +238,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
 
         Map<String,Object> dialog = new HashMap<>();
         dialog.put("title",button.getLabel());
+        if(SpringContextUtil.isTest()){
+            dialog.put("title", new String[]{button.getLabel()+"-"+ Util.getFormTitle(f)});
+        }
         dialog.put("size",f.getSize());
         if("default".equals(f.getSize())){
             dialog.remove("size");

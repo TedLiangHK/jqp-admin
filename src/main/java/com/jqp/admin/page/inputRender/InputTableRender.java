@@ -1,5 +1,7 @@
 package com.jqp.admin.page.inputRender;
 
+import cn.hutool.core.util.StrUtil;
+import com.jqp.admin.page.constants.DataType;
 import com.jqp.admin.page.constants.Whether;
 import com.jqp.admin.page.data.Form;
 import com.jqp.admin.page.data.FormField;
@@ -7,6 +9,7 @@ import com.jqp.admin.page.data.InputField;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.InputFieldService;
 import com.jqp.admin.util.SpringContextUtil;
+import com.jqp.admin.util.Util;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -53,6 +56,9 @@ public class InputTableRender extends InputDefaultRender{
             }
             if(formField.getWidth() != null){
                 fieldConfig.put("width",formField.getWidth());
+            }
+            if(SpringContextUtil.isTest()){
+                fieldConfig.put("remark",fieldConfig.remove("labelRemark"));
             }
         }
         config.put("columns",columns);
