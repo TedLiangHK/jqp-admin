@@ -140,9 +140,9 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         if(FormType.Wizard.equals(f.getFormType())){
             formType = FormType.Wizard;
         }
-        if(SpringContextUtil.isTest()){
-            form.put("debug",true);
-        }
+//        if(SpringContextUtil.isTest()){
+//            form.put("debug",true);
+//        }
         form.put("type",formType);
         form.put("title","");
         if(StrUtil.isNotBlank(f.getTableName())){

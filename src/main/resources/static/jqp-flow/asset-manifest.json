@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/jqp-flow/static/css/main.cdf2e7dc.css",
+    "main.js": "/jqp-flow/static/js/main.3844187c.js",
+    "static/js/787.ebd6d757.chunk.js": "/jqp-flow/static/js/787.ebd6d757.chunk.js",
+    "index.html": "/jqp-flow/index.html",
+    "main.cdf2e7dc.css.map": "/jqp-flow/static/css/main.cdf2e7dc.css.map",
+    "main.3844187c.js.map": "/jqp-flow/static/js/main.3844187c.js.map",
+    "787.ebd6d757.chunk.js.map": "/jqp-flow/static/js/787.ebd6d757.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.cdf2e7dc.css",
+    "static/js/main.3844187c.js"
+  ]
+}

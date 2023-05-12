@@ -17,7 +17,7 @@ public class SwitchRender extends InputDefaultRender{
             List<Map<String, Object>> options = dicCacheService.options(field.getFormat());
             if(options.size() == 2){
                 Map<String, Object> trueObj = options.get(0);
-                Map<String, Object> falseObj = options.get(0);
+                Map<String, Object> falseObj = options.get(1);
 
                 config.put("trueValue",trueObj.get("value"));
                 config.put("falseValue",falseObj.get("value"));
