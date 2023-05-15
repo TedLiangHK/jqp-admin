@@ -10,6 +10,7 @@ import com.jqp.admin.activity.data.AuditRecord;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.config.SessionContext;
 import com.jqp.admin.db.service.JdbcService;
+import com.jqp.admin.flow.constants.CheckType;
 import com.jqp.admin.flow.constants.NodeType;
 import com.jqp.admin.flow.data.Flow;
 import com.jqp.admin.flow.data.FlowDeploy;
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.ssssssss.script.MagicScriptContext;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -408,6 +410,9 @@ public class FlowController {
                 m.put("redirect",StrUtil.format("/taskAudit/{}?t=",task.getId(), System.currentTimeMillis()));
             });
         }
+        if(view){
+            actions.clear();
+        }
         formJson.put("actions",actions);
         formJson.put("mode","horizontal");
         return "AMIS_JSON="+ JSONUtil.toJsonPrettyStr(formJson);
@@ -416,119 +421,7 @@ public class FlowController {
     @RequestMapping("/task/complete/{id}/{edgeId}")
     @ResponseBody
     public Object taskComplete(@PathVariable Long id,@PathVariable String edgeId,@RequestBody Map<String,Object> body){
-        FlowInstanceTask task = jdbcService.getById(FlowInstanceTask.class, id);
-        if(task == null || task.getEndTime() != null){
-            return Result.error("任务已完成");
-        }
-        FlowInstance flowInstance = jdbcService.getById(FlowInstance.class, task.getFlowInstanceId());
-        FlowDeploy flowDeploy = jdbcService.getById(FlowDeploy.class, flowInstance.getFlowDeployId());
-
-        String viewForm = flowDeploy.getViewForm();
-        String tableName = flowDeploy.getTableName();
-        String statusField = StringUtil.toFieldColumn(flowDeploy.getStatusField());
-        String beforeApi = flowDeploy.getBeforeApi();
-        String afterApi = flowDeploy.getAfterApi();
-        String statusDic = flowDeploy.getStatusDic();
-        Long refId = flowInstance.getRefId();
-        GraphContext graphContext = new GraphContext(flowDeploy.getGraphData());
-
-        Map<String, Object> obj = jdbcService.getById(tableName, refId);
-        String objStatus = (String) obj.get(statusField);
-        if(org.apache.commons.lang.StringUtils.isBlank(objStatus)){
-            return Result.error("审核失败,单据状态错误");
-        }
-        Node currentNode = graphContext.getNode(task.getTaskId());
-        List<Edge> edges = graphContext.getEdges(currentNode.getId());
-        Edge edge = graphContext.getEdge(edgeId);
-        Node nextNode = graphContext.getNode(edge.getTargetNodeId());
-        String nodeStatus = currentNode.getProperties().getStatus();
-        if(StringUtils.isNotBlank(nodeStatus)){
-            String[] arr = StringUtil.splitStr(nodeStatus, ",");
-            boolean flag = false;
-            for(String s:arr){
-                if(s.equals(objStatus)){
-                    flag = true;
-                    break;
-                }
-            }
-            if(!flag){
-                return Result.error("审核失败,单据状态可能已经发生变化!");
-            }
-        }
-        Map<String, Object> params = new HashMap<>();
-        params.put("prevStatus",objStatus);
-        params.put("nextStatus",edge.getProperties().getStatus());
-        params.put("params",body);
-        //executionId 和processInstanceId 是一样的
-        params.put("flowInstance",flowInstance);
-        params.put("task",task);
-        params.put("obj",obj);
-
-        Result<String> call = apiService.call(beforeApi, params);
-        if(!call.isSuccess()){
-            return call;
-        }
-
-        try{
-            jdbcService.transactionOption(()->{
-
-                //设置动态参数必须在任务完成之前设置,完成任务找不到参数直接报错
-                Result<String> _call = apiService.call(afterApi, params);
-                if(!_call.isSuccess()){
-                    throw new RuntimeException(_call.getMsg());
-                }
-                String auditRemark = (String)body.get("auditRemark");
-                String auditImgs = (String)body.get("auditImgs");
-                String auditFiles = (String)body.get("auditFiles");
-
-                task.setOrderStatus(edge.getProperties().getStatus());
-                task.setOrderStatusName(dicService.getLabel(flowDeploy.getStatusDic(),edge.getProperties().getStatus()));
-                task.setEndTime(new Date());
-                task.setPass(Whether.NO.equals(edge.getProperties().getPass()) ? Whether.NO : Whether.YES);
-                task.setEdgeId(edge.getId());
-                task.setEdgeName(edge.getText().getValue());
-                if(StringUtils.isNotBlank(auditFiles)){
-                    task.setAuditFiles(auditFiles);
-                }
-                if(StringUtils.isNotBlank(auditImgs)){
-                    task.setAuditImgs(auditImgs);
-                }
-                if(StringUtils.isNotBlank(auditRemark)){
-                    task.setAuditRemark(auditRemark);
-                }
-
-                try{
-                    User user = SessionContext.getUser();
-
-                    task.setAuditUserId(user.getId());
-                    task.setAuditUserName(user.getName());
-                }catch (Exception e){}
-
-                jdbcService.update(task);
-
-
-                obj.put(statusField,edge.getProperties().getStatus());
-                jdbcService.update(obj,tableName);
-
-                flowInstance.setCurrentTaskId(nextNode.getId());
-                jdbcService.update(flowInstance);
-                if(NodeType.End.equals(nextNode.getType())){
-                    //结束节点
-                    flowInstance.setEndTime(new Date());
-                    jdbcService.update(flowInstance);
-                    return;
-                }
-
-                FlowInstanceTask nextTask = flowService.createTask(flowDeploy, flowInstance, id, nextNode);
-                jdbcService.saveOrUpdate(nextTask);
-            });
-        }catch (Exception e){
-            log.error("审核失败:"+e.getMessage(),e);
-            return Result.error(e.getMessage());
-        }
-
+        flowService.completeTask(id,edgeId,body);
         return Result.success();
     }
-
-
 }

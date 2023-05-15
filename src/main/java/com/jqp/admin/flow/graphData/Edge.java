@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Edge {
+public class Edge implements Comparable<Edge>{
     private String id;
     private String type;
     private String sourceNodeId;
@@ -18,4 +18,13 @@ public class Edge {
     private Point startPoint = new Point();
     private Point endPoint = new Point();
     private List<Point> pointsList = new ArrayList<>();
+
+    @Override
+    public int compareTo(Edge o) {
+        Integer checkSeq1 = this.getProperties().getCheckSeq();
+        Integer checkSeq2 = o.getProperties().getCheckSeq();
+        checkSeq1 = checkSeq1 == null ? 0 : checkSeq1;
+        checkSeq2 = checkSeq2 == null ? 0 : checkSeq2;
+        return checkSeq1.compareTo(checkSeq2);
+    }
 }

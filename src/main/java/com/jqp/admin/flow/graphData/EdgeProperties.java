@@ -16,4 +16,11 @@ public class EdgeProperties {
     private String active;
     //是否当前,已经流转的会变成当前,值为"true"
     private String current;
+
+    //判断类型
+    private String checkType;
+    //判断配置
+    private String checkConfig;
+    //判断顺序
+    private Integer checkSeq;
 }
