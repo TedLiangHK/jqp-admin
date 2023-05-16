@@ -142,6 +142,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    @Transactional
     public void completeTask(Long id,String edgeId,Map<String,Object> body) {
         FlowInstanceTask task = jdbcService.getById(FlowInstanceTask.class, id);
         if(task == null || task.getEndTime() != null){
