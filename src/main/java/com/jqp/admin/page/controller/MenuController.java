@@ -1,18 +1,18 @@
 package com.jqp.admin.page.controller;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.jqp.admin.common.BaseData;
 import com.jqp.admin.common.Result;
 import com.jqp.admin.common.data.Obj;
 import com.jqp.admin.db.service.JdbcService;
-import com.jqp.admin.page.constants.ActionType;
-import com.jqp.admin.page.constants.DataType;
-import com.jqp.admin.page.constants.RefType;
-import com.jqp.admin.page.constants.Whether;
+import com.jqp.admin.page.constants.*;
 import com.jqp.admin.page.data.*;
 import com.jqp.admin.page.service.FormService;
 import com.jqp.admin.page.service.PageService;
 import com.jqp.admin.rbac.data.MenuUrl;
+import com.jqp.admin.rbac.service.InputParam;
 import com.jqp.admin.util.StringUtil;
 import com.jqp.admin.util.UrlUtil;
 import com.jqp.admin.util.Util;
@@ -87,6 +87,33 @@ public class MenuController {
             jdbcService.bathSaveOrUpdate(btnMenus);
             jdbcService.bathSaveOrUpdate(btns);
 
+            Set<Long> formIds = new HashSet<>();
+            Set<Long> pageIds = new HashSet<>();
+
+            for (BaseData btn : btns) {
+                if(btn instanceof PageButton){
+                    pageIds.add(((PageButton) btn).getPageId());
+                }else if(btn instanceof FormButton){
+                    formIds.add(((FormButton) btn).getFormId());
+                }
+            }
+            //清理表单缓存
+            for (Long formId : formIds) {
+                Form form = jdbcService.getById(Form.class,formId);
+                if(form != null){
+                    formService.invalid(form.getCode());
+                }
+            }
+
+            //清理页面缓存
+            for (Long pageId : pageIds) {
+                Page page = jdbcService.getById(Page.class,pageId);
+                if(page != null){
+                    pageService.invalid(page.getCode());
+                }
+            }
+
+
             menuUrls.entrySet().forEach((Map.Entry<String,Set<MenuUrl>> en)->{
                 String menuCode = en.getKey();
                 Long id = jdbcService.findOneForObject("select id from sys_menu where menu_code = ? ", Long.class, menuCode);
@@ -105,6 +132,66 @@ public class MenuController {
         return Result.success();
     }
 
+    @RequestMapping("/clearButtons/{menuId}")
+    public Result clearButtons(@PathVariable Long menuId){
+        jdbcService.transactionOption(()->{
+
+            //页面编号
+            List<String> pageCodes = jdbcService.findForObject("select distinct code from page where id in (" +
+                    "select distinct page_id from page_button where code in (" +
+                    "select code from sys_menu " +
+                    "where parent_id = ? " +
+                    "and whether_button = ? " +
+                    ")" +
+                    ")",String.class,menuId,Whether.YES);
+
+            //清空页面按钮编号
+            jdbcService.update("update page_button set code = null where code in (" +
+                    "select code from sys_menu " +
+                    "where parent_id = ? " +
+                    "and whether_button = ? " +
+                    ")",menuId,Whether.YES);
+
+            //表单编号
+            List<String> formCodes = jdbcService.findForObject("select distinct code from form where id in (" +
+                    "select distinct form_id from form_button where code in (" +
+                    "select code from sys_menu " +
+                    "where parent_id = ? " +
+                    "and whether_button = ? " +
+                    ")" +
+                    ")",String.class,menuId,Whether.YES);
+
+            //清空表单按钮编号
+            jdbcService.update("update form_button set code = null where code in (" +
+                    "select code " +
+                    "from sys_menu " +
+                    "where parent_id = ? " +
+                    "and whether_button = ? " +
+                    ")",menuId,Whether.YES);
+
+            jdbcService.update("delete from menu_url where menu_id in (" +
+                    "select id " +
+                    "from sys_menu " +
+                    "where id = ? " +
+                    "or (parent_id = ? and whether_button = ?)" +
+                    ")",menuId,menuId,Whether.YES);
+
+            jdbcService.update("delete from sys_menu where parent_id = ? and whether_button = ? ",
+                    menuId,Whether.YES);
+
+            //清理页面缓存
+            for (String pageCode : pageCodes) {
+                pageService.invalid(pageCode);
+            }
+
+            //清理表单缓存
+            for (String formCode : formCodes) {
+                formService.invalid(formCode);
+            }
+        });
+        return Result.success();
+    }
+
     private void add(String menuCode,String name,String url,Map<String,Set<MenuUrl>> menuUrls){
         if(StringUtils.isBlank(url)){
             return;
@@ -118,7 +205,7 @@ public class MenuController {
         menuUrls.get(menuCode).add(menuUrl);
     }
 
-    private void add(String menuCode,InputField field,Map<String,Set<MenuUrl>> menuUrls){
+    private void add(String menuCode, InputParam field, Map<String,Set<MenuUrl>> menuUrls){
         if(DataType.Selector.equals(field.getType())){
             String name = jdbcService.findOneForObject("select name from page where code = ? ", String.class, field.getFormat());
             add(menuCode,StrUtil.format("{}选择器",name),StrUtil.format("/admin/page/selector/{}",field.getFormat()),menuUrls);
@@ -126,10 +213,33 @@ public class MenuController {
         if(field.getComponentType() != null && field.getComponentType().contains("tree")){
             String name = jdbcService.findOneForObject("select name from page where code = ? ", String.class, field.getFormat());
             add(menuCode,StrUtil.format("{}选择树",name),StrUtil.format("/admin/page/options/{}",field.getFormat()),menuUrls);
+        }else if(ComponentType.InputTable.equals(field.getComponentType())){
+            String format = field.getFormat();
+            if(StringUtils.isNotBlank(format)){
+                String[] arr = format.split(",");
+                Form form = formService.get(arr[0]);
+                add(menuCode,form.getFormFields(),menuUrls);
+            }
+        }
+
+        if(StringUtils.isNotBlank(field.getExtraJson())){
+            try{
+                JSONObject extraJson = JSONUtil.parseObj(field.getExtraJson());
+                String source = extraJson.getStr("source");
+                if(StringUtils.isNotBlank(source)){
+                    add(menuCode,StrUtil.format("{}数据来源",field.getLabel()),source,menuUrls);
+                }
+                String schemaApi = extraJson.getStr("schemaApi");
+                if(StringUtils.isNotBlank(schemaApi)){
+                    add(menuCode,StrUtil.format("{}动态组件",field.getLabel()),schemaApi,menuUrls);
+                }
+            }catch (Exception e){
+
+            }
         }
     }
-    private void add(String menuCode,List<? extends InputField> fields,Map<String,Set<MenuUrl>> menuUrls){
-        for(InputField field:fields){
+    private void add(String menuCode,List<? extends InputParam> fields,Map<String,Set<MenuUrl>> menuUrls){
+        for(InputParam field:fields){
             add(menuCode,field,menuUrls);
         }
     }
@@ -146,6 +256,21 @@ public class MenuController {
         add(menuCode,StrUtil.format("{}查询",page.getName()),StrUtil.format("/admin/page/crudQuery/{}",page.getCode()),menuUrls);
         add(menuCode,StrUtil.format("{}页面JS",page.getName()), StrUtil.format("/admin/page/js/{}.js",page.getCode()),menuUrls);
         add(menuCode,StrUtil.format("{}导出",page.getName()), StrUtil.format("/admin/page/crudExport/{}",page.getCode()),menuUrls);
+
+        Long viewBtnId = jdbcService.findOneForObject("select id from sys_menu where menu_name = ? ",Long.class,page.getName()+"-"+"查看");
+
+        if(viewBtnId == null && !btnIds.contains(page.getName()+"-"+"查看")){
+            sysMenu = new SysMenu();
+            sysMenu.setMenuName(page.getName()+"-"+"查看");
+            seq.setValue(seq.getValue()+1);
+            sysMenu.setSeq(seq.getValue());
+            sysMenu.setMenuCode(code+StringUtil.getAddCode(sysMenu.getSeq()+"","0",2));
+            sysMenu.setWhetherButton(Whether.YES);
+            sysMenu.setParentId(menu.getId());
+            sysMenu.setMenuType(menu.getMenuType());
+            btnMenus.add(sysMenu);
+            btnIds.add(page.getName()+"-"+"查看");
+        }
 
         for(PageButton btn:pageButtons){
             if(StringUtils.isNotBlank(btn.getCode()) || btnIds.contains("p"+btn.getId())){
@@ -168,7 +293,7 @@ public class MenuController {
             this.buttonButtons(page.getName(),btnIds,btns,btn,btnMenus,menu,seq,btn.getCode(),menuUrls);
         }
         this.add(menuCode,page.getQueryFields(),menuUrls);
-
+        this.add(menuCode,page.getResultFields(),menuUrls);
         for(PageRef pageRef:page.getPageRefs()){
             String refType = pageRef.getRefType();
             if(RefType.Page.equals(refType)){
@@ -254,11 +379,20 @@ public class MenuController {
             Form form = formService.get(btn.getOptionValue());
             this.formButtons(btnIds,btns,form,btnMenus,menu,seq,btn.getCode(),menuUrls);
         }else if(ActionType.PopPage.equals(btn.getOptionType())){
-            String[] arr = StringUtil.splitStr(btn.getOptionValue(), ",");
-            if(arr != null && arr.length>0){
-                Page page = pageService.get(arr[0]);
-                this.pageButtons(btnIds,btns,page,btnMenus,menu,seq,btn.getCode(),menuUrls);
+            if(btn.getOptionValue().contains(",")){
+                String[] arr = StringUtil.splitStr(btn.getOptionValue(), ",");
+                if(arr != null && arr.length>0){
+                    Page page = pageService.get(arr[0]);
+                    this.pageButtons(btnIds,btns,page,btnMenus,menu,seq,btn.getCode(),menuUrls);
+                }
+            }else if(btn.getOptionValue().contains("?")){
+                String[] arr = StringUtil.splitStr(btn.getOptionValue(), "\\?");
+                if(arr != null && arr.length>0){
+                    Page page = pageService.get(arr[0]);
+                    this.pageButtons(btnIds,btns,page,btnMenus,menu,seq,btn.getCode(),menuUrls);
+                }
             }
+
         }else if(ActionType.PopIframe.equals(btn.getOptionType())){
             String logPrefix = "/admin/operationLog/page/";
             if(btn.getOptionValue() != null && btn.getOptionValue().contains(logPrefix)){

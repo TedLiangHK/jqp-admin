@@ -2,6 +2,9 @@ package com.jqp.admin.common.controller;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.generator.CodeGenerator;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.jqp.admin.common.constants.Constants;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +22,20 @@ public class CaptchaController {
 //        AbstractCaptcha captcha = CaptchaUtil.createCircleCaptcha(100, 37, 4,10);
 //        AbstractCaptcha captcha = CaptchaUtil.createLineCaptcha(100, 37, 4,10);
         AbstractCaptcha captcha = CaptchaUtil.createShearCaptcha(150, 37, 4,3);
+        captcha.setGenerator(new CodeGenerator() {
+            @Override
+            public String generate() {
+                return RandomUtil.randomString("23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ",4);
+            }
+
+            @Override
+            public boolean verify(String code, String userInputCode) {
+                if (StrUtil.isNotBlank(userInputCode)) {
+                    return StrUtil.equalsIgnoreCase(code, userInputCode);
+                }
+                return false;
+            }
+        });
         String code = captcha.getCode();
         request.getSession().setAttribute(Constants.CAPTCHA_CODE,code);
         request.getSession().setAttribute(Constants.CAPTCHA_TIMEOUT,System.currentTimeMillis()+5*60*1000);

@@ -7,4 +7,5 @@ public interface InputParam {
     String getLabel();
     String getMust();
     String getComponentType();
+    String getExtraJson();
 }
