@@ -167,6 +167,8 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         groupNames.add("");
         //解决2.0版本以上  富文本编辑器在dom未加载完成时,initApi先请求完成,报错
         boolean hasInputRichText = false;
+
+
         for(FormField field:formFields){
             String groupName = field.getGroupName();
             if(StringUtils.isBlank(groupName)){
@@ -197,6 +199,7 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
         }
 
         List<Map<String,Object>> body = new ArrayList<>();
+
         for(String groupName:groupNames){
             List<FormField> fields = groupFields.get(groupName);
             if(fields == null || fields.isEmpty()){
@@ -204,7 +207,12 @@ public class FormServiceImpl extends AbstractCacheService<Form> implements FormS
             }
             List<Map<String,Object>> items = new ArrayList<>();
             for(FormField field:fields){
-                items.add(this.buildFormField(f,field));
+                Map<String, Object> config = this.buildFormField(f, field);
+                if(Whether.YES.equals(field.getHidden())){
+                    body.add(config);
+                }else{
+                    items.add(config);
+                }
             }
             Map<String,Object> grid = new HashMap<>();
             grid.put("type","grid");
