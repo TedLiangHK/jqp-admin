@@ -139,7 +139,7 @@ public class MenuController {
             //页面编号
             List<String> pageCodes = jdbcService.findForObject("select distinct code from page where id in (" +
                     "select distinct page_id from page_button where code in (" +
-                    "select code from sys_menu " +
+                    "select menu_code from sys_menu " +
                     "where parent_id = ? " +
                     "and whether_button = ? " +
                     ")" +
@@ -147,7 +147,7 @@ public class MenuController {
 
             //清空页面按钮编号
             jdbcService.update("update page_button set code = null where code in (" +
-                    "select code from sys_menu " +
+                    "select menu_code from sys_menu " +
                     "where parent_id = ? " +
                     "and whether_button = ? " +
                     ")",menuId,Whether.YES);
@@ -155,7 +155,7 @@ public class MenuController {
             //表单编号
             List<String> formCodes = jdbcService.findForObject("select distinct code from form where id in (" +
                     "select distinct form_id from form_button where code in (" +
-                    "select code from sys_menu " +
+                    "select menu_code from sys_menu " +
                     "where parent_id = ? " +
                     "and whether_button = ? " +
                     ")" +
@@ -163,7 +163,7 @@ public class MenuController {
 
             //清空表单按钮编号
             jdbcService.update("update form_button set code = null where code in (" +
-                    "select code " +
+                    "select menu_code " +
                     "from sys_menu " +
                     "where parent_id = ? " +
                     "and whether_button = ? " +
