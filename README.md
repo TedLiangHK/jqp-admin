@@ -23,6 +23,9 @@ https://gitee.com/hyz79/jqp-doc
 ## 前后端不分离版本(兼容分离和不分离版本)
 
 https://gitee.com/hyz79/jqp-admin
+(由于gitee强制私有化上面的项目,用下面的地址替代)
+
+https://gitee.com/hyz79/jqp-admin-back
 
 ## 前后端分离版本-前端
 
